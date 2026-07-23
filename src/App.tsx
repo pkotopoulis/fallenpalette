@@ -217,7 +217,7 @@ export default function App() {
               <div className="empty">
                 <div className="empty-icon">🔍</div>
                 <div className="empty-body">Search for any paint by name to find its equivalents across all brands</div>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 12 }}>{allFlat.length} paints across {activeBrands.size} brands</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 12 }}>{activeBrands.size} brands loaded</div>
               </div>
             )}
           </>)}
@@ -323,7 +323,7 @@ export default function App() {
           {!hasStoreSearch && <div className="hint">Search by city or postal code to see stores on the map</div>}
         </>)}
 
-        <div className="footer">PaintXRef · {PAINT_GROUPS.length} paint groups · {STORES.length} stores</div>
+        <div className="footer">PaintXRef · Data is approximate — always test swatches</div>
       </div>
 
       {/* Bottom tabs */}

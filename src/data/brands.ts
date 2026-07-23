@@ -5,6 +5,8 @@ export const BRANDS: Record<string, string> = {
   army_painter: "Army Painter",
   ak: "AK Interactive",
   scale75: "Scale75",
+  ttc: "Two Thin Coats",
+  proacryl: "Pro Acryl",
 };
 
 export const BRAND_IDS = Object.keys(BRANDS);
