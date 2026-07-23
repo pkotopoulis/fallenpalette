@@ -1,0 +1,12 @@
+{
+  "name": "PaintXRef",
+  "short_name": "PaintXRef",
+  "description": "Miniature paint conversion, collection tracker, and FLGS store finder",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121417",
+  "theme_color": "#121417",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
