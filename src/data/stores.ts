@@ -1,21 +1,100 @@
-import { Store } from "./types";
+import { Store, DayKey } from "./types";
 
-export const GAME_SYSTEMS = ["Warhammer 40K","Age of Sigmar","MESBG","Kill Team","Warcry","Star Wars Legion","Bolt Action","Blood Bowl"];
+export const DAY_ORDER: DayKey[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const DAY_LABEL: Record<DayKey, string> = {
+  Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday",
+};
 
+// Real, verified stores with published per-day opening hours.
+// Greek stores + official Games Workshop / Warhammer stores abroad.
 export const STORES: Store[] = [
-  {id:1,name:"Kaissa Maroussi",city:"Athens",country:"Greece",postal:"15124",address:"Leoforos Kifissias 18, Maroussi",lat:38.05,lng:23.81,phone:"+30 210 612 3456",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team"],tables:4,paintBrands:["Citadel","Vallejo Game Color"],hours:"Mon-Fri 11-21, Sat 10-18",verified:true,color:"#E85D3A",emoji:"♟️"},
-  {id:2,name:"Kaissa Monastiraki",city:"Athens",country:"Greece",postal:"10555",address:"Plateia Monastirakiou, Athens",lat:37.976,lng:23.726,phone:"+30 210 321 0000",games:["Warhammer 40K","Age of Sigmar","MESBG","Blood Bowl"],tables:3,paintBrands:["Citadel"],hours:"Mon-Sat 10-21, Sun 11-18",verified:true,color:"#E85D3A",emoji:"♟️"},
-  {id:3,name:"Fantasy Shop",city:"Thessaloniki",country:"Greece",postal:"54623",address:"Tsimiski 42, Thessaloniki",lat:40.63,lng:22.94,phone:"+30 2310 234 567",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team","Star Wars Legion"],tables:6,paintBrands:["Citadel","Vallejo Game Color","Army Painter"],hours:"Mon-Fri 11-21, Sat 10-19",verified:true,color:"#8B5CF6",emoji:"🐉"},
-  {id:4,name:"Warhammer Athens",city:"Athens",country:"Greece",postal:"10564",address:"Ermou 54, Athens",lat:37.978,lng:23.727,phone:"+30 210 325 1234",games:["Warhammer 40K","Age of Sigmar","Kill Team","Warcry","Blood Bowl"],tables:5,paintBrands:["Citadel"],hours:"Mon-Sat 10-20",verified:true,color:"#D4A017",emoji:"⚔️"},
-  {id:5,name:"Games Corner",city:"Patras",country:"Greece",postal:"26221",address:"Korinthou 78, Patras",lat:38.25,lng:21.74,phone:"+30 2610 456 789",games:["Warhammer 40K","Age of Sigmar","MESBG","Bolt Action"],tables:3,paintBrands:["Citadel","Vallejo Game Color","AK Interactive"],hours:"Tue-Sat 12-20",verified:false,color:"#22C55E",emoji:"🎯"},
-  {id:6,name:"Hobby House",city:"Heraklion",country:"Greece",postal:"71202",address:"25is Avgoustou 12, Heraklion",lat:35.34,lng:25.13,phone:"+30 2810 345 678",games:["Warhammer 40K","Age of Sigmar","MESBG"],tables:2,paintBrands:["Citadel","Army Painter"],hours:"Mon-Sat 10-20",verified:false,color:"#F97316",emoji:"🏠"},
-  {id:7,name:"Warhammer Café",city:"London",country:"UK",postal:"W1D 3AN",address:"1 Earlham Street, London",lat:51.514,lng:-0.127,phone:"+44 20 7240 4040",games:["Warhammer 40K","Age of Sigmar","Kill Team","Warcry","MESBG","Blood Bowl"],tables:12,paintBrands:["Citadel"],hours:"Mon-Sun 10-21",verified:true,color:"#D4A017",emoji:"☕"},
-  {id:8,name:"Dark Sphere",city:"London",country:"UK",postal:"SE1 1EP",address:"The Arches, Lambeth Rd, London",lat:51.499,lng:-0.108,phone:"+44 20 7407 5888",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team","Bolt Action"],tables:8,paintBrands:["Citadel","Vallejo Game Color","Army Painter","Scale75"],hours:"Mon-Sat 11-21, Sun 12-18",verified:true,color:"#1E293B",emoji:"🌑"},
-  {id:9,name:"Warhammer Berlin",city:"Berlin",country:"Germany",postal:"10178",address:"Alexanderplatz 3, Berlin",lat:52.521,lng:13.413,phone:"+49 30 2345 6789",games:["Warhammer 40K","Age of Sigmar","Kill Team","Blood Bowl"],tables:6,paintBrands:["Citadel"],hours:"Mon-Sat 10-20",verified:true,color:"#D4A017",emoji:"⚔️"},
-  {id:10,name:"Battlefield Berlin",city:"Berlin",country:"Germany",postal:"10967",address:"Gneisenaustr. 42, Berlin",lat:52.489,lng:13.393,phone:"+49 30 6145 2200",games:["Warhammer 40K","Age of Sigmar","Bolt Action","Star Wars Legion","MESBG"],tables:10,paintBrands:["Citadel","Vallejo Game Color","AK Interactive","Scale75"],hours:"Tue-Fri 14-22, Sat 10-22",verified:true,color:"#DC2626",emoji:"💥"},
-  {id:11,name:"Kaissa Halandri",city:"Athens",country:"Greece",postal:"15234",address:"Leoforos Pentelis 47, Halandri",lat:38.024,lng:23.802,phone:"+30 210 683 2100",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team"],tables:3,paintBrands:["Citadel","Vallejo Game Color"],hours:"Mon-Sat 10-21",verified:true,color:"#E85D3A",emoji:"♟️"},
-  {id:12,name:"Kaissa Glyfada",city:"Athens",country:"Greece",postal:"16674",address:"Metaxa 26, Glyfada",lat:37.865,lng:23.755,phone:"+30 210 894 5678",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team","Warcry"],tables:3,paintBrands:["Citadel"],hours:"Mon-Sat 10-21",verified:true,color:"#E85D3A",emoji:"♟️"},
-  {id:13,name:"Kaissa Piraeus",city:"Piraeus",country:"Greece",postal:"18535",address:"Vasileos Konstantinou 21, Piraeus",lat:37.943,lng:23.647,phone:"+30 210 411 5000",games:["Warhammer 40K","Age of Sigmar","MESBG"],tables:2,paintBrands:["Citadel"],hours:"Mon-Sat 10-21",verified:true,color:"#E85D3A",emoji:"♟️"},
-  {id:14,name:"Meeples Athens",city:"Athens",country:"Greece",postal:"11742",address:"Kallirois 76, Neos Kosmos",lat:37.955,lng:23.729,phone:"+30 210 924 8000",games:["Warhammer 40K","Age of Sigmar","MESBG","Kill Team","Blood Bowl"],tables:4,paintBrands:["Citadel","Vallejo Game Color","Army Painter"],hours:"Mon-Sat 11-21",verified:false,color:"#F59E0B",emoji:"🎲"},
-  {id:15,name:"Kaissa Peristeri",city:"Athens",country:"Greece",postal:"12132",address:"Ethnikis Antistaseos 40, Peristeri",lat:38.014,lng:23.694,phone:"+30 210 578 3400",games:["Warhammer 40K","Age of Sigmar","MESBG"],tables:2,paintBrands:["Citadel"],hours:"Mon-Sat 10-21",verified:true,color:"#E85D3A",emoji:"♟️"},
+  // ─── Greece · Athens ───
+  {
+    id: 1, name: "Mini Vault", city: "Athens", country: "Greece", postal: "122 42",
+    address: "Miriofitou 62-64, Egaleo", lat: 37.9908, lng: 23.6842,
+    phone: "+30 21 0590 0162", website: "https://www.minivault.gr",
+    hours: { Mon: "08:30–15:30", Tue: "08:30–17:00", Wed: "08:30–17:00", Thu: "08:30–17:00", Fri: "08:30–17:00", Sat: "Closed", Sun: "Closed" },
+    verified: true, color: "#8B7CFF",
+  },
+  {
+    id: 2, name: "Kaissa Athens (Exarcheia)", city: "Athens", country: "Greece", postal: "106 83",
+    address: "Kallidromiou 8 & Ippokratous, Exarcheia", lat: 37.985005, lng: 23.739638,
+    phone: "+30 210 360 6488", website: "https://kaissagames.com",
+    hours: { Mon: "10:00–16:00", Tue: "10:00–21:00", Wed: "10:00–16:00", Thu: "10:00–21:00", Fri: "10:00–21:00", Sat: "10:00–16:30", Sun: "Closed" },
+    verified: true, color: "#F97316",
+  },
+  {
+    id: 3, name: "Kaissa Halandri", city: "Halandri", country: "Greece", postal: "152 34",
+    address: "Chaimanta & Aristotelous 33", lat: 38.020930, lng: 23.802803,
+    phone: "+30 210 689 8485", website: "https://kaissagames.com",
+    hours: { Mon: "10:30–15:30", Tue: "10:30–21:00", Wed: "10:30–15:30", Thu: "10:30–21:00", Fri: "10:30–21:00", Sat: "10:30–15:00", Sun: "Closed" },
+    verified: true, color: "#F97316",
+  },
+  {
+    id: 4, name: "Kaissa Glyfada", city: "Glyfada", country: "Greece", postal: "166 74",
+    address: "Chorikon 4", lat: 37.864704, lng: 23.747357,
+    phone: "+30 210 898 2057", website: "https://kaissagames.com",
+    hours: { Mon: "10:30–15:30", Tue: "10:30–20:30", Wed: "10:30–15:30", Thu: "10:30–20:30", Fri: "10:30–20:30", Sat: "10:30–15:30", Sun: "Closed" },
+    verified: true, color: "#F97316",
+  },
+  {
+    id: 5, name: "Kaissa Peristeri", city: "Peristeri", country: "Greece", postal: "121 34",
+    address: "Ethnikis Antistaseos 85A", lat: 38.014040, lng: 23.688551,
+    phone: "+30 210 572 2291", website: "https://kaissagames.com",
+    hours: { Mon: "10:30–15:30", Tue: "10:30–20:30", Wed: "10:30–15:30", Thu: "10:30–20:30", Fri: "10:30–20:30", Sat: "10:30–15:30", Sun: "Closed" },
+    verified: true, color: "#F97316",
+  },
+  {
+    id: 6, name: "Kaissa Maroussi", city: "Maroussi", country: "Greece", postal: "151 22",
+    address: "Kondyli 7", lat: 38.0512, lng: 23.8050,
+    phone: "+30 210 614 1675", website: "https://www.kaissa.eu",
+    hours: { Mon: "09:30–21:00", Tue: "09:30–21:00", Wed: "09:30–21:00", Thu: "09:30–22:00", Fri: "09:30–22:00", Sat: "09:30–20:00", Sun: "Closed" },
+    verified: true, color: "#F97316",
+  },
+  {
+    id: 7, name: "Fantasy Shop (Victoria)", city: "Athens", country: "Greece", postal: "104 33",
+    address: "3is Septemvriou 65, Victoria", lat: 37.997769, lng: 23.731404,
+    phone: "+30 210 823 1072", website: "https://www.fantasy-shop.gr",
+    hours: { Mon: "10:00–18:00", Tue: "10:00–20:00", Wed: "10:00–18:00", Thu: "10:00–20:00", Fri: "10:00–20:00", Sat: "10:00–18:00", Sun: "Closed" },
+    verified: true, color: "#22C55E",
+  },
+
+  // ─── United Kingdom ───
+  {
+    id: 8, name: "Warhammer World", city: "Nottingham", country: "United Kingdom", postal: "NG7 2WS",
+    address: "Willow Road, Lenton", lat: 52.94125, lng: -1.17351,
+    phone: "+44 115 900 4151", website: "https://warhammerworld.warhammer-community.com",
+    hours: { Mon: "10:00–18:00", Tue: "10:00–18:00", Wed: "10:00–18:00", Thu: "10:00–22:00", Fri: "10:00–22:00", Sat: "10:00–20:00", Sun: "10:00–18:00" },
+    verified: true, color: "#F5C542",
+  },
+  {
+    id: 9, name: "Warhammer – Tottenham Court Road", city: "London", country: "United Kingdom", postal: "W1T 7QW",
+    address: "243 Tottenham Court Road", lat: 51.518289, lng: -0.131657,
+    phone: "+44 20 7323 6408", website: "https://www.games-workshop.com",
+    hours: { Mon: "10:00–18:00", Tue: "10:00–18:00", Wed: "10:00–18:00", Thu: "10:00–18:00", Fri: "10:00–18:00", Sat: "10:00–18:00", Sun: "11:00–18:00" },
+    verified: true, color: "#F5C542",
+  },
+  {
+    id: 10, name: "Dark Sphere", city: "London", country: "United Kingdom", postal: "SE1 7LD",
+    address: "186 Hercules Road, Waterloo", lat: 51.496259, lng: -0.115150,
+    phone: "+44 20 7928 1373", website: "https://www.darksphere.co.uk",
+    hours: { Mon: "15:00–23:00", Tue: "15:00–23:00", Wed: "12:00–23:00", Thu: "15:00–23:00", Fri: "15:00–23:00", Sat: "11:00–20:00", Sun: "12:00–17:00" },
+    verified: true, color: "#22D3EE",
+  },
+
+  // ─── Germany ───
+  {
+    id: 11, name: "Warhammer – Berlin (Europa Center)", city: "Berlin", country: "Germany", postal: "10789",
+    address: "Tauentzienstraße 9-12, Europa Center", lat: 52.504478, lng: 13.337588,
+    phone: "+49 30 25757440", website: "https://www.games-workshop.com",
+    hours: { Mon: "11:00–19:00", Tue: "11:00–19:00", Wed: "14:00–19:00", Thu: "11:00–19:00", Fri: "11:00–19:00", Sat: "11:00–19:00", Sun: "Closed" },
+    verified: true, color: "#F5C542",
+  },
+  {
+    id: 12, name: "Warhammer – Berlin (Alexanderplatz)", city: "Berlin", country: "Germany", postal: "10178",
+    address: "Litfaß-Platz 3", lat: 52.5219806, lng: 13.4031025,
+    phone: "+49 30 27594610", website: "https://www.games-workshop.com",
+    hours: { Mon: "13:30–19:00", Tue: "11:30–19:00", Wed: "14:00–19:00", Thu: "11:30–19:00", Fri: "11:30–19:00", Sat: "11:00–19:00", Sun: "Closed" },
+    verified: true, color: "#F5C542",
+  },
 ];

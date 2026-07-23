@@ -4,8 +4,8 @@
   "description": "Miniature paint conversion, collection tracker, and FLGS store finder",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121417",
-  "theme_color": "#121417",
+  "background_color": "#0A0C11",
+  "theme_color": "#0A0C11",
   "icons": [
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
   ]

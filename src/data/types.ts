@@ -10,6 +10,10 @@ export interface PaintGroup {
   paints: Paint[];
 }
 
+export type DayKey = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
+
+export type StoreHours = Record<DayKey, string>;
+
 export interface Store {
   id: number;
   name: string;
@@ -20,11 +24,8 @@ export interface Store {
   lat: number;
   lng: number;
   phone: string;
-  games: string[];
-  tables: number;
-  paintBrands: string[];
-  hours: string;
+  website?: string;
+  hours: StoreHours;
   verified: boolean;
   color: string;
-  emoji: string;
 }

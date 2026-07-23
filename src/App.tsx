@@ -1,24 +1,41 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+import {
+  Search, Palette, Layers, Store as StoreIcon, Plus, Check, Download, Upload,
+  Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
+  Navigation, Sparkles, ArrowRight, Droplets,
+} from "lucide-react";
 import { PAINT_GROUPS } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
-import { STORES, GAME_SYSTEMS } from "./data/stores";
-import { Paint, Store } from "./data/types";
+import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
+import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchLabel, matchBg, matchFg } from "./utils/colors";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
+import FallenIcon from "./FallenIcon";
 
 const pid = (p: Paint) => `${p.brand}::${p.name}`;
+const JS_DAY: DayKey[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const todayKey = (): DayKey => JS_DAY[new Date().getDay()];
 
-// Custom map marker
-const makeIcon = (color: string, emoji: string) =>
+// Clean futuristic map marker — glowing node
+const makeIcon = (color: string, active: boolean) =>
   L.divIcon({
     className: "",
-    html: `<div style="width:32px;height:32px;border-radius:8px;background:${color};display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)">${emoji}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
+    html: `<div class="map-pin ${active ? "active" : ""}" style="--pc:${color}"></div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+    popupAnchor: [0, -12],
   });
+
+// Pans/zooms the map toward the active store
+function MapController({ store }: { store: Store | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (store) map.flyTo([store.lat, store.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
+  }, [store, map]);
+  return null;
+}
 
 export default function App() {
   const [tab, setTab] = useState<"match" | "collection" | "stores">("match");
@@ -30,9 +47,9 @@ export default function App() {
   const [collection, setCollection] = useState<Set<string>>(loadCollection);
   const [collFilter, setCollFilter] = useState("");
   const [storeQ, setStoreQ] = useState("");
-  const [gameFilter, setGameFilter] = useState<string | null>(null);
-  const [storeDetail, setStoreDetail] = useState<Store | null>(null);
-  const [hlStore, setHlStore] = useState<number | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [activeStore, setActiveStore] = useState<number | null>(null);
+  const [featSeed, setFeatSeed] = useState(() => Math.floor(Math.random() * 1e9));
 
   useEffect(() => { saveCollection(collection); }, [collection]);
 
@@ -47,6 +64,7 @@ export default function App() {
   const isOwned = (p: Paint) => collection.has(pid(p));
 
   // ── Paint logic ──
+  const allPaints = useMemo(() => PAINT_GROUPS.flatMap(g => g.paints), []);
   const allFlat = useMemo(() =>
     PAINT_GROUPS.flatMap((g, gi) => g.paints.filter(p => activeBrands.has(p.brand)).map(p => ({ ...p, groupIndex: gi, family: g.family })))
   , [activeBrands]);
@@ -57,19 +75,41 @@ export default function App() {
     return allFlat.filter(p => p.name.toLowerCase().includes(q) || (BRANDS[p.brand] || "").toLowerCase().includes(q)).slice(0, 15);
   }, [allFlat, query, mode]);
 
-  const nameResults = useMemo(() => {
-    if (!selPaint) return { eq: [], nb: [] };
-    const gr = PAINT_GROUPS.find(g => g.paints.some(p => pid(p) === pid(selPaint)));
-    const eq = gr ? gr.paints.filter(p => pid(p) !== pid(selPaint) && activeBrands.has(p.brand)) : [];
-    const ids = new Set([pid(selPaint), ...eq.map(pid)]);
-    const nb = allFlat.filter(p => !ids.has(pid(p))).map(p => ({ ...p, distance: colorDistance(selPaint.hex, p.hex) })).sort((a, b) => a.distance - b.distance).slice(0, 20);
+  const computeMatches = useCallback((paint: Paint) => {
+    const gr = PAINT_GROUPS.find(g => g.paints.some(p => pid(p) === pid(paint)));
+    const eq = gr ? gr.paints.filter(p => pid(p) !== pid(paint) && activeBrands.has(p.brand)) : [];
+    const ids = new Set([pid(paint), ...eq.map(pid)]);
+    const nb = allFlat.filter(p => !ids.has(pid(p))).map(p => ({ ...p, distance: colorDistance(paint.hex, p.hex) })).sort((a, b) => a.distance - b.distance).slice(0, 20);
     return { eq, nb };
-  }, [selPaint, allFlat, activeBrands]);
+  }, [allFlat, activeBrands]);
+
+  const nameResults = useMemo(() => selPaint ? computeMatches(selPaint) : { eq: [], nb: [] }, [selPaint, computeMatches]);
 
   const hexResults = useMemo(() => {
     if (mode !== "hex" || hexVal.length < 7) return [];
     return allFlat.map(p => ({ ...p, distance: colorDistance(hexVal, p.hex) })).sort((a, b) => a.distance - b.distance).slice(0, 30);
   }, [allFlat, hexVal, mode]);
+
+  // ── Landing data ──
+  const families = useMemo(() => {
+    const seen = new Set<string>(); const out: { family: string; hex: string }[] = [];
+    PAINT_GROUPS.forEach(g => {
+      if (!seen.has(g.family)) {
+        seen.add(g.family);
+        const rep = g.paints.find(p => p.brand === "citadel") || g.paints[0];
+        out.push({ family: g.family, hex: rep.hex });
+      }
+    });
+    return out;
+  }, []);
+
+  const featured = useMemo(() => allPaints[featSeed % allPaints.length], [featSeed, allPaints]);
+  const featuredMatches = useMemo(() => {
+    const { eq, nb } = computeMatches(featured);
+    return [...eq, ...nb].slice(0, 3);
+  }, [featured, computeMatches]);
+
+  const selectPaint = (p: Paint) => { setMode("name"); setSelPaint(p); setQuery(p.name); };
 
   // ── Collection logic ──
   const collPaints = useMemo(() => {
@@ -88,7 +128,7 @@ export default function App() {
   }, [collection]);
 
   // ── Store logic ──
-  const hasStoreSearch = storeQ.trim().length > 0 || gameFilter !== null;
+  const countries = useMemo(() => Array.from(new Set(STORES.map(s => s.country))).sort(), []);
   const storeResults = useMemo(() => {
     let res = STORES;
     if (storeQ.trim()) {
@@ -98,13 +138,14 @@ export default function App() {
         s.city.toLowerCase().includes(q) ||
         s.address.toLowerCase().includes(q) ||
         s.country.toLowerCase().includes(q) ||
-        // Postal code: match full or partial (first 2-5 digits)
         s.postal.toLowerCase().replace(/\s/g, "").includes(q.replace(/\s/g, ""))
       );
     }
-    if (gameFilter) res = res.filter(s => s.games.includes(gameFilter));
+    if (countryFilter) res = res.filter(s => s.country === countryFilter);
     return res;
-  }, [storeQ, gameFilter]);
+  }, [storeQ, countryFilter]);
+
+  const activeStoreObj = useMemo(() => STORES.find(s => s.id === activeStore) || null, [activeStore]);
 
   // ── Shared components ──
   const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => (
@@ -131,7 +172,7 @@ export default function App() {
           title={isOwned(paint) ? "Remove from my paints" : "Add to my paints"}
           aria-label={isOwned(paint) ? "Remove from collection" : "Add to collection"}
         >
-          {isOwned(paint) ? "✓" : "+"}
+          {isOwned(paint) ? <Check size={16} /> : <Plus size={16} />}
         </button>
       )}
     </div>
@@ -146,98 +187,64 @@ export default function App() {
   );
 
   const NAV = [
-    { id: "match" as const, icon: "🎯", label: "Colours", badge: null as number | null },
-    { id: "collection" as const, icon: "🗂", label: "My Paints", badge: collection.size || null },
-    { id: "stores" as const, icon: "🏪", label: "Stores", badge: null as number | null },
+    { id: "match" as const, Icon: Palette, label: "Colours", badge: null as number | null },
+    { id: "collection" as const, Icon: Layers, label: "My Paints", badge: collection.size || null },
+    { id: "stores" as const, Icon: StoreIcon, label: "Stores", badge: null as number | null },
   ];
-
-  // ── Store detail view ──
-  if (storeDetail) {
-    const s = storeDetail;
-    return (
-      <div className="app">
-        <div className="app-content">
-          <div style={{ padding: 16 }}>
-            <button className="detail-back" onClick={() => setStoreDetail(null)}>← Back</button>
-          </div>
-          <div className="detail-header">
-            <div className="store-icon" style={{ width: 46, height: 46, background: s.color, fontSize: 20 }}>{s.emoji}</div>
-            <div>
-              <div className="detail-name">{s.name}</div>
-              <div className="detail-sub">{s.city}, {s.country}{s.verified ? " · ✓ Verified" : ""}</div>
-            </div>
-          </div>
-          {[{ i: "📍", l: "Address", v: s.address }, { i: "📞", l: "Phone", v: s.phone }, { i: "🕐", l: "Hours", v: s.hours }, { i: "🎲", l: "Tables", v: `${s.tables} gaming table${s.tables !== 1 ? "s" : ""}` }].map((r, i) => (
-            <div key={i} className="detail-info"><span className="detail-info-icon">{r.i}</span><div><div className="detail-info-label">{r.l}</div><div className="detail-info-value">{r.v}</div></div></div>
-          ))}
-          <div className="section-label">Game systems</div>
-          <div className="tag-row">{s.games.map(g => <span key={g} className="tag-game">{g}</span>)}</div>
-          <div className="section-label">Paint brands stocked</div>
-          <div className="tag-row">{s.paintBrands.map(b => <span key={b} className="tag-paint">{b}</span>)}</div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="app">
-      {/* Header */}
-      <div className="header">
-        <div className="header-brand">
-          <div className="header-logo">FP</div>
-          <div>
-            <div className="header-title">FallenPalette</div>
-            <div className="header-sub">Paint conversion · Collection · Store finder</div>
-          </div>
+      {/* ═══ HEADER ═══ */}
+      <header className="site-header">
+        <div className="brand">
+          <FallenIcon size={44} />
+          <h1 className="wordmark">Fallen&nbsp;Palette</h1>
         </div>
-        <nav className="desktop-nav">
+        <p className="tagline">Miniature paint cross-reference · collection · store finder</p>
+        <nav className="nav">
           {NAV.map(t => (
             <button key={t.id} className={`nav-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-              <span className="nav-icon">{t.icon}</span>
+              <t.Icon size={17} />
               <span>{t.label}</span>
               {t.badge ? <span className="nav-badge">{t.badge}</span> : null}
             </button>
           ))}
         </nav>
-      </div>
+      </header>
 
       <div className="app-content">
-        {/* ═══ COLOUR MATCH ═══ */}
-        {tab === "match" && (<>
+        {/* ═══════════ COLOUR MATCH ═══════════ */}
+        {tab === "match" && (<div className="view">
           <div className="mode-row">
-            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => { setMode("name"); setSelPaint(null); }}>Search by Name</button>
-            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => { setMode("hex"); setSelPaint(null); setQuery(""); }}>Search by Colour</button>
+            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => { setMode("name"); setSelPaint(null); }}><Search size={14} /> By name</button>
+            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => { setMode("hex"); setSelPaint(null); setQuery(""); }}><Droplets size={14} /> By colour</button>
           </div>
 
           {mode === "name" && (<>
             <div className="search-wrap">
-              <span className="search-icon">🔍</span>
-              <input className="search-input" placeholder='Type a paint name, e.g. "Mephiston Red"...' value={query} onChange={e => { setQuery(e.target.value); setSelPaint(null); }} />
+              <Search size={17} className="search-icon" />
+              <input className="search-input" placeholder='Type a paint name, e.g. "Mephiston Red"…' value={query} onChange={e => { setQuery(e.target.value); setSelPaint(null); }} />
             </div>
             <BrandChips />
 
             {!selPaint && query.trim() && suggestions.length > 0 && (
               <div className="card suggestions">
-                <div style={{ padding: "8px 14px 4px", fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>Select a paint</div>
-                {suggestions.map((p, i) => <PaintRow key={i} paint={p} showOwn={false} onClick={() => { setSelPaint(p); setQuery(p.name); }} />)}
+                <div className="suggest-label">Select a paint</div>
+                {suggestions.map((p, i) => <PaintRow key={i} paint={p} showOwn={false} onClick={() => selectPaint(p)} />)}
               </div>
             )}
-            {!selPaint && query.trim() && suggestions.length === 0 && <div className="hint">No paints match "{query}"</div>}
+            {!selPaint && query.trim() && suggestions.length === 0 && <div className="hint">No paints match “{query}”</div>}
 
             {selPaint && (<>
               <div className="card-hero">
                 <div className="card-hero-inner">
-                  <Swatch hex={selPaint.hex} size={44} className="swatch-lg" />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--bright)" }}>{selPaint.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>{BRANDS[selPaint.brand]} · {selPaint.type} · {selPaint.hex}</div>
+                  <Swatch hex={selPaint.hex} size={48} className="swatch-lg" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="hero-name">{selPaint.name}</div>
+                    <div className="hero-meta">{BRANDS[selPaint.brand]} · {selPaint.type} · {selPaint.hex}</div>
                   </div>
-                  <button
-                    className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`}
-                    onClick={() => toggleOwned(selPaint)}
-                    title={isOwned(selPaint) ? "Remove from my paints" : "Add to my paints"}
-                  >
-                    {isOwned(selPaint) ? "✓" : "+"}
+                  <button className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`} onClick={() => toggleOwned(selPaint)} title={isOwned(selPaint) ? "Remove from my paints" : "Add to my paints"}>
+                    {isOwned(selPaint) ? <Check size={16} /> : <Plus size={16} />}
                   </button>
                 </div>
               </div>
@@ -255,11 +262,64 @@ export default function App() {
               </>)}
             </>)}
 
+            {/* ─── DYNAMIC LANDING ─── */}
             {!selPaint && !query.trim() && (
-              <div className="empty">
-                <div className="empty-icon">🔍</div>
-                <div className="empty-body">Search for any paint by name to find its equivalents across all brands</div>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 12 }}>{activeBrands.size} brands loaded</div>
+              <div className="landing">
+                <div className="stats-band">
+                  <div className="stat-pill"><Droplets size={18} /><div><b>{allPaints.length}</b><span>paints</span></div></div>
+                  <div className="stat-pill"><Palette size={18} /><div><b>{BRAND_IDS.length}</b><span>brands</span></div></div>
+                  <div className="stat-pill"><StoreIcon size={18} /><div><b>{STORES.length}</b><span>stores</span></div></div>
+                </div>
+
+                <div className="section-head">
+                  <div className="section-label"><Sparkles size={14} /> Featured cross-reference</div>
+                  <button className="ghost-btn" onClick={() => setFeatSeed(Math.floor(Math.random() * 1e9))}><Shuffle size={13} /> Shuffle</button>
+                </div>
+                <div className="feature-card" onClick={() => selectPaint(featured)}>
+                  <div className="feature-top">
+                    <Swatch hex={featured.hex} size={52} className="swatch-lg" />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="hero-name">{featured.name}</div>
+                      <div className="hero-meta">{BRANDS[featured.brand]} · {featured.type}</div>
+                    </div>
+                    <ArrowRight size={18} className="feature-arrow" />
+                  </div>
+                  {featuredMatches.length > 0 && (
+                    <div className="feature-matches">
+                      {featuredMatches.map((p, i) => (
+                        <div key={i} className="feature-match">
+                          <Swatch hex={p.hex} size={20} />
+                          <span className="fm-name">{p.name}</span>
+                          <span className="fm-brand">{BRANDS[p.brand]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="section-label"><Palette size={14} /> Browse by colour family</div>
+                <div className="family-grid">
+                  {families.map(f => {
+                    const rep = (PAINT_GROUPS.find(g => g.family === f.family)?.paints.find(p => activeBrands.has(p.brand))) || null;
+                    return (
+                      <button key={f.family} className="family-tile" onClick={() => rep && selectPaint(rep)} title={f.family}>
+                        <span className="family-swatch" style={{ background: f.hex }} />
+                        <span className="family-name">{f.family}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="section-label">How it works</div>
+                <div className="how-grid">
+                  {[
+                    { Icon: Search, t: "Search", d: "Find any paint by name or pick a colour." },
+                    { Icon: Palette, t: "Compare", d: "See equivalents across every brand." },
+                    { Icon: Layers, t: "Save", d: "Track what you own in your rack." },
+                  ].map((s, i) => (
+                    <div key={i} className="how-card"><span className="how-icon"><s.Icon size={18} /></span><div className="how-title">{s.t}</div><div className="how-desc">{s.d}</div></div>
+                  ))}
+                </div>
               </div>
             )}
           </>)}
@@ -268,10 +328,10 @@ export default function App() {
             <div className="hex-picker">
               <input type="color" value={hexVal} onChange={e => setHexVal(e.target.value)} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 5 }}>Pick a colour or enter hex</div>
+                <div className="hex-label">Pick a colour or enter hex</div>
                 <input className="hex-input" value={hexVal} maxLength={7} onChange={e => { let v = e.target.value; if (!v.startsWith("#")) v = "#" + v; if (v.length <= 7) setHexVal(v); }} />
               </div>
-              <Swatch hex={hexVal} size={52} className="hex-preview swatch-lg" />
+              <Swatch hex={hexVal} size={54} className="hex-preview swatch-lg" />
             </div>
             <BrandChips />
             <div className="count">Top 30 closest matches</div>
@@ -279,37 +339,19 @@ export default function App() {
               {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
             </div>
           </>)}
-        </>)}
+        </div>)}
 
-        {/* ═══ COLLECTION ═══ */}
-        {tab === "collection" && (<>
+        {/* ═══════════ COLLECTION ═══════════ */}
+        {tab === "collection" && (<div className="view">
           {collection.size === 0 ? (
             <div className="empty">
-              <div className="empty-icon">🎨</div>
+              <div className="empty-icon"><Layers size={40} /></div>
               <div className="empty-title">Your paint rack is empty</div>
               <div className="empty-body">
-                Search for a paint in <b>Colours</b>, then tap the <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.05)", color: "#4B5563", fontSize: 13, fontWeight: 600, verticalAlign: "middle", margin: "0 4px", border: "1px solid var(--border)" }}>+</span> button on any result to save it here.
+                Search for a paint in <b>Colours</b>, then hit the <span className="inline-plus"><Plus size={13} /></span> button on any result to save it here.
               </div>
-              <button
-                onClick={() => setTab("match")}
-                style={{
-                  marginTop: 20,
-                  padding: "10px 20px",
-                  background: "var(--accent)",
-                  color: "var(--bg)",
-                  border: "none",
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                Browse paints →
-              </button>
-              <div style={{ marginTop: 24, padding: "12px 20px", background: "var(--card-alt)", borderRadius: 8, fontSize: 11, color: "var(--muted)", lineHeight: 1.5, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
-                💾 Your collection is saved locally on this device.
-                Clearing your browser data will remove it.
-              </div>
+              <button className="cta-btn" onClick={() => setTab("match")}>Browse paints <ArrowRight size={15} /></button>
+              <div className="save-note">💾 Your collection is saved locally on this device. Clearing browser data will remove it.</div>
             </div>
           ) : (<>
             <div className="stats-row">
@@ -319,125 +361,122 @@ export default function App() {
               ))}
             </div>
             <div className="search-wrap">
-              <span className="search-icon">🔍</span>
-              <input className="search-input" placeholder="Filter your collection..." value={collFilter} onChange={e => setCollFilter(e.target.value)} />
+              <Search size={17} className="search-icon" />
+              <input className="search-input" placeholder="Filter your collection…" value={collFilter} onChange={e => setCollFilter(e.target.value)} />
             </div>
-            <div style={{ padding: "0 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="coll-actions">
               <span className="count" style={{ padding: 0 }}>{collPaints.length} paint{collPaints.length !== 1 ? "s" : ""}</span>
-              <div style={{ display: "flex", gap: 12 }}>
-                <button
-                  style={{ fontSize: 11, color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}
-                  onClick={() => exportCollection(collection)}
-                  title="Download your collection as a JSON file"
-                >⤓ Export</button>
-                <label style={{ fontSize: 11, color: "var(--muted)", cursor: "pointer" }} title="Restore collection from a backup file">
-                  ⤒ Import
-                  <input
-                    type="file"
-                    accept="application/json,.json"
-                    style={{ display: "none" }}
-                    onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        const imported = await importCollection(file);
-                        if (confirm(`Import ${imported.size} paints? This will merge with your current collection.`)) {
-                          setCollection(prev => new Set([...prev, ...imported]));
-                        }
-                      } catch (err) {
-                        alert("Failed to import: " + (err instanceof Error ? err.message : "unknown error"));
+              <div className="coll-buttons">
+                <button className="text-btn" onClick={() => exportCollection(collection)} title="Download your collection as a JSON file"><Download size={13} /> Export</button>
+                <label className="text-btn" title="Restore collection from a backup file">
+                  <Upload size={13} /> Import
+                  <input type="file" accept="application/json,.json" style={{ display: "none" }} onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const imported = await importCollection(file);
+                      if (confirm(`Import ${imported.size} paints? This will merge with your current collection.`)) {
+                        setCollection(prev => new Set([...prev, ...imported]));
                       }
-                      e.target.value = "";
-                    }}
-                  />
+                    } catch (err) {
+                      alert("Failed to import: " + (err instanceof Error ? err.message : "unknown error"));
+                    }
+                    e.target.value = "";
+                  }} />
                 </label>
-                <button
-                  style={{ fontSize: 11, color: "var(--danger)", background: "none", border: "none", cursor: "pointer" }}
-                  onClick={() => {
-                    if (confirm("Clear all paints from your collection?")) setCollection(new Set());
-                  }}
-                >Clear all</button>
+                <button className="text-btn danger" onClick={() => { if (confirm("Clear all paints from your collection?")) setCollection(new Set()); }}><Trash2 size={13} /> Clear</button>
               </div>
             </div>
             <div className="results-grid">
               {collPaints.map((p, i) => <div key={i} className="card"><PaintRow paint={p} /></div>)}
             </div>
           </>)}
-        </>)}
+        </div>)}
 
-        {/* ═══ STORES ═══ */}
-        {tab === "stores" && (<>
+        {/* ═══════════ STORES ═══════════ */}
+        {tab === "stores" && (<div className="view">
           <div className="search-wrap">
-            <span className="search-icon">🔍</span>
-            <input className="search-input" placeholder="Search by city, postal code, or store name..." value={storeQ} onChange={e => { setStoreQ(e.target.value); setHlStore(null); }} />
+            <Search size={17} className="search-icon" />
+            <input className="search-input" placeholder="Search by city, postal code, or store name…" value={storeQ} onChange={e => { setStoreQ(e.target.value); }} />
           </div>
           <div className="chips">
-            <button className={`chip ${!gameFilter ? "active" : ""}`} onClick={() => setGameFilter(null)}>All</button>
-            {GAME_SYSTEMS.map(g => <button key={g} className={`chip ${gameFilter === g ? "active" : ""}`} onClick={() => setGameFilter(gameFilter === g ? null : g)}>{g}</button>)}
+            <button className={`chip ${!countryFilter ? "active" : ""}`} onClick={() => setCountryFilter(null)}>All</button>
+            {countries.map(c => <button key={c} className={`chip ${countryFilter === c ? "active" : ""}`} onClick={() => setCountryFilter(countryFilter === c ? null : c)}>{c}</button>)}
           </div>
-          <div className="count">{storeResults.length} store{storeResults.length !== 1 ? "s" : ""} found</div>
+          <div className="count">{storeResults.length} store{storeResults.length !== 1 ? "s" : ""}</div>
 
           <div className="store-layout">
-          <div className={`store-list ${hasStoreSearch && storeResults.length > 0 ? "with-map scrollable" : ""}`}>
-            {storeResults.length === 0 ? <div className="hint">No stores match your search.</div> :
-              storeResults.map(s => (
-                <div key={s.id} className={`store-row ${hlStore === s.id ? "highlighted" : ""}`}
-                  style={hlStore === s.id ? { borderLeftColor: s.color, background: s.color + "12" } : {}}
-                  onClick={() => setHlStore(hlStore === s.id ? null : s.id)}
-                  onDoubleClick={() => setStoreDetail(s)}>
-                  <div className="store-icon" style={{ width: 30, height: 30, background: s.color, fontSize: 13 }}>{s.emoji}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="store-name">{s.name}{s.verified && <span className="store-verified">✓</span>}</div>
-                    <div className="store-addr">{s.address}, {s.postal}</div>
-                  </div>
-                  <div className="store-meta">
-                    <div className="store-tables">🎲 {s.tables}</div>
-                    <div className="store-city">{s.city}</div>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-
-          {hasStoreSearch && storeResults.length > 0 && (
-            <div className="map-container">
-              <MapContainer
-                key={storeResults.map(s => s.id).join(",")}
-                bounds={storeResults.length > 0 ? storeResults.map(s => [s.lat, s.lng] as [number, number]) : undefined}
-                boundsOptions={{ padding: [40, 40] }}
-                center={storeResults.length === 1 ? [storeResults[0].lat, storeResults[0].lng] : [38, 23]}
-                zoom={storeResults.length === 1 ? 14 : 6}
-                scrollWheelZoom={true}
-                style={{ height: "calc(100% - 28px)", width: "100%" }}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
-                {storeResults.map(s => (
-                  <Marker key={s.id} position={[s.lat, s.lng]} icon={makeIcon(s.color, s.emoji)}
-                    eventHandlers={{ click: () => setStoreDetail(s) }}>
-                    <Popup><b>{s.name}</b><br />{s.city} · {s.tables} tables</Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-              <div className="map-hint">Tap a pin for details · {storeResults.length} location{storeResults.length !== 1 ? "s" : ""}</div>
+            <div className="store-list">
+              {storeResults.length === 0 ? <div className="hint">No stores match your search.</div> :
+                storeResults.map(s => {
+                  const open = activeStore === s.id;
+                  const th = s.hours[todayKey()];
+                  return (
+                    <div key={s.id} className={`store-card ${open ? "open" : ""}`} style={open ? { borderColor: s.color } : {}}>
+                      <div className="store-head" onClick={() => setActiveStore(open ? null : s.id)}>
+                        <span className="store-dot" style={{ background: s.color }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="store-name">{s.name}{s.verified && <BadgeCheck size={14} className="store-verified" />}</div>
+                          <div className="store-addr">{s.address} · {s.city}</div>
+                        </div>
+                        <div className="store-today">
+                          <span className={th === "Closed" ? "closed" : "openhrs"}>{th === "Closed" ? "Closed today" : th}</span>
+                        </div>
+                        <ChevronDown size={16} className="store-chev" />
+                      </div>
+                      {open && (
+                        <div className="store-detail">
+                          <a className="detail-row" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.address + " " + s.city)}`} target="_blank" rel="noreferrer">
+                            <MapPin size={15} /><span>{s.address}, {s.postal} · {s.city}, {s.country}</span>
+                          </a>
+                          {s.phone && <a className="detail-row" href={`tel:${s.phone.replace(/\s/g, "")}`}><Phone size={15} /><span>{s.phone}</span></a>}
+                          {s.website && <a className="detail-row" href={s.website} target="_blank" rel="noreferrer"><Globe size={15} /><span>{s.website.replace(/^https?:\/\//, "")}</span></a>}
+                          <div className="detail-row hours-head"><Clock size={15} /><span>Opening hours</span></div>
+                          <div className="hours-table">
+                            {DAY_ORDER.map(d => (
+                              <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
+                                <span>{DAY_LABEL[d]}</span>
+                                <span className={s.hours[d] === "Closed" ? "closed" : ""}>{s.hours[d]}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              }
             </div>
-          )}
+
+            {storeResults.length > 0 && (
+              <div className="map-container">
+                <MapContainer
+                  key={storeResults.map(s => s.id).join(",")}
+                  bounds={storeResults.map(s => [s.lat, s.lng] as [number, number])}
+                  boundsOptions={{ padding: [50, 50], maxZoom: 13 }}
+                  scrollWheelZoom={true}
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    subdomains="abcd"
+                    attribution='&copy; OpenStreetMap &copy; CARTO'
+                  />
+                  <MapController store={activeStoreObj} />
+                  {storeResults.map(s => (
+                    <Marker key={s.id} position={[s.lat, s.lng]} icon={makeIcon(s.color, activeStore === s.id)}
+                      eventHandlers={{ click: () => setActiveStore(s.id) }}>
+                      <Popup><b>{s.name}</b><br />{s.city}</Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            )}
           </div>
+        </div>)}
 
-          {!hasStoreSearch && <div className="hint">Search by city or postal code to see stores on the map</div>}
-        </>)}
-
-        <div className="footer">FallenPalette · Data is approximate — always test swatches</div>
-      </div>
-
-      {/* Bottom tabs (mobile) */}
-      <div className="tabs">
-        {NAV.map(t => (
-          <button key={t.id} className={`tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)} style={{ position: "relative" }}>
-            <span className="tab-icon">{t.icon}</span>
-            <span>{t.label}</span>
-            {t.badge ? <span className="tab-badge">{t.badge}</span> : null}
-          </button>
-        ))}
+        <footer className="footer"><FallenIcon size={16} /> Fallen Palette · Data is approximate — always test swatches</footer>
       </div>
     </div>
   );
