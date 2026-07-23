@@ -6,7 +6,7 @@ import { BRANDS, BRAND_IDS } from "./data/brands";
 import { STORES, GAME_SYSTEMS } from "./data/stores";
 import { Paint, Store } from "./data/types";
 import { colorDistance, luminance, matchLabel, matchBg, matchFg } from "./utils/colors";
-import { loadCollection, saveCollection } from "./utils/storage";
+import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 
 const pid = (p: Paint) => `${p.brand}::${p.name}`;
 
@@ -91,7 +91,17 @@ export default function App() {
   const hasStoreSearch = storeQ.trim().length > 0 || gameFilter !== null;
   const storeResults = useMemo(() => {
     let res = STORES;
-    if (storeQ.trim()) { const q = storeQ.toLowerCase(); res = res.filter(s => s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q) || s.postal.includes(q) || s.country.toLowerCase().includes(q)); }
+    if (storeQ.trim()) {
+      const q = storeQ.toLowerCase().trim();
+      res = res.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.city.toLowerCase().includes(q) ||
+        s.address.toLowerCase().includes(q) ||
+        s.country.toLowerCase().includes(q) ||
+        // Postal code: match full or partial (first 2-5 digits)
+        s.postal.toLowerCase().replace(/\s/g, "").includes(q.replace(/\s/g, ""))
+      );
+    }
     if (gameFilter) res = res.filter(s => s.games.includes(gameFilter));
     return res;
   }, [storeQ, gameFilter]);
@@ -115,7 +125,12 @@ export default function App() {
       {extra}
       <span className="brand-badge">{BRANDS[paint.brand]}</span>
       {showOwn && (
-        <button className={`own-btn ${isOwned(paint) ? "owned" : ""}`} onClick={e => { e.stopPropagation(); toggleOwned(paint); }}>
+        <button
+          className={`own-btn ${isOwned(paint) ? "owned" : ""}`}
+          onClick={e => { e.stopPropagation(); toggleOwned(paint); }}
+          title={isOwned(paint) ? "Remove from my paints" : "Add to my paints"}
+          aria-label={isOwned(paint) ? "Remove from collection" : "Add to collection"}
+        >
           {isOwned(paint) ? "✓" : "+"}
         </button>
       )}
@@ -200,7 +215,13 @@ export default function App() {
                     <div style={{ fontSize: 15, fontWeight: 700, color: "var(--bright)" }}>{selPaint.name}</div>
                     <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>{BRANDS[selPaint.brand]} · {selPaint.type} · {selPaint.hex}</div>
                   </div>
-                  <button className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`} onClick={() => toggleOwned(selPaint)}>{isOwned(selPaint) ? "✓" : "+"}</button>
+                  <button
+                    className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`}
+                    onClick={() => toggleOwned(selPaint)}
+                    title={isOwned(selPaint) ? "Remove from my paints" : "Add to my paints"}
+                  >
+                    {isOwned(selPaint) ? "✓" : "+"}
+                  </button>
                 </div>
               </div>
               {nameResults.eq.length > 0 && (<>
@@ -242,8 +263,30 @@ export default function App() {
           {collection.size === 0 ? (
             <div className="empty">
               <div className="empty-icon">🎨</div>
-              <div className="empty-title">No paints yet</div>
-              <div className="empty-body">Tap + on any paint in Colour Match to add it to your collection.</div>
+              <div className="empty-title">Your paint rack is empty</div>
+              <div className="empty-body">
+                Search for a paint in <b>Colours</b>, then tap the <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.05)", color: "#4B5563", fontSize: 13, fontWeight: 600, verticalAlign: "middle", margin: "0 4px", border: "1px solid var(--border)" }}>+</span> button on any result to save it here.
+              </div>
+              <button
+                onClick={() => setTab("match")}
+                style={{
+                  marginTop: 20,
+                  padding: "10px 20px",
+                  background: "var(--accent)",
+                  color: "var(--bg)",
+                  border: "none",
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                Browse paints →
+              </button>
+              <div style={{ marginTop: 24, padding: "12px 20px", background: "var(--card-alt)", borderRadius: 8, fontSize: 11, color: "var(--muted)", lineHeight: 1.5, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
+                💾 Your collection is saved locally on this device.
+                Clearing your browser data will remove it.
+              </div>
             </div>
           ) : (<>
             <div className="stats-row">
@@ -256,9 +299,42 @@ export default function App() {
               <span className="search-icon">🔍</span>
               <input className="search-input" placeholder="Filter your collection..." value={collFilter} onChange={e => setCollFilter(e.target.value)} />
             </div>
-            <div style={{ padding: "0 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "0 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span className="count" style={{ padding: 0 }}>{collPaints.length} paint{collPaints.length !== 1 ? "s" : ""}</span>
-              <button style={{ fontSize: 11, color: "var(--danger)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setCollection(new Set())}>Clear all</button>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button
+                  style={{ fontSize: 11, color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}
+                  onClick={() => exportCollection(collection)}
+                  title="Download your collection as a JSON file"
+                >⤓ Export</button>
+                <label style={{ fontSize: 11, color: "var(--muted)", cursor: "pointer" }} title="Restore collection from a backup file">
+                  ⤒ Import
+                  <input
+                    type="file"
+                    accept="application/json,.json"
+                    style={{ display: "none" }}
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const imported = await importCollection(file);
+                        if (confirm(`Import ${imported.size} paints? This will merge with your current collection.`)) {
+                          setCollection(prev => new Set([...prev, ...imported]));
+                        }
+                      } catch (err) {
+                        alert("Failed to import: " + (err instanceof Error ? err.message : "unknown error"));
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  style={{ fontSize: 11, color: "var(--danger)", background: "none", border: "none", cursor: "pointer" }}
+                  onClick={() => {
+                    if (confirm("Clear all paints from your collection?")) setCollection(new Set());
+                  }}
+                >Clear all</button>
+              </div>
             </div>
             {collPaints.map((p, i) => <div key={i} className="card"><PaintRow paint={p} /></div>)}
           </>)}
