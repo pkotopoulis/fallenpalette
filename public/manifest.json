@@ -1,6 +1,6 @@
 {
-  "name": "PaintXRef",
-  "short_name": "PaintXRef",
+  "name": "FallenPalette",
+  "short_name": "FallenPalette",
   "description": "Miniature paint conversion, collection tracker, and FLGS store finder",
   "start_url": "/",
   "display": "standalone",

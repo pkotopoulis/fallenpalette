@@ -145,6 +145,12 @@ export default function App() {
     </div>
   );
 
+  const NAV = [
+    { id: "match" as const, icon: "🎯", label: "Colours", badge: null as number | null },
+    { id: "collection" as const, icon: "🗂", label: "My Paints", badge: collection.size || null },
+    { id: "stores" as const, icon: "🏪", label: "Stores", badge: null as number | null },
+  ];
+
   // ── Store detail view ──
   if (storeDetail) {
     const s = storeDetail;
@@ -177,11 +183,22 @@ export default function App() {
     <div className="app">
       {/* Header */}
       <div className="header">
-        <div className="header-logo">PX</div>
-        <div>
-          <div className="header-title">PaintXRef</div>
-          <div className="header-sub">Paint conversion · Collection · Store finder</div>
+        <div className="header-brand">
+          <div className="header-logo">FP</div>
+          <div>
+            <div className="header-title">FallenPalette</div>
+            <div className="header-sub">Paint conversion · Collection · Store finder</div>
+          </div>
         </div>
+        <nav className="desktop-nav">
+          {NAV.map(t => (
+            <button key={t.id} className={`nav-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+              <span className="nav-icon">{t.icon}</span>
+              <span>{t.label}</span>
+              {t.badge ? <span className="nav-badge">{t.badge}</span> : null}
+            </button>
+          ))}
+        </nav>
       </div>
 
       <div className="app-content">
@@ -200,7 +217,7 @@ export default function App() {
             <BrandChips />
 
             {!selPaint && query.trim() && suggestions.length > 0 && (
-              <div className="card">
+              <div className="card suggestions">
                 <div style={{ padding: "8px 14px 4px", fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>Select a paint</div>
                 {suggestions.map((p, i) => <PaintRow key={i} paint={p} showOwn={false} onClick={() => { setSelPaint(p); setQuery(p.name); }} />)}
               </div>
@@ -226,11 +243,15 @@ export default function App() {
               </div>
               {nameResults.eq.length > 0 && (<>
                 <div className="section-label">Direct equivalents</div>
-                {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
+                <div className="results-grid">
+                  {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
+                </div>
               </>)}
               {nameResults.nb.length > 0 && (<>
                 <div className="section-label">Similar colours</div>
-                {nameResults.nb.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
+                <div className="results-grid">
+                  {nameResults.nb.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
+                </div>
               </>)}
             </>)}
 
@@ -254,7 +275,9 @@ export default function App() {
             </div>
             <BrandChips />
             <div className="count">Top 30 closest matches</div>
-            {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
+            <div className="results-grid">
+              {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
+            </div>
           </>)}
         </>)}
 
@@ -336,7 +359,9 @@ export default function App() {
                 >Clear all</button>
               </div>
             </div>
-            {collPaints.map((p, i) => <div key={i} className="card"><PaintRow paint={p} /></div>)}
+            <div className="results-grid">
+              {collPaints.map((p, i) => <div key={i} className="card"><PaintRow paint={p} /></div>)}
+            </div>
           </>)}
         </>)}
 
@@ -352,7 +377,8 @@ export default function App() {
           </div>
           <div className="count">{storeResults.length} store{storeResults.length !== 1 ? "s" : ""} found</div>
 
-          <div className={`store-list ${hasStoreSearch && storeResults.length > 0 ? "with-map" : ""}`} style={hasStoreSearch ? { maxHeight: "calc(50vh - 140px)", overflowY: "auto" } : {}}>
+          <div className="store-layout">
+          <div className={`store-list ${hasStoreSearch && storeResults.length > 0 ? "with-map scrollable" : ""}`}>
             {storeResults.length === 0 ? <div className="hint">No stores match your search.</div> :
               storeResults.map(s => (
                 <div key={s.id} className={`store-row ${hlStore === s.id ? "highlighted" : ""}`}
@@ -395,20 +421,17 @@ export default function App() {
               <div className="map-hint">Tap a pin for details · {storeResults.length} location{storeResults.length !== 1 ? "s" : ""}</div>
             </div>
           )}
+          </div>
 
           {!hasStoreSearch && <div className="hint">Search by city or postal code to see stores on the map</div>}
         </>)}
 
-        <div className="footer">PaintXRef · Data is approximate — always test swatches</div>
+        <div className="footer">FallenPalette · Data is approximate — always test swatches</div>
       </div>
 
-      {/* Bottom tabs */}
+      {/* Bottom tabs (mobile) */}
       <div className="tabs">
-        {([
-          { id: "match" as const, icon: "🎯", label: "Colours" },
-          { id: "collection" as const, icon: "🗂", label: `My Paints`, badge: collection.size || null },
-          { id: "stores" as const, icon: "🏪", label: "Stores" },
-        ]).map(t => (
+        {NAV.map(t => (
           <button key={t.id} className={`tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)} style={{ position: "relative" }}>
             <span className="tab-icon">{t.icon}</span>
             <span>{t.label}</span>
