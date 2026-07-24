@@ -7,6 +7,6 @@
   "background_color": "#0A0C11",
   "theme_color": "#0A0C11",
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "/fallen-icon.png", "sizes": "384x384", "type": "image/png" }
   ]
 }

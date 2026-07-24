@@ -91,18 +91,6 @@ export default function App() {
   }, [allFlat, hexVal, mode]);
 
   // ── Landing data ──
-  const families = useMemo(() => {
-    const seen = new Set<string>(); const out: { family: string; hex: string }[] = [];
-    PAINT_GROUPS.forEach(g => {
-      if (!seen.has(g.family)) {
-        seen.add(g.family);
-        const rep = g.paints.find(p => p.brand === "citadel") || g.paints[0];
-        out.push({ family: g.family, hex: rep.hex });
-      }
-    });
-    return out;
-  }, []);
-
   const featured = useMemo(() => allPaints[featSeed % allPaints.length], [featSeed, allPaints]);
   const featuredMatches = useMemo(() => {
     const { eq, nb } = computeMatches(featured);
@@ -196,11 +184,13 @@ export default function App() {
     <div className="app">
       {/* ═══ HEADER ═══ */}
       <header className="site-header">
-        <div className="brand">
-          <FallenIcon size={44} />
-          <h1 className="wordmark">Fallen&nbsp;Palette</h1>
+        <div className="header-left">
+          <div className="brand">
+            <FallenIcon size={48} />
+            <h1 className="wordmark">Fallen&nbsp;Palette</h1>
+          </div>
+          <p className="tagline">Miniature paint cross-reference · collection · store finder</p>
         </div>
-        <p className="tagline">Miniature paint cross-reference · collection · store finder</p>
         <nav className="nav">
           {NAV.map(t => (
             <button key={t.id} className={`nav-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
@@ -297,19 +287,6 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="section-label"><Palette size={14} /> Browse by colour family</div>
-                <div className="family-grid">
-                  {families.map(f => {
-                    const rep = (PAINT_GROUPS.find(g => g.family === f.family)?.paints.find(p => activeBrands.has(p.brand))) || null;
-                    return (
-                      <button key={f.family} className="family-tile" onClick={() => rep && selectPaint(rep)} title={f.family}>
-                        <span className="family-swatch" style={{ background: f.hex }} />
-                        <span className="family-name">{f.family}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
                 <div className="section-label">How it works</div>
                 <div className="how-grid">
                   {[
@@ -325,16 +302,29 @@ export default function App() {
           </>)}
 
           {mode === "hex" && (<>
-            <div className="hex-picker">
-              <input type="color" value={hexVal} onChange={e => setHexVal(e.target.value)} />
-              <div style={{ flex: 1 }}>
-                <div className="hex-label">Pick a colour or enter hex</div>
-                <input className="hex-input" value={hexVal} maxLength={7} onChange={e => { let v = e.target.value; if (!v.startsWith("#")) v = "#" + v; if (v.length <= 7) setHexVal(v); }} />
+            <div className="hex-panel">
+              <div className="hex-intro">
+                <div className="hex-intro-title"><Droplets size={16} /> Search by colour</div>
+                <p className="hex-intro-desc">Pick a colour or paste a hex code — we’ll find the closest paint matches across every brand.</p>
               </div>
-              <Swatch hex={hexVal} size={54} className="hex-preview swatch-lg" />
+              <div className="hex-picker">
+                <label className="color-pick" title="Open the colour picker">
+                  <input type="color" value={hexVal} onChange={e => setHexVal(e.target.value)} />
+                  <span>Pick</span>
+                </label>
+                <div className="hex-field">
+                  <label htmlFor="hexInput">Hex code</label>
+                  <input id="hexInput" className="hex-input" value={hexVal} maxLength={7} onChange={e => { let v = e.target.value; if (!v.startsWith("#")) v = "#" + v; if (v.length <= 7) setHexVal(v); }} />
+                </div>
+                <div className="hex-current">
+                  <Swatch hex={hexVal} size={56} className="hex-preview swatch-lg" />
+                  <span className="hex-current-val">{hexVal.toUpperCase()}</span>
+                </div>
+              </div>
             </div>
+            <div className="section-label"><Palette size={14} /> Filter by brand</div>
             <BrandChips />
-            <div className="count">Top 30 closest matches</div>
+            <div className="count">{hexResults.length} closest matches to <b style={{ color: "var(--bright)" }}>{hexVal.toUpperCase()}</b></div>
             <div className="results-grid">
               {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
             </div>
