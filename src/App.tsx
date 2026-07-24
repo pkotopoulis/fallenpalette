@@ -4,7 +4,7 @@ import L from "leaflet";
 import {
   Search, Palette, Layers, Store as StoreIcon, Plus, Check, Download, Upload,
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
-  Navigation, Sparkles, ArrowRight, Droplets,
+  Navigation, Sparkles, ArrowRight, Droplets, Mail,
 } from "lucide-react";
 import { PAINT_GROUPS } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
@@ -16,6 +16,9 @@ import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
 
 const pid = (p: Paint) => `${p.brand}::${p.name}`;
+
+// Feedback destination — update the address once domain email is set up (see README).
+const FEEDBACK_EMAIL = "feedback@fallenpalette.com";
 const JS_DAY: DayKey[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const todayKey = (): DayKey => JS_DAY[new Date().getDay()];
 
@@ -526,6 +529,9 @@ export default function App() {
 
         <footer className="footer">
           <div className="footer-brand"><FallenIcon size={20} /> {t.footer}</div>
+          <a className="footer-feedback" href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Fallen Palette — feedback")}`}>
+            <Mail size={13} /> {t.feedback}
+          </a>
           <div className="footer-copy">{t.copyright}</div>
           <div className="footer-disclaimer">{t.disclaimer}</div>
         </footer>
