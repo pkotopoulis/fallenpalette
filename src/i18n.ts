@@ -35,7 +35,7 @@ export interface Dict {
   countries: Record<string, string>;
   matchExact: string; matchClose: string; matchApprox: string;
   addPaint: string; removePaint: string;
-  footer: string;
+  footer: string; copyright: string; disclaimer: string;
 }
 
 const EN_DAYS: Record<DayKey, string> = {
@@ -103,6 +103,8 @@ export const I18N: Record<Lang, Dict> = {
     matchExact: "Exact", matchClose: "Close", matchApprox: "Approx",
     addPaint: "Add to my paints", removePaint: "Remove from my paints",
     footer: "Fallen Palette · Data is approximate — always test swatches",
+    copyright: "© 2026 Fallen Palette. All rights reserved.",
+    disclaimer: "Unofficial fan-made tool — not affiliated with, endorsed by, or sponsored by Games Workshop. Warhammer and all associated marks are trademarks of Games Workshop Ltd. Paint names and colours are trademarks of their respective manufacturers.",
   },
   el: {
     langLabel: "ΕΛ",
@@ -142,5 +144,7 @@ export const I18N: Record<Lang, Dict> = {
     matchExact: "Ακριβές", matchClose: "Κοντινό", matchApprox: "Κατά προσέγγ.",
     addPaint: "Προσθήκη στα χρώματά μου", removePaint: "Αφαίρεση από τα χρώματά μου",
     footer: "Fallen Palette · Τα δεδομένα είναι κατά προσέγγιση — δοκίμαζε πάντα δείγματα.",
+    copyright: "© 2026 Fallen Palette. Με επιφύλαξη παντός δικαιώματος.",
+    disclaimer: "Ανεπίσημο εργαλείο από φαν — δεν σχετίζεται, δεν εγκρίνεται και δεν χορηγείται από την Games Workshop. Το Warhammer και τα σχετικά σήματα είναι εμπορικά σήματα της Games Workshop Ltd. Τα ονόματα και τα χρώματα βαφών είναι εμπορικά σήματα των αντίστοιχων κατασκευαστών.",
   },
 };

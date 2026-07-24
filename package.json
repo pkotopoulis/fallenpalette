@@ -3,6 +3,8 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "license": "UNLICENSED",
+  "author": "Fallen Palette",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

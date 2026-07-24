@@ -270,7 +270,7 @@ export default function App() {
       <header className="site-header">
         <div className="header-left">
           <div className="brand">
-            <FallenIcon size={48} />
+            <FallenIcon size={68} />
             <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           </div>
           <p className="tagline">{t.tagline}</p>
@@ -287,7 +287,7 @@ export default function App() {
           </nav>
           <div className="lang-toggle" role="group" aria-label="Language">
             <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} aria-pressed={lang === "en"}>EN</button>
-            <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>ΕΛ</button>
+            <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>GR</button>
           </div>
         </div>
       </header>
@@ -524,7 +524,11 @@ export default function App() {
           </div>
         </div>)}
 
-        <footer className="footer"><FallenIcon size={16} /> {t.footer}</footer>
+        <footer className="footer">
+          <div className="footer-brand"><FallenIcon size={20} /> {t.footer}</div>
+          <div className="footer-copy">{t.copyright}</div>
+          <div className="footer-disclaimer">{t.disclaimer}</div>
+        </footer>
       </div>
     </div>
   );
