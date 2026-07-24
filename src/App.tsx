@@ -275,7 +275,7 @@ export default function App() {
       <header className="site-header">
         <div className="header-left">
           <div className="brand">
-            <FallenIcon size={68} />
+            <FallenIcon size={88} />
             <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           </div>
           <p className="tagline">{t.tagline}</p>
