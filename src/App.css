@@ -24,13 +24,12 @@ a{color:inherit;text-decoration:none}
 .app-content{flex:1}
 .view{animation:fadeUp .35s cubic-bezier(.22,.61,.36,1)}
 
-/* ═══════════════════════ HERO BANNER ═══════════════════════ */
-.hero-banner{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;text-align:center;
-  min-height:clamp(190px,26vw,340px);
-  background:#0A0B0D url("/fallen-banner.jpg") center 34% / cover no-repeat}
+/* ═══════════════════════ HERO BANNER (full image, no crop) ═══════════════════════ */
+.hero-banner{position:relative;overflow:hidden;background:#0A0B0D}
+.hero-banner-img{display:block;width:100%;height:auto}
 .hero-banner::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(10,11,13,0.10) 0%,rgba(10,11,13,0.34) 46%,rgba(10,11,13,0.93) 100%)}
-.hero-banner-text{position:relative;z-index:1;width:100%;padding:0 16px 20px;animation:fadeUp .5s ease}
+  background:linear-gradient(180deg,transparent 42%,rgba(10,11,13,0.5) 70%,rgba(10,11,13,0.96) 100%)}
+.hero-banner-text{position:absolute;left:0;right:0;bottom:0;z-index:2;text-align:center;padding:0 16px clamp(14px,2.4vw,28px);animation:fadeUp .5s ease}
 .fallen-icon{border-radius:50%;object-fit:cover;flex-shrink:0;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,0.55));animation:pop .5s ease}
 .wordmark{margin:0;font-size:clamp(30px,4.2vw,48px);font-weight:800;letter-spacing:2px;line-height:1.05;color:var(--bright);
@@ -264,7 +263,6 @@ a.detail-row:hover{color:var(--accent)}
 @media (min-width:820px){
   .app{max-width:1680px;border-left:1px solid var(--border);border-right:1px solid var(--border);
     box-shadow:0 0 80px rgba(0,0,0,0.5)}
-  .hero-banner{min-height:clamp(260px,22vw,400px)}
   .wordmark{letter-spacing:3px}
   .navbar{gap:16px;padding:11px 18px}
   .nav-btn{padding:10px 20px;font-size:14px}

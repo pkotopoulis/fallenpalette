@@ -273,6 +273,7 @@ export default function App() {
     <div className="app">
       {/* ═══ HERO BANNER ═══ */}
       <header className="hero-banner">
+        <img className="hero-banner-img" src="/fallen-banner.jpg" alt="" />
         <div className="hero-banner-text">
           <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           <p className="tagline">{t.tagline}</p>
