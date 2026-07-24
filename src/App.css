@@ -20,16 +20,18 @@ a{color:inherit;text-decoration:none}
 @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 
 /* ═══════════════════════ APP SHELL ═══════════════════════ */
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:520px;margin:0 auto;position:relative}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:520px;margin:0 auto;position:relative;z-index:1;
+  margin-top:calc(-1 * clamp(42px,6vh,80px))}
 .app-content{flex:1}
 .view{animation:fadeUp .35s cubic-bezier(.22,.61,.36,1)}
 
-/* ═══════════════════════ HERO BANNER (full image, no crop) ═══════════════════════ */
-.hero-banner{position:relative;overflow:hidden;background:#0A0B0D}
-.hero-banner-img{display:block;width:100%;height:auto}
+/* ═══════════════════════ HERO BANNER (full-bleed, fades out at bottom) ═══════════════════════ */
+.hero-banner{position:relative;overflow:hidden;background:#0A0B0D;width:100%;z-index:0}
+.hero-banner-img{display:block;width:100%;height:clamp(250px,36vh,480px);object-fit:cover;object-position:center 26%;
+  -webkit-mask-image:linear-gradient(to bottom,#000 38%,transparent 97%);mask-image:linear-gradient(to bottom,#000 38%,transparent 97%)}
 .hero-banner::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent 42%,rgba(10,11,13,0.5) 70%,rgba(10,11,13,0.96) 100%)}
-.hero-banner-text{position:absolute;left:0;right:0;bottom:0;z-index:2;text-align:center;padding:0 16px clamp(14px,2.4vw,28px);animation:fadeUp .5s ease}
+  background:linear-gradient(180deg,transparent 44%,rgba(10,11,13,0.4) 78%,rgba(10,11,13,0.85) 100%)}
+.hero-banner-text{position:absolute;left:0;right:0;bottom:clamp(54px,8vh,96px);z-index:2;text-align:center;padding:0 16px;animation:fadeUp .5s ease}
 .fallen-icon{border-radius:50%;object-fit:cover;flex-shrink:0;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,0.55));animation:pop .5s ease}
 .wordmark{margin:0;font-size:clamp(30px,4.2vw,48px);font-weight:800;letter-spacing:2px;line-height:1.05;color:var(--bright);

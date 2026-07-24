@@ -270,8 +270,8 @@ export default function App() {
   };
 
   return (
-    <div className="app">
-      {/* ═══ HERO BANNER ═══ */}
+    <>
+      {/* ═══ HERO BANNER (full-bleed) ═══ */}
       <header className="hero-banner">
         <img className="hero-banner-img" src="/fallen-banner.jpg" alt="" />
         <div className="hero-banner-text">
@@ -280,6 +280,7 @@ export default function App() {
         </div>
       </header>
 
+      <div className="app">
       {/* ═══ STICKY NAV ═══ */}
       <div className="navbar">
         <nav className="nav">
@@ -541,5 +542,6 @@ export default function App() {
         </footer>
       </div>
     </div>
+    </>
   );
 }
