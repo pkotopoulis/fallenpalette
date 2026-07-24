@@ -271,31 +271,29 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ═══ HEADER ═══ */}
-      <header className="site-header">
-        <div className="header-left">
-          <div className="brand">
-            <FallenIcon size={88} />
-            <h1 className="wordmark">Fallen&nbsp;Palette</h1>
-          </div>
-          <p className="tagline">{t.tagline}</p>
-        </div>
-        <div className="header-right">
-          <nav className="nav">
-            {NAV.map(n => (
-              <button key={n.id} className={`nav-btn ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
-                <n.Icon size={17} />
-                <span>{n.label}</span>
-                {n.badge ? <span className="nav-badge">{n.badge}</span> : null}
-              </button>
-            ))}
-          </nav>
-          <div className="lang-toggle" role="group" aria-label="Language">
-            <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} aria-pressed={lang === "en"}>EN</button>
-            <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>GR</button>
-          </div>
-        </div>
+      {/* ═══ HERO ═══ */}
+      <header className="hero">
+        <FallenIcon size={140} />
+        <h1 className="wordmark">Fallen&nbsp;Palette</h1>
+        <p className="tagline">{t.tagline}</p>
       </header>
+
+      {/* ═══ STICKY NAV ═══ */}
+      <div className="navbar">
+        <nav className="nav">
+          {NAV.map(n => (
+            <button key={n.id} className={`nav-btn ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
+              <n.Icon size={17} />
+              <span>{n.label}</span>
+              {n.badge ? <span className="nav-badge">{n.badge}</span> : null}
+            </button>
+          ))}
+        </nav>
+        <div className="lang-toggle" role="group" aria-label="Language">
+          <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} aria-pressed={lang === "en"}>EN</button>
+          <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>GR</button>
+        </div>
+      </div>
 
       <div className="app-content">
         {/* ═══════════ COLOUR MATCH ═══════════ */}
