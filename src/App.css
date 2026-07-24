@@ -71,7 +71,7 @@ a{color:inherit;text-decoration:none}
 .swatch-lg{border-radius:8px}
 .paint-info{flex:1;min-width:0}
 .paint-name{font-weight:600;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.paint-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.paint-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-badge{font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--accent);background:var(--accent-soft);
   padding:3px 8px;border-radius:6px;flex-shrink:0;white-space:nowrap}
 .match-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0}
@@ -178,17 +178,26 @@ a{color:inherit;text-decoration:none}
 /* ═══════════════════════ STORES ═══════════════════════ */
 .store-layout{display:flex;flex-direction:column;gap:12px;padding:0 16px 8px}
 .store-list{display:flex;flex-direction:column;gap:8px}
+.store-group{display:flex;flex-direction:column;gap:8px}
+.store-group + .store-group{margin-top:8px}
+.store-group-label{display:flex;align-items:center;gap:6px;padding:6px 2px 0;font-size:11px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.store-group-label svg{color:var(--accent)}
+.store-group-count{margin-left:auto;background:var(--card);border:1px solid var(--border);color:var(--muted);
+  font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px}
 .store-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;transition:border-color .18s}
 .store-card.open{box-shadow:var(--shadow)}
-.store-head{display:flex;align-items:center;gap:11px;padding:12px 14px;cursor:pointer;transition:background .14s}
+.store-head{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;cursor:pointer;transition:background .14s}
 .store-head:hover{background:rgba(255,255,255,0.03)}
-.store-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
-.store-name{display:flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;color:var(--bright)}
-.store-verified{color:var(--accent2)}
-.store-addr{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.store-today{flex-shrink:0;text-align:right}
-.store-today .openhrs{font-size:11px;font-weight:600;color:var(--success)}
-.store-today .closed{font-size:11px;font-weight:600;color:var(--danger)}
+.store-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.store-main{flex:1;min-width:0}
+.store-name-row{display:flex;align-items:center;gap:5px}
+.store-name{font-size:14px;font-weight:700;color:var(--bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-verified{color:var(--accent2);flex-shrink:0}
+.store-addr{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-right{display:flex;align-items:center;gap:7px;flex-shrink:0;padding-top:1px}
+.store-right .openhrs{font-size:11px;font-weight:700;color:var(--success);white-space:nowrap}
+.store-right .closed{font-size:11px;font-weight:700;color:var(--danger);white-space:nowrap}
 .store-chev{color:var(--muted);flex-shrink:0;transition:transform .22s}
 .store-card.open .store-chev{transform:rotate(180deg)}
 .store-detail{padding:6px 14px 14px;border-top:1px solid var(--border);animation:fadeUp .22s ease}
@@ -230,41 +239,37 @@ a.detail-row:hover{color:var(--accent)}
 
 /* ═══════════════════════ DESKTOP ═══════════════════════ */
 @media (min-width:820px){
-  .app{max-width:1160px;border-left:1px solid var(--border);border-right:1px solid var(--border);
+  .app{max-width:1280px;border-left:1px solid var(--border);border-right:1px solid var(--border);
     box-shadow:0 0 80px rgba(0,0,0,0.5)}
   .site-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;
-    padding:20px 28px;position:sticky;top:0;z-index:60;
+    padding:20px 18px;position:sticky;top:0;z-index:60;
     background:linear-gradient(180deg,rgba(15,19,26,0.96),rgba(10,12,17,0.92));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .wordmark{font-size:34px;letter-spacing:3px}
   .tagline{font-size:13px}
   .nav{margin-top:0}
   .nav-btn{padding:10px 20px;font-size:14px}
 
-  .mode-row,.search-wrap{max-width:640px}
-  .search-icon{left:40px}
-  .mode-row{padding-left:28px}.search-wrap{padding-left:28px}
-  .chips,.count,.section-label,.section-head{padding-left:28px;padding-right:28px}
-  .section-head{padding-left:28px}
-  .card.suggestions{margin-left:28px;margin-right:28px;max-width:640px}
-  .card-hero{margin-left:28px;margin-right:28px}
-  .hex-panel{margin-left:28px;margin-right:28px;max-width:660px}
+  .mode-row,.search-wrap{max-width:660px}
+  .search-icon{left:30px}
+  .mode-row{padding-left:18px}.search-wrap{padding-left:18px}
+  .chips,.count,.section-label,.section-head{padding-left:18px;padding-right:18px}
+  .section-head{padding-left:18px}
+  .card.suggestions{margin-left:18px;margin-right:18px;max-width:660px}
+  .card-hero{margin-left:18px;margin-right:18px}
+  .hex-panel{margin-left:18px;margin-right:18px;max-width:680px}
 
-  .results-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:11px;padding:2px 28px;align-items:start}
+  .results-grid{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;padding:2px 18px;align-items:start}
   .card:hover{border-color:#333B4A;transform:translateY(-2px)}
 
-  .stats-band{padding:16px 28px 6px}
-  .feature-card{margin-left:28px;margin-right:28px}
-  .how-grid{padding-left:28px;padding-right:28px}
-  .stats-row,.coll-actions{padding-left:28px;padding-right:28px}
+  .stats-band{padding:16px 18px 6px}
+  .feature-card{margin-left:18px;margin-right:18px}
+  .how-grid{padding-left:18px;padding-right:18px}
+  .stats-row,.coll-actions{padding-left:18px;padding-right:18px}
 
   /* Stores: list + sticky map side by side */
-  .store-layout{flex-direction:row;align-items:flex-start;gap:18px;padding:2px 28px 12px}
-  .store-list{flex:0 0 400px;max-height:calc(100vh - 170px);overflow-y:auto;padding-right:4px}
+  .store-layout{flex-direction:row;align-items:flex-start;gap:16px;padding:2px 18px 12px}
+  .store-list{flex:0 0 430px;max-height:calc(100vh - 170px);overflow-y:auto;padding-right:4px}
   .map-container{flex:1;height:calc(100vh - 150px);position:sticky;top:118px}
 
   .footer{margin-top:34px}
-}
-
-@media (min-width:1180px){
-  .results-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 }

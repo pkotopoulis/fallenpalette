@@ -135,6 +135,15 @@ export default function App() {
 
   const activeStoreObj = useMemo(() => STORES.find(s => s.id === activeStore) || null, [activeStore]);
 
+  // Group results by country (Greece pinned first, then alphabetical)
+  const groupedStores = useMemo(() => {
+    const m = new Map<string, Store[]>();
+    storeResults.forEach(s => { if (!m.has(s.country)) m.set(s.country, []); m.get(s.country)!.push(s); });
+    const rank = (c: string) => (c === "Greece" ? 0 : 1);
+    return [...m.entries()].sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]));
+  }, [storeResults]);
+  const showGroups = groupedStores.length > 1;
+
   // ── Shared components ──
   const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => (
     <div className={`swatch ${className}`} style={{ width: size, height: size, background: hex, border: luminance(hex) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent" }} />
@@ -148,8 +157,8 @@ export default function App() {
     <div className={`paint-row ${onClick ? "clickable" : ""}`} onClick={onClick}>
       <Swatch hex={paint.hex} />
       <div className="paint-info">
-        <div className="paint-name">{paint.name}</div>
-        <div className="paint-meta">{BRANDS[paint.brand]} · {paint.type}</div>
+        <div className="paint-name" title={paint.name}>{paint.name}</div>
+        <div className="paint-meta" title={`${BRANDS[paint.brand]} · ${paint.type}`}>{BRANDS[paint.brand]} · {paint.type}</div>
       </div>
       {extra}
       <span className="brand-badge">{BRANDS[paint.brand]}</span>
@@ -180,6 +189,60 @@ export default function App() {
     { id: "stores" as const, Icon: StoreIcon, label: "Stores", badge: null as number | null },
   ];
 
+  // Collapsed-card summary: collapse split "11:00–13:00, 14:00–19:00" to "11:00–19:00"
+  const summaryHours = (th: string) => {
+    if (th === "Closed") return "Closed";
+    if (th.includes(",")) {
+      const parts = th.split(",").map(x => x.trim());
+      const start = parts[0].split("–")[0];
+      const end = parts[parts.length - 1].split("–")[1];
+      if (start && end) return `${start}–${end}`;
+    }
+    return th;
+  };
+
+  const renderStore = (s: Store) => {
+    const open = activeStore === s.id;
+    const th = s.hours[todayKey()];
+    return (
+      <div key={s.id} className={`store-card ${open ? "open" : ""}`} style={open ? { borderColor: s.color } : {}}>
+        <div className="store-head" onClick={() => setActiveStore(open ? null : s.id)}>
+          <span className="store-dot" style={{ background: s.color }} />
+          <div className="store-main">
+            <div className="store-name-row">
+              <span className="store-name" title={s.name}>{s.name}</span>
+              {s.verified && <BadgeCheck size={14} className="store-verified" />}
+            </div>
+            <div className="store-addr" title={`${s.address}, ${s.city}`}>{s.address} · {s.city}</div>
+          </div>
+          <div className="store-right">
+            <span className={th === "Closed" ? "closed" : "openhrs"}>{summaryHours(th)}</span>
+            <ChevronDown size={16} className="store-chev" />
+          </div>
+        </div>
+        {open && (
+          <div className="store-detail">
+            <a className="detail-row" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.address + " " + s.city)}`} target="_blank" rel="noreferrer">
+              <MapPin size={15} /><span>{s.address}, {s.postal} · {s.city}, {s.country}</span>
+            </a>
+            {s.phone && <a className="detail-row" href={`tel:${s.phone.replace(/\s/g, "")}`}><Phone size={15} /><span>{s.phone}</span></a>}
+            {s.website && <a className="detail-row" href={s.website} target="_blank" rel="noreferrer"><Globe size={15} /><span>{s.website.replace(/^https?:\/\//, "")}</span></a>}
+            <div className="detail-row hours-head"><Clock size={15} /><span>Opening hours</span></div>
+            <div className="hours-table">
+              {DAY_ORDER.map(d => (
+                <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
+                  <span>{DAY_LABEL[d]}</span>
+                  <span className={s.hours[d] === "Closed" ? "closed" : ""}>{s.hours[d]}</span>
+                </div>
+              ))}
+            </div>
+            <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="app">
       {/* ═══ HEADER ═══ */}
@@ -189,7 +252,7 @@ export default function App() {
             <FallenIcon size={48} />
             <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           </div>
-          <p className="tagline">Miniature paint cross-reference · collection · store finder</p>
+          <p className="tagline">Miniature Paint Cross-Reference · Collection · Store Finder</p>
         </div>
         <nav className="nav">
           {NAV.map(t => (
@@ -230,7 +293,7 @@ export default function App() {
                 <div className="card-hero-inner">
                   <Swatch hex={selPaint.hex} size={48} className="swatch-lg" />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="hero-name">{selPaint.name}</div>
+                    <div className="hero-name" title={selPaint.name}>{selPaint.name}</div>
                     <div className="hero-meta">{BRANDS[selPaint.brand]} · {selPaint.type} · {selPaint.hex}</div>
                   </div>
                   <button className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`} onClick={() => toggleOwned(selPaint)} title={isOwned(selPaint) ? "Remove from my paints" : "Add to my paints"}>
@@ -269,7 +332,7 @@ export default function App() {
                   <div className="feature-top">
                     <Swatch hex={featured.hex} size={52} className="swatch-lg" />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="hero-name">{featured.name}</div>
+                      <div className="hero-name" title={featured.name}>{featured.name}</div>
                       <div className="hero-meta">{BRANDS[featured.brand]} · {featured.type}</div>
                     </div>
                     <ArrowRight size={18} className="feature-arrow" />
@@ -279,7 +342,7 @@ export default function App() {
                       {featuredMatches.map((p, i) => (
                         <div key={i} className="feature-match">
                           <Swatch hex={p.hex} size={20} />
-                          <span className="fm-name">{p.name}</span>
+                          <span className="fm-name" title={p.name}>{p.name}</span>
                           <span className="fm-brand">{BRANDS[p.brand]}</span>
                         </div>
                       ))}
@@ -398,44 +461,12 @@ export default function App() {
           <div className="store-layout">
             <div className="store-list">
               {storeResults.length === 0 ? <div className="hint">No stores match your search.</div> :
-                storeResults.map(s => {
-                  const open = activeStore === s.id;
-                  const th = s.hours[todayKey()];
-                  return (
-                    <div key={s.id} className={`store-card ${open ? "open" : ""}`} style={open ? { borderColor: s.color } : {}}>
-                      <div className="store-head" onClick={() => setActiveStore(open ? null : s.id)}>
-                        <span className="store-dot" style={{ background: s.color }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="store-name">{s.name}{s.verified && <BadgeCheck size={14} className="store-verified" />}</div>
-                          <div className="store-addr">{s.address} · {s.city}</div>
-                        </div>
-                        <div className="store-today">
-                          <span className={th === "Closed" ? "closed" : "openhrs"}>{th === "Closed" ? "Closed today" : th}</span>
-                        </div>
-                        <ChevronDown size={16} className="store-chev" />
-                      </div>
-                      {open && (
-                        <div className="store-detail">
-                          <a className="detail-row" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.address + " " + s.city)}`} target="_blank" rel="noreferrer">
-                            <MapPin size={15} /><span>{s.address}, {s.postal} · {s.city}, {s.country}</span>
-                          </a>
-                          {s.phone && <a className="detail-row" href={`tel:${s.phone.replace(/\s/g, "")}`}><Phone size={15} /><span>{s.phone}</span></a>}
-                          {s.website && <a className="detail-row" href={s.website} target="_blank" rel="noreferrer"><Globe size={15} /><span>{s.website.replace(/^https?:\/\//, "")}</span></a>}
-                          <div className="detail-row hours-head"><Clock size={15} /><span>Opening hours</span></div>
-                          <div className="hours-table">
-                            {DAY_ORDER.map(d => (
-                              <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
-                                <span>{DAY_LABEL[d]}</span>
-                                <span className={s.hours[d] === "Closed" ? "closed" : ""}>{s.hours[d]}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
+                showGroups ? groupedStores.map(([country, list]) => (
+                  <div key={country} className="store-group">
+                    <div className="store-group-label"><MapPin size={12} /> {country} <span className="store-group-count">{list.length}</span></div>
+                    {list.map(renderStore)}
+                  </div>
+                )) : storeResults.map(renderStore)
               }
             </div>
 
