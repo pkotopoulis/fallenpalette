@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["fallen-icon.png"],
+      includeAssets: ["fallen-icon.png", "fallen-banner.jpg"],
       manifest: {
         name: "Fallen Palette",
         short_name: "Fallen Palette",
@@ -21,7 +21,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,png,svg,ico,woff2}"],
+        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,woff2}"],
         navigateFallback: "/index.html",
       },
     }),

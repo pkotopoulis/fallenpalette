@@ -24,15 +24,19 @@ a{color:inherit;text-decoration:none}
 .app-content{flex:1}
 .view{animation:fadeUp .35s cubic-bezier(.22,.61,.36,1)}
 
-/* ═══════════════════════ HERO (centered) ═══════════════════════ */
-.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;padding:24px 16px 12px;
-  background:radial-gradient(620px 300px at 50% -40px,rgba(159,178,201,0.07),transparent 70%)}
+/* ═══════════════════════ HERO BANNER ═══════════════════════ */
+.hero-banner{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;text-align:center;
+  min-height:clamp(190px,26vw,340px);
+  background:#0A0B0D url("/fallen-banner.jpg") center 34% / cover no-repeat}
+.hero-banner::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,11,13,0.10) 0%,rgba(10,11,13,0.34) 46%,rgba(10,11,13,0.93) 100%)}
+.hero-banner-text{position:relative;z-index:1;width:100%;padding:0 16px 20px;animation:fadeUp .5s ease}
 .fallen-icon{border-radius:50%;object-fit:cover;flex-shrink:0;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,0.55));animation:pop .5s ease}
-.hero .fallen-icon{width:clamp(76px,7vw,100px);height:clamp(76px,7vw,100px)}
-.wordmark{margin:0;font-size:clamp(28px,3.4vw,40px);font-weight:800;letter-spacing:2px;line-height:1.05;color:var(--bright);
-  background:linear-gradient(100deg,#F2F4F8 0%,#C7CDD6 55%,#9FB2C9 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.tagline{font-size:clamp(12px,1.5vw,14px);color:var(--muted);letter-spacing:.3px;margin:0}
+.wordmark{margin:0;font-size:clamp(30px,4.2vw,48px);font-weight:800;letter-spacing:2px;line-height:1.05;color:var(--bright);
+  background:linear-gradient(100deg,#F2F4F8 0%,#C7CDD6 55%,#9FB2C9 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 12px rgba(0,0,0,0.9))}
+.tagline{font-size:clamp(12px,1.6vw,15px);color:#DBE0E7;letter-spacing:.3px;margin:7px 0 0;text-shadow:0 1px 8px rgba(0,0,0,0.95)}
 
 /* ═══════════════════════ STICKY NAV BAR (centered) ═══════════════════════ */
 .navbar{position:sticky;top:0;z-index:60;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;
@@ -260,7 +264,7 @@ a.detail-row:hover{color:var(--accent)}
 @media (min-width:820px){
   .app{max-width:1680px;border-left:1px solid var(--border);border-right:1px solid var(--border);
     box-shadow:0 0 80px rgba(0,0,0,0.5)}
-  .hero{padding:28px 24px 12px;gap:10px}
+  .hero-banner{min-height:clamp(260px,22vw,400px)}
   .wordmark{letter-spacing:3px}
   .navbar{gap:16px;padding:11px 18px}
   .nav-btn{padding:10px 20px;font-size:14px}

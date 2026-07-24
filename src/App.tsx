@@ -271,11 +271,12 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ═══ HERO ═══ */}
-      <header className="hero">
-        <FallenIcon size={140} />
-        <h1 className="wordmark">Fallen&nbsp;Palette</h1>
-        <p className="tagline">{t.tagline}</p>
+      {/* ═══ HERO BANNER ═══ */}
+      <header className="hero-banner">
+        <div className="hero-banner-text">
+          <h1 className="wordmark">Fallen&nbsp;Palette</h1>
+          <p className="tagline">{t.tagline}</p>
+        </div>
       </header>
 
       {/* ═══ STICKY NAV ═══ */}
