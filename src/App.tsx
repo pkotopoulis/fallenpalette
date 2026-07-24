@@ -19,7 +19,7 @@ const pid = (p: Paint) => `${p.brand}::${p.name}`;
 
 // Feedback link — flip FEEDBACK_READY to true and set the real address once
 // domain email (Cloudflare Email Routing) is configured. See README.
-const FEEDBACK_READY = false;
+const FEEDBACK_READY = true;
 const FEEDBACK_EMAIL = "feedback@fallenpalette.com";
 const JS_DAY: DayKey[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const todayKey = (): DayKey => JS_DAY[new Date().getDay()];
