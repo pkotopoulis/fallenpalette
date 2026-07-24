@@ -197,4 +197,18 @@ export const STORES: Store[] = [
   // ─── Czechia ───
   { id: 47, name: "Warhammer – Prague", city: "Praha", country: "Czechia", postal: "110 00", address: "Na Příkopě 853/12", lat: 50.085163, lng: 14.425507, phone: "+420 735 751 031", website: "https://www.warhammer.com/shop/Warhammer-Prague",
     hours: { Mon: "11:00–19:00", Tue: "11:00–19:00", Wed: "11:00–19:00", Thu: "11:00–19:00", Fri: "11:00–19:00", Sat: "10:30–19:00", Sun: "11:00–19:00" }, verified: true, color: "#F5C542" },
+
+  // ─── Greece · Thessaloniki & central Greece (partial data — unknown fields left empty) ───
+  { id: 48, name: "Hobby Games", city: "Thessaloniki", country: "Greece", postal: "54621", address: "Georgiou Theochari 4", phone: "+30 2310 252668", website: "https://www.hobby-games.eu",
+    hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#22C55E" },
+  { id: 49, name: "Underworld Games", city: "Thessaloniki", country: "Greece", postal: "54635", address: "Konstantinou Palaiologou 25", phone: "+30 2310 240193", website: "https://www.underworldgames.gr",
+    hours: { Mon: "Closed", Tue: "11:00–14:30, 17:30–20:30", Wed: "11:00–15:00", Thu: "11:00–14:30, 17:30–20:30", Fri: "11:00–14:30, 17:30–20:30", Sat: "11:00–16:00", Sun: "11:30–17:00" }, verified: true, color: "#22D3EE" },
+  { id: 50, name: "Kaissa Kalamaria", city: "Kalamaria", country: "Greece", postal: "55132", address: "Mitropoliti Chrysanthou 20", phone: "+30 2313 037108", website: "https://kaissagames.com",
+    hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
+  { id: 51, name: "Kaissa Larissa", city: "Larissa", country: "Greece", postal: "41222", address: "Koumoundourou 22", phone: "+30 2410 538555",
+    hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
+  { id: 52, name: "Kaissa Chalkida", city: "Chalkida", country: "Greece", postal: "34100", address: "Miaouli 24", phone: "+30 2221 087315",
+    hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
+  { id: 53, name: "GameVille", city: "Volos", country: "Greece", postal: "38221", address: "Polymeri 6", phone: "+30 2421 108718", website: "http://gameville.gr",
+    hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#A855F7" },
 ];

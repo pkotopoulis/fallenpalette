@@ -21,11 +21,11 @@ export interface Store {
   country: string;
   postal: string;
   address: string;
-  lat: number;
-  lng: number;
-  phone: string;
+  lat?: number;      // optional — may be unknown for partially-sourced stores
+  lng?: number;
+  phone?: string;    // "" / undefined when unknown
   website?: string;
-  hours: StoreHours;
+  hours: StoreHours; // individual days may be "" when unknown
   verified: boolean;
   color: string;
 }

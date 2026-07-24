@@ -1,16 +1,18 @@
 /* ═══════════════════════ RESET & THEME ═══════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0A0C11;--panel:#0F131A;--card:#151A23;--card-alt:#12161E;--border:#232A36;
-  --muted:#7B8494;--text:#D7DCE5;--bright:#F2F5FA;
-  --accent:#8B7CFF;--accent-soft:rgba(139,124,255,0.12);--accent2:#22D3EE;
-  --success:#4ADE80;--warn:#FBB040;--danger:#F87171;
-  --shadow:0 8px 30px rgba(0,0,0,0.35);
+  /* Moody dark base with a warm burgundy tint + steel-silver accents (matches the Fallen marine) */
+  --bg:#0B0A0C;--panel:#141013;--card:#1A1418;--card-alt:#161114;--border:#2E2529;
+  --muted:#8C8088;--text:#E0DADD;--bright:#F5F1F3;
+  --accent:#C24A5C;--accent-soft:rgba(194,74,92,0.14);--accent2:#B9C0CB;
+  --silver:#C7CDD6;
+  --success:#5BD68A;--warn:#FBB040;--danger:#F1707F;
+  --shadow:0 8px 30px rgba(0,0,0,0.45);
 }
 html{scroll-behavior:smooth}
 html,body,#root{height:100%;background:var(--bg);color:var(--text);
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
-body{background:radial-gradient(1200px 600px at 50% -200px,rgba(139,124,255,0.10),transparent 60%),var(--bg)}
+body{background:radial-gradient(1200px 600px at 50% -200px,rgba(194,74,92,0.13),transparent 60%),var(--bg)}
 button{font-family:inherit}
 a{color:inherit;text-decoration:none}
 
@@ -24,13 +26,13 @@ a{color:inherit;text-decoration:none}
 
 /* ═══════════════════════ HEADER (centered brand + nav) ═══════════════════════ */
 .site-header{padding:24px 16px 14px;text-align:left;border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg,rgba(139,124,255,0.06),transparent)}
+  background:linear-gradient(180deg,rgba(194,74,92,0.08),transparent)}
 .header-left{min-width:0}
 .brand{display:flex;align-items:center;justify-content:flex-start;gap:13px}
 .fallen-icon{border-radius:50%;object-fit:cover;flex-shrink:0;
   box-shadow:0 0 0 1px var(--border),0 6px 18px rgba(0,0,0,0.45);animation:pop .5s ease}
 .wordmark{font-size:30px;font-weight:800;letter-spacing:2px;color:var(--bright);
-  background:linear-gradient(90deg,#F2F5FA,#C9C3FF);-webkit-background-clip:text;background-clip:text}
+  background:linear-gradient(100deg,#EEF0F4 0%,#C7CDD6 42%,#C24A5C 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .tagline{font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:.2px}
 .nav{display:flex;justify-content:flex-start;gap:6px;margin-top:16px;flex-wrap:wrap}
 .nav-btn{position:relative;display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;
@@ -211,6 +213,9 @@ a.detail-row:hover{color:var(--accent)}
 .hours-line .closed{color:var(--danger)}
 .hours-line.today{color:var(--bright);font-weight:700}
 .hours-line.today span:last-child{color:var(--bright)}
+.hours-line .noinfo{color:var(--muted);opacity:.6}
+.hours-empty{padding:6px 0 8px 25px;font-size:12px;color:var(--muted);font-style:italic}
+.store-right .noinfo{font-size:11px;font-weight:600;color:var(--muted);opacity:.7}
 .directions-btn{display:inline-flex;align-items:center;gap:7px;margin-top:6px;padding:9px 15px;background:var(--accent-soft);
   color:var(--accent);border:1px solid var(--accent);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:all .16s}
 .directions-btn:hover{background:var(--accent);color:#0A0C11}
@@ -243,7 +248,7 @@ a.detail-row:hover{color:var(--accent)}
     box-shadow:0 0 80px rgba(0,0,0,0.5)}
   .site-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;
     padding:20px 18px;position:sticky;top:0;z-index:60;
-    background:linear-gradient(180deg,rgba(15,19,26,0.96),rgba(10,12,17,0.92));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    background:linear-gradient(180deg,rgba(20,16,19,0.96),rgba(11,10,12,0.92));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .wordmark{font-size:34px;letter-spacing:3px}
   .tagline{font-size:13px}
   .nav{margin-top:0}

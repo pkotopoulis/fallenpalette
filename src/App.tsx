@@ -32,7 +32,9 @@ const makeIcon = (color: string, active: boolean) =>
 function MapController({ store }: { store: Store | null }) {
   const map = useMap();
   useEffect(() => {
-    if (store) map.flyTo([store.lat, store.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
+    if (store && store.lat != null && store.lng != null) {
+      map.flyTo([store.lat, store.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
+    }
   }, [store, map]);
   return null;
 }
@@ -134,6 +136,7 @@ export default function App() {
   }, [storeQ, countryFilter]);
 
   const activeStoreObj = useMemo(() => STORES.find(s => s.id === activeStore) || null, [activeStore]);
+  const mapStores = useMemo(() => storeResults.filter(s => s.lat != null && s.lng != null), [storeResults]);
 
   // Group results by country (Greece pinned first, then alphabetical)
   const groupedStores = useMemo(() => {
@@ -204,6 +207,8 @@ export default function App() {
   const renderStore = (s: Store) => {
     const open = activeStore === s.id;
     const th = s.hours[todayKey()];
+    const hasHours = DAY_ORDER.some(d => s.hours[d]);
+    const hasCoords = s.lat != null && s.lng != null;
     return (
       <div key={s.id} className={`store-card ${open ? "open" : ""}`} style={open ? { borderColor: s.color } : {}}>
         <div className="store-head" onClick={() => setActiveStore(open ? null : s.id)}>
@@ -213,30 +218,36 @@ export default function App() {
               <span className="store-name" title={s.name}>{s.name}</span>
               {s.verified && <BadgeCheck size={14} className="store-verified" />}
             </div>
-            <div className="store-addr" title={`${s.address}, ${s.city}`}>{s.address} · {s.city}</div>
+            <div className="store-addr" title={`${s.address}, ${s.city}`}>{s.address ? `${s.address} · ` : ""}{s.city}</div>
           </div>
           <div className="store-right">
-            <span className={th === "Closed" ? "closed" : "openhrs"}>{summaryHours(th)}</span>
+            <span className={th === "Closed" ? "closed" : th ? "openhrs" : "noinfo"}>{th ? summaryHours(th) : "—"}</span>
             <ChevronDown size={16} className="store-chev" />
           </div>
         </div>
         {open && (
           <div className="store-detail">
             <a className="detail-row" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.address + " " + s.city)}`} target="_blank" rel="noreferrer">
-              <MapPin size={15} /><span>{s.address}, {s.postal} · {s.city}, {s.country}</span>
+              <MapPin size={15} /><span>{[s.address, s.postal].filter(Boolean).join(", ")}{s.address || s.postal ? " · " : ""}{s.city}, {s.country}</span>
             </a>
             {s.phone && <a className="detail-row" href={`tel:${s.phone.replace(/\s/g, "")}`}><Phone size={15} /><span>{s.phone}</span></a>}
             {s.website && <a className="detail-row" href={s.website} target="_blank" rel="noreferrer"><Globe size={15} /><span>{s.website.replace(/^https?:\/\//, "")}</span></a>}
             <div className="detail-row hours-head"><Clock size={15} /><span>Opening hours</span></div>
-            <div className="hours-table">
-              {DAY_ORDER.map(d => (
-                <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
-                  <span>{DAY_LABEL[d]}</span>
-                  <span className={s.hours[d] === "Closed" ? "closed" : ""}>{s.hours[d]}</span>
-                </div>
-              ))}
-            </div>
-            <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
+            {hasHours ? (
+              <div className="hours-table">
+                {DAY_ORDER.map(d => (
+                  <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
+                    <span>{DAY_LABEL[d]}</span>
+                    <span className={s.hours[d] === "Closed" ? "closed" : s.hours[d] ? "" : "noinfo"}>{s.hours[d] || "—"}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="hours-empty">Opening hours not listed yet.</div>
+            )}
+            {hasCoords && (
+              <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
+            )}
           </div>
         )}
       </div>
@@ -470,11 +481,11 @@ export default function App() {
               }
             </div>
 
-            {storeResults.length > 0 && (
+            {mapStores.length > 0 && (
               <div className="map-container">
                 <MapContainer
-                  key={storeResults.map(s => s.id).join(",")}
-                  bounds={storeResults.map(s => [s.lat, s.lng] as [number, number])}
+                  key={mapStores.map(s => s.id).join(",")}
+                  bounds={mapStores.map(s => [s.lat as number, s.lng as number] as [number, number])}
                   boundsOptions={{ padding: [50, 50], maxZoom: 13 }}
                   scrollWheelZoom={true}
                   style={{ height: "100%", width: "100%" }}
@@ -485,8 +496,8 @@ export default function App() {
                     attribution='&copy; OpenStreetMap &copy; CARTO'
                   />
                   <MapController store={activeStoreObj} />
-                  {storeResults.map(s => (
-                    <Marker key={s.id} position={[s.lat, s.lng]} icon={makeIcon(s.color, activeStore === s.id)}
+                  {mapStores.map(s => (
+                    <Marker key={s.id} position={[s.lat as number, s.lng as number]} icon={makeIcon(s.color, activeStore === s.id)}
                       eventHandlers={{ click: () => setActiveStore(s.id) }}>
                       <Popup><b>{s.name}</b><br />{s.city}</Popup>
                     </Marker>

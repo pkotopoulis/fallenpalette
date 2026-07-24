@@ -477,4 +477,40 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"proacryl",name:"Copper",hex:"#B06838",type:"Metallic"},
     {brand:"proacryl",name:"White Gold",hex:"#D0C890",type:"Metallic"},
   ]},
+
+  // ═══ PINK ═══
+  {family:"Pink",paints:[
+    {brand:"citadel",name:"Emperor's Children",hex:"#c0407f",type:"Contrast"},
+    {brand:"vallejo_gc",name:"Squid Pink (72.013)",hex:"#b23a6a",type:"Game Color"},
+    {brand:"army_painter",name:"Pixie Pink",hex:"#cf5390",type:"Fanatic"},
+    {brand:"proacryl",name:"Magenta",hex:"#bd3a76",type:"Base Set"},
+  ]},
+  {family:"Pink",paints:[
+    {brand:"citadel",name:"Fulgrim Pink",hex:"#e783a9",type:"Layer"},
+    {brand:"proacryl",name:"Bright Pink",hex:"#e97fa6",type:"Base Set"},
+  ]},
+
+  // ═══ ORANGE (bright) ═══
+  {family:"Orange",paints:[
+    {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Layer"},
+    {brand:"vallejo_gc",name:"Hot Orange (72.009)",hex:"#f2641c",type:"Game Color"},
+    {brand:"army_painter",name:"Lava Orange",hex:"#ef6420",type:"Fanatic"},
+    {brand:"proacryl",name:"Orange",hex:"#f0661f",type:"Base Set"},
+  ]},
+
+  // ═══ YELLOW (bright) ═══
+  {family:"Yellow",paints:[
+    {brand:"citadel",name:"Flash Gitz Yellow",hex:"#ffe000",type:"Layer"},
+    {brand:"vallejo_gc",name:"Sun Yellow (72.006)",hex:"#fbe018",type:"Game Color"},
+    {brand:"army_painter",name:"Daemonic Yellow",hex:"#ffdf14",type:"Fanatic"},
+    {brand:"proacryl",name:"Yellow",hex:"#ffd400",type:"Base Set"},
+  ]},
+
+  // ═══ BONE / IVORY ═══
+  {family:"Bone",paints:[
+    {brand:"citadel",name:"Ushabti Bone",hex:"#c9be8b",type:"Layer"},
+    {brand:"vallejo_gc",name:"Bonewhite (72.034)",hex:"#cabf8e",type:"Game Color"},
+    {brand:"army_painter",name:"Skeleton Bone",hex:"#c8bd88",type:"Fanatic"},
+    {brand:"proacryl",name:"Bone",hex:"#cdbf92",type:"Base Set"},
+  ]},
 ];
