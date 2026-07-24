@@ -17,7 +17,9 @@ import FallenIcon from "./FallenIcon";
 
 const pid = (p: Paint) => `${p.brand}::${p.name}`;
 
-// Feedback destination — update the address once domain email is set up (see README).
+// Feedback link — flip FEEDBACK_READY to true and set the real address once
+// domain email (Cloudflare Email Routing) is configured. See README.
+const FEEDBACK_READY = false;
 const FEEDBACK_EMAIL = "feedback@fallenpalette.com";
 const JS_DAY: DayKey[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const todayKey = (): DayKey => JS_DAY[new Date().getDay()];
@@ -529,9 +531,11 @@ export default function App() {
 
         <footer className="footer">
           <div className="footer-brand"><FallenIcon size={20} /> {t.footer}</div>
-          <a className="footer-feedback" href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Fallen Palette — feedback")}`}>
-            <Mail size={13} /> {t.feedback}
-          </a>
+          {FEEDBACK_READY && (
+            <a className="footer-feedback" href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Fallen Palette — feedback")}`}>
+              <Mail size={13} /> {t.feedback}
+            </a>
+          )}
           <div className="footer-copy">{t.copyright}</div>
           <div className="footer-disclaimer">{t.disclaimer}</div>
         </footer>
