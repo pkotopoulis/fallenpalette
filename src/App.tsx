@@ -271,9 +271,10 @@ export default function App() {
 
   return (
     <>
-      {/* ═══ HERO BANNER (full-bleed) ═══ */}
+      {/* ═══ HERO BANNER (full-bleed, whole image + blurred fill) ═══ */}
       <header className="hero-banner">
-        <img className="hero-banner-img" src="/fallen-banner.jpg" alt="" />
+        <img className="hero-banner-bg" src="/fallen-banner.jpg" alt="" aria-hidden="true" />
+        <img className="hero-banner-img" src="/fallen-banner.jpg" alt="Fallen Palette" />
         <div className="hero-banner-text">
           <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           <p className="tagline">{t.tagline}</p>
