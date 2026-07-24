@@ -12,6 +12,7 @@ import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchLabel, matchBg, matchFg } from "./utils/colors";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
+import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
 
 const pid = (p: Paint) => `${p.brand}::${p.name}`;
@@ -52,8 +53,17 @@ export default function App() {
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [activeStore, setActiveStore] = useState<number | null>(null);
   const [featSeed, setFeatSeed] = useState(() => Math.floor(Math.random() * 1e9));
+  const [lang, setLang] = useState<Lang>(() => {
+    try { const s = localStorage.getItem("fp_lang"); if (s === "en" || s === "el") return s; } catch {}
+    return (navigator.language || "").toLowerCase().startsWith("el") ? "el" : "en";
+  });
+  const t = I18N[lang];
 
   useEffect(() => { saveCollection(collection); }, [collection]);
+  useEffect(() => {
+    try { localStorage.setItem("fp_lang", lang); } catch {}
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const toggleBrand = useCallback((b: string) => {
     setActiveBrands(p => { const n = new Set(p); if (n.has(b)) { if (n.size > 1) n.delete(b); } else n.add(b); return n; });
@@ -153,7 +163,7 @@ export default function App() {
   );
 
   const MatchBadge = ({ d }: { d: number }) => (
-    <span className="match-badge" style={{ background: matchBg(d), color: matchFg(d) }}>{matchLabel(d)}</span>
+    <span className="match-badge" style={{ background: matchBg(d), color: matchFg(d) }}>{d < 15 ? t.matchExact : d < 35 ? t.matchClose : t.matchApprox}</span>
   );
 
   const PaintRow = ({ paint, showOwn = true, extra, onClick }: { paint: Paint; showOwn?: boolean; extra?: React.ReactNode; onClick?: () => void }) => (
@@ -169,8 +179,8 @@ export default function App() {
         <button
           className={`own-btn ${isOwned(paint) ? "owned" : ""}`}
           onClick={e => { e.stopPropagation(); toggleOwned(paint); }}
-          title={isOwned(paint) ? "Remove from my paints" : "Add to my paints"}
-          aria-label={isOwned(paint) ? "Remove from collection" : "Add to collection"}
+          title={isOwned(paint) ? t.removePaint : t.addPaint}
+          aria-label={isOwned(paint) ? t.removePaint : t.addPaint}
         >
           {isOwned(paint) ? <Check size={16} /> : <Plus size={16} />}
         </button>
@@ -187,9 +197,9 @@ export default function App() {
   );
 
   const NAV = [
-    { id: "match" as const, Icon: Palette, label: "Colours", badge: null as number | null },
-    { id: "collection" as const, Icon: Layers, label: "My Paints", badge: collection.size || null },
-    { id: "stores" as const, Icon: StoreIcon, label: "Stores", badge: null as number | null },
+    { id: "match" as const, Icon: Palette, label: t.navMatch, badge: null as number | null },
+    { id: "collection" as const, Icon: Layers, label: t.navCollection, badge: collection.size || null },
+    { id: "stores" as const, Icon: StoreIcon, label: t.navStores, badge: null as number | null },
   ];
 
   // Collapsed-card summary: collapse split "11:00–13:00, 14:00–19:00" to "11:00–19:00"
@@ -221,32 +231,32 @@ export default function App() {
             <div className="store-addr" title={`${s.address}, ${s.city}`}>{s.address ? `${s.address} · ` : ""}{s.city}</div>
           </div>
           <div className="store-right">
-            <span className={th === "Closed" ? "closed" : th ? "openhrs" : "noinfo"}>{th ? summaryHours(th) : "—"}</span>
+            <span className={th === "Closed" ? "closed" : th ? "openhrs" : "noinfo"}>{th === "Closed" ? t.closed : th ? summaryHours(th) : "—"}</span>
             <ChevronDown size={16} className="store-chev" />
           </div>
         </div>
         {open && (
           <div className="store-detail">
             <a className="detail-row" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.address + " " + s.city)}`} target="_blank" rel="noreferrer">
-              <MapPin size={15} /><span>{[s.address, s.postal].filter(Boolean).join(", ")}{s.address || s.postal ? " · " : ""}{s.city}, {s.country}</span>
+              <MapPin size={15} /><span>{[s.address, s.postal].filter(Boolean).join(", ")}{s.address || s.postal ? " · " : ""}{s.city}, {t.countries[s.country] || s.country}</span>
             </a>
             {s.phone && <a className="detail-row" href={`tel:${s.phone.replace(/\s/g, "")}`}><Phone size={15} /><span>{s.phone}</span></a>}
             {s.website && <a className="detail-row" href={s.website} target="_blank" rel="noreferrer"><Globe size={15} /><span>{s.website.replace(/^https?:\/\//, "")}</span></a>}
-            <div className="detail-row hours-head"><Clock size={15} /><span>Opening hours</span></div>
+            <div className="detail-row hours-head"><Clock size={15} /><span>{t.openingHours}</span></div>
             {hasHours ? (
               <div className="hours-table">
                 {DAY_ORDER.map(d => (
                   <div key={d} className={`hours-line ${d === todayKey() ? "today" : ""}`}>
-                    <span>{DAY_LABEL[d]}</span>
-                    <span className={s.hours[d] === "Closed" ? "closed" : s.hours[d] ? "" : "noinfo"}>{s.hours[d] || "—"}</span>
+                    <span>{t.days[d]}</span>
+                    <span className={s.hours[d] === "Closed" ? "closed" : s.hours[d] ? "" : "noinfo"}>{s.hours[d] === "Closed" ? t.closed : (s.hours[d] || "—")}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="hours-empty">Opening hours not listed yet.</div>
+              <div className="hours-empty">{t.hoursNotListed}</div>
             )}
             {hasCoords && (
-              <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> Directions</a>
+              <a className="directions-btn" href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`} target="_blank" rel="noreferrer"><Navigation size={14} /> {t.directions}</a>
             )}
           </div>
         )}
@@ -263,41 +273,47 @@ export default function App() {
             <FallenIcon size={48} />
             <h1 className="wordmark">Fallen&nbsp;Palette</h1>
           </div>
-          <p className="tagline">Miniature Paint Cross-Reference · Collection · Store Finder</p>
+          <p className="tagline">{t.tagline}</p>
         </div>
-        <nav className="nav">
-          {NAV.map(t => (
-            <button key={t.id} className={`nav-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
-              <t.Icon size={17} />
-              <span>{t.label}</span>
-              {t.badge ? <span className="nav-badge">{t.badge}</span> : null}
-            </button>
-          ))}
-        </nav>
+        <div className="header-right">
+          <nav className="nav">
+            {NAV.map(n => (
+              <button key={n.id} className={`nav-btn ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
+                <n.Icon size={17} />
+                <span>{n.label}</span>
+                {n.badge ? <span className="nav-badge">{n.badge}</span> : null}
+              </button>
+            ))}
+          </nav>
+          <div className="lang-toggle" role="group" aria-label="Language">
+            <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} aria-pressed={lang === "en"}>EN</button>
+            <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>ΕΛ</button>
+          </div>
+        </div>
       </header>
 
       <div className="app-content">
         {/* ═══════════ COLOUR MATCH ═══════════ */}
         {tab === "match" && (<div className="view">
           <div className="mode-row">
-            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => { setMode("name"); setSelPaint(null); }}><Search size={14} /> By name</button>
-            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => { setMode("hex"); setSelPaint(null); setQuery(""); }}><Droplets size={14} /> By colour</button>
+            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => { setMode("name"); setSelPaint(null); }}><Search size={14} /> {t.byName}</button>
+            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => { setMode("hex"); setSelPaint(null); setQuery(""); }}><Droplets size={14} /> {t.byColour}</button>
           </div>
 
           {mode === "name" && (<>
             <div className="search-wrap">
               <Search size={17} className="search-icon" />
-              <input className="search-input" placeholder='Type a paint name, e.g. "Mephiston Red"…' value={query} onChange={e => { setQuery(e.target.value); setSelPaint(null); }} />
+              <input className="search-input" placeholder={t.searchNamePh} value={query} onChange={e => { setQuery(e.target.value); setSelPaint(null); }} />
             </div>
             <BrandChips />
 
             {!selPaint && query.trim() && suggestions.length > 0 && (
               <div className="card suggestions">
-                <div className="suggest-label">Select a paint</div>
+                <div className="suggest-label">{t.selectPaint}</div>
                 {suggestions.map((p, i) => <PaintRow key={i} paint={p} showOwn={false} onClick={() => selectPaint(p)} />)}
               </div>
             )}
-            {!selPaint && query.trim() && suggestions.length === 0 && <div className="hint">No paints match “{query}”</div>}
+            {!selPaint && query.trim() && suggestions.length === 0 && <div className="hint">{t.noPaintMatch.replace("{q}", query)}</div>}
 
             {selPaint && (<>
               <div className="card-hero">
@@ -307,19 +323,19 @@ export default function App() {
                     <div className="hero-name" title={selPaint.name}>{selPaint.name}</div>
                     <div className="hero-meta">{BRANDS[selPaint.brand]} · {selPaint.type} · {selPaint.hex}</div>
                   </div>
-                  <button className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`} onClick={() => toggleOwned(selPaint)} title={isOwned(selPaint) ? "Remove from my paints" : "Add to my paints"}>
+                  <button className={`own-btn ${isOwned(selPaint) ? "owned" : ""}`} onClick={() => toggleOwned(selPaint)} title={isOwned(selPaint) ? t.removePaint : t.addPaint}>
                     {isOwned(selPaint) ? <Check size={16} /> : <Plus size={16} />}
                   </button>
                 </div>
               </div>
               {nameResults.eq.length > 0 && (<>
-                <div className="section-label">Direct equivalents</div>
+                <div className="section-label">{t.directEquivalents}</div>
                 <div className="results-grid">
                   {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
                 </div>
               </>)}
               {nameResults.nb.length > 0 && (<>
-                <div className="section-label">Similar colours</div>
+                <div className="section-label">{t.similarColours}</div>
                 <div className="results-grid">
                   {nameResults.nb.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
                 </div>
@@ -330,14 +346,14 @@ export default function App() {
             {!selPaint && !query.trim() && (
               <div className="landing">
                 <div className="stats-band">
-                  <div className="stat-pill"><Droplets size={18} /><div><b>{allPaints.length}</b><span>paints</span></div></div>
-                  <div className="stat-pill"><Palette size={18} /><div><b>{BRAND_IDS.length}</b><span>brands</span></div></div>
-                  <div className="stat-pill"><StoreIcon size={18} /><div><b>{STORES.length}</b><span>stores</span></div></div>
+                  <div className="stat-pill"><Droplets size={18} /><div><b>{allPaints.length}</b><span>{t.statPaints}</span></div></div>
+                  <div className="stat-pill"><Palette size={18} /><div><b>{BRAND_IDS.length}</b><span>{t.statBrands}</span></div></div>
+                  <div className="stat-pill"><StoreIcon size={18} /><div><b>{STORES.length}</b><span>{t.statStores}</span></div></div>
                 </div>
 
                 <div className="section-head">
-                  <div className="section-label"><Sparkles size={14} /> Featured cross-reference</div>
-                  <button className="ghost-btn" onClick={() => setFeatSeed(Math.floor(Math.random() * 1e9))}><Shuffle size={13} /> Shuffle</button>
+                  <div className="section-label"><Sparkles size={14} /> {t.featured}</div>
+                  <button className="ghost-btn" onClick={() => setFeatSeed(Math.floor(Math.random() * 1e9))}><Shuffle size={13} /> {t.shuffle}</button>
                 </div>
                 <div className="feature-card" onClick={() => selectPaint(featured)}>
                   <div className="feature-top">
@@ -361,14 +377,14 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="section-label">How it works</div>
+                <div className="section-label">{t.howItWorks}</div>
                 <div className="how-grid">
                   {[
-                    { Icon: Search, t: "Search", d: "Find any paint by name or pick a colour." },
-                    { Icon: Palette, t: "Compare", d: "See equivalents across every brand." },
-                    { Icon: Layers, t: "Save", d: "Track what you own in your rack." },
+                    { Icon: Search, title: t.howSearchT, d: t.howSearchD },
+                    { Icon: Palette, title: t.howCompareT, d: t.howCompareD },
+                    { Icon: Layers, title: t.howSaveT, d: t.howSaveD },
                   ].map((s, i) => (
-                    <div key={i} className="how-card"><span className="how-icon"><s.Icon size={18} /></span><div className="how-title">{s.t}</div><div className="how-desc">{s.d}</div></div>
+                    <div key={i} className="how-card"><span className="how-icon"><s.Icon size={18} /></span><div className="how-title">{s.title}</div><div className="how-desc">{s.d}</div></div>
                   ))}
                 </div>
               </div>
@@ -378,16 +394,16 @@ export default function App() {
           {mode === "hex" && (<>
             <div className="hex-panel">
               <div className="hex-intro">
-                <div className="hex-intro-title"><Droplets size={16} /> Search by colour</div>
-                <p className="hex-intro-desc">Pick a colour or paste a hex code — we’ll find the closest paint matches across every brand.</p>
+                <div className="hex-intro-title"><Droplets size={16} /> {t.colourTitle}</div>
+                <p className="hex-intro-desc">{t.colourDesc}</p>
               </div>
               <div className="hex-picker">
-                <label className="color-pick" title="Open the colour picker">
+                <label className="color-pick" title={t.pick}>
                   <input type="color" value={hexVal} onChange={e => setHexVal(e.target.value)} />
-                  <span>Pick</span>
+                  <span>{t.pick}</span>
                 </label>
                 <div className="hex-field">
-                  <label htmlFor="hexInput">Hex code</label>
+                  <label htmlFor="hexInput">{t.hexCode}</label>
                   <input id="hexInput" className="hex-input" value={hexVal} maxLength={7} onChange={e => { let v = e.target.value; if (!v.startsWith("#")) v = "#" + v; if (v.length <= 7) setHexVal(v); }} />
                 </div>
                 <div className="hex-current">
@@ -396,9 +412,9 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className="section-label"><Palette size={14} /> Filter by brand</div>
+            <div className="section-label"><Palette size={14} /> {t.filterByBrand}</div>
             <BrandChips />
-            <div className="count">{hexResults.length} closest matches to <b style={{ color: "var(--bright)" }}>{hexVal.toUpperCase()}</b></div>
+            <div className="count">{hexResults.length} {t.closestTo} <b style={{ color: "var(--bright)" }}>{hexVal.toUpperCase()}</b></div>
             <div className="results-grid">
               {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
             </div>
@@ -410,45 +426,45 @@ export default function App() {
           {collection.size === 0 ? (
             <div className="empty">
               <div className="empty-icon"><Layers size={40} /></div>
-              <div className="empty-title">Your paint rack is empty</div>
+              <div className="empty-title">{t.rackEmptyTitle}</div>
               <div className="empty-body">
-                Search for a paint in <b>Colours</b>, then hit the <span className="inline-plus"><Plus size={13} /></span> button on any result to save it here.
+                {t.rackPre}<b>{t.navMatch}</b>{t.rackMid}<span className="inline-plus"><Plus size={13} /></span>{t.rackPost}
               </div>
-              <button className="cta-btn" onClick={() => setTab("match")}>Browse paints <ArrowRight size={15} /></button>
-              <div className="save-note">💾 Your collection is saved locally on this device. Clearing browser data will remove it.</div>
+              <button className="cta-btn" onClick={() => setTab("match")}>{t.browsePaints} <ArrowRight size={15} /></button>
+              <div className="save-note">{t.saveNote}</div>
             </div>
           ) : (<>
             <div className="stats-row">
-              <div className="stat-card"><div className="stat-num">{collection.size}</div><div className="stat-label">Total</div></div>
+              <div className="stat-card"><div className="stat-num">{collection.size}</div><div className="stat-label">{t.total}</div></div>
               {Object.entries(collStats).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([brand, count]) => (
                 <div key={brand} className="stat-card"><div className="stat-num">{count}</div><div className="stat-label">{(BRANDS[brand] || brand).split(" ")[0]}</div></div>
               ))}
             </div>
             <div className="search-wrap">
               <Search size={17} className="search-icon" />
-              <input className="search-input" placeholder="Filter your collection…" value={collFilter} onChange={e => setCollFilter(e.target.value)} />
+              <input className="search-input" placeholder={t.filterColl} value={collFilter} onChange={e => setCollFilter(e.target.value)} />
             </div>
             <div className="coll-actions">
-              <span className="count" style={{ padding: 0 }}>{collPaints.length} paint{collPaints.length !== 1 ? "s" : ""}</span>
+              <span className="count" style={{ padding: 0 }}>{collPaints.length} {collPaints.length !== 1 ? t.paintPlur : t.paintSing}</span>
               <div className="coll-buttons">
-                <button className="text-btn" onClick={() => exportCollection(collection)} title="Download your collection as a JSON file"><Download size={13} /> Export</button>
-                <label className="text-btn" title="Restore collection from a backup file">
-                  <Upload size={13} /> Import
+                <button className="text-btn" onClick={() => exportCollection(collection)} title="JSON"><Download size={13} /> {t.exportL}</button>
+                <label className="text-btn" title="JSON">
+                  <Upload size={13} /> {t.importL}
                   <input type="file" accept="application/json,.json" style={{ display: "none" }} onChange={async e => {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     try {
                       const imported = await importCollection(file);
-                      if (confirm(`Import ${imported.size} paints? This will merge with your current collection.`)) {
+                      if (confirm(t.importConfirm.replace("{n}", String(imported.size)))) {
                         setCollection(prev => new Set([...prev, ...imported]));
                       }
                     } catch (err) {
-                      alert("Failed to import: " + (err instanceof Error ? err.message : "unknown error"));
+                      alert(t.importFail.replace("{msg}", err instanceof Error ? err.message : "unknown error"));
                     }
                     e.target.value = "";
                   }} />
                 </label>
-                <button className="text-btn danger" onClick={() => { if (confirm("Clear all paints from your collection?")) setCollection(new Set()); }}><Trash2 size={13} /> Clear</button>
+                <button className="text-btn danger" onClick={() => { if (confirm(t.clearConfirm)) setCollection(new Set()); }}><Trash2 size={13} /> {t.clearL}</button>
               </div>
             </div>
             <div className="results-grid">
@@ -461,20 +477,20 @@ export default function App() {
         {tab === "stores" && (<div className="view">
           <div className="search-wrap">
             <Search size={17} className="search-icon" />
-            <input className="search-input" placeholder="Search by city, postal code, or store name…" value={storeQ} onChange={e => { setStoreQ(e.target.value); }} />
+            <input className="search-input" placeholder={t.storeSearchPh} value={storeQ} onChange={e => { setStoreQ(e.target.value); }} />
           </div>
           <div className="chips">
-            <button className={`chip ${!countryFilter ? "active" : ""}`} onClick={() => setCountryFilter(null)}>All</button>
-            {countries.map(c => <button key={c} className={`chip ${countryFilter === c ? "active" : ""}`} onClick={() => setCountryFilter(countryFilter === c ? null : c)}>{c}</button>)}
+            <button className={`chip ${!countryFilter ? "active" : ""}`} onClick={() => setCountryFilter(null)}>{t.all}</button>
+            {countries.map(c => <button key={c} className={`chip ${countryFilter === c ? "active" : ""}`} onClick={() => setCountryFilter(countryFilter === c ? null : c)}>{t.countries[c] || c}</button>)}
           </div>
-          <div className="count">{storeResults.length} store{storeResults.length !== 1 ? "s" : ""}</div>
+          <div className="count">{storeResults.length} {storeResults.length !== 1 ? t.storePlur : t.storeSing}</div>
 
           <div className="store-layout">
             <div className="store-list">
-              {storeResults.length === 0 ? <div className="hint">No stores match your search.</div> :
+              {storeResults.length === 0 ? <div className="hint">{t.noStoresMatch}</div> :
                 showGroups ? groupedStores.map(([country, list]) => (
                   <div key={country} className="store-group">
-                    <div className="store-group-label"><MapPin size={12} /> {country} <span className="store-group-count">{list.length}</span></div>
+                    <div className="store-group-label"><MapPin size={12} /> {t.countries[country] || country} <span className="store-group-count">{list.length}</span></div>
                     {list.map(renderStore)}
                   </div>
                 )) : storeResults.map(renderStore)
@@ -508,7 +524,7 @@ export default function App() {
           </div>
         </div>)}
 
-        <footer className="footer"><FallenIcon size={16} /> Fallen Palette · Data is approximate — always test swatches</footer>
+        <footer className="footer"><FallenIcon size={16} /> {t.footer}</footer>
       </div>
     </div>
   );
