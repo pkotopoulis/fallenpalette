@@ -27,10 +27,10 @@ a{color:inherit;text-decoration:none}
 
 /* ═══════════════════════ HERO BANNER (full-bleed, fades out at bottom) ═══════════════════════ */
 .hero-banner{position:relative;overflow:hidden;background:#0A0B0D;width:100%;z-index:0}
-.hero-banner-img{display:block;width:100%;height:clamp(250px,36vh,480px);object-fit:cover;object-position:center 26%;
-  -webkit-mask-image:linear-gradient(to bottom,#000 38%,transparent 97%);mask-image:linear-gradient(to bottom,#000 38%,transparent 97%)}
+.hero-banner-img{display:block;width:100%;height:clamp(320px,52vh,640px);object-fit:cover;object-position:center 36%;
+  -webkit-mask-image:linear-gradient(to bottom,#000 66%,transparent 100%);mask-image:linear-gradient(to bottom,#000 66%,transparent 100%)}
 .hero-banner::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent 44%,rgba(10,11,13,0.4) 78%,rgba(10,11,13,0.85) 100%)}
+  background:linear-gradient(180deg,transparent 58%,rgba(10,11,13,0.4) 84%,rgba(10,11,13,0.88) 100%)}
 .hero-banner-text{position:absolute;left:0;right:0;bottom:clamp(54px,8vh,96px);z-index:2;text-align:center;padding:0 16px;animation:fadeUp .5s ease}
 .fallen-icon{border-radius:50%;object-fit:cover;flex-shrink:0;
   filter:drop-shadow(0 8px 22px rgba(0,0,0,0.55));animation:pop .5s ease}
