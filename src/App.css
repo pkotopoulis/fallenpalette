@@ -8,6 +8,9 @@
   --silver:#C7CDD6;
   --success:#5BD68A;--warn:#FBB040;--danger:#F1707F;
   --shadow:0 8px 30px rgba(0,0,0,0.45);
+  /* Horizontal gutter for content sections. Widens with the shell at each
+     breakpoint so everything stays aligned to one edge. */
+  --gutter:16px;
 }
 html{scroll-behavior:smooth}
 html,body,#root{height:100%;background:var(--bg);color:var(--text);
@@ -304,41 +307,58 @@ a.detail-row:hover{color:var(--accent)}
 
 /* ═══════════════════════ DESKTOP ═══════════════════════ */
 @media (min-width:820px){
+  :root{--gutter:18px}
   .app{max-width:1680px;border-left:1px solid var(--border);border-right:1px solid var(--border);
     box-shadow:0 0 80px rgba(0,0,0,0.5)}
   .wordmark{letter-spacing:3px}
-  .navbar{gap:16px;padding:11px 18px}
+  .navbar{gap:16px;padding:11px var(--gutter)}
   .nav-btn{padding:10px 20px;font-size:14px}
 
+  /* Search controls stay narrow whatever the shell does — a full-width text
+     input on a wide screen is harder to use, not easier. */
   .mode-row,.search-wrap{max-width:660px;margin-left:auto;margin-right:auto}
-  .chips,.count,.section-label,.section-head{padding-left:18px;padding-right:18px}
-  .section-head{padding-left:18px}
-  .card.suggestions{margin-left:18px;margin-right:18px;max-width:660px}
-  .card-hero{margin-left:18px;margin-right:18px}
-  .hex-panel{margin-left:18px;margin-right:18px;max-width:680px}
+  .chips,.count,.section-label,.section-head{padding-left:var(--gutter);padding-right:var(--gutter)}
+  .card.suggestions{margin-left:var(--gutter);margin-right:var(--gutter);max-width:660px}
+  .card-hero{margin-left:var(--gutter);margin-right:var(--gutter)}
+  .hex-panel{margin-left:var(--gutter);margin-right:var(--gutter);max-width:680px}
 
-  /* 288px was too narrow for "Vallejo Model Color"-length metadata plus two
-     badges — cards now fit the full paint name without a tooltip. */
-  .index-hint,.index-foot{padding-left:18px;padding-right:18px}
-  .index-brand{padding-left:18px;padding-right:18px}
+  .index-hint,.index-foot{padding-left:var(--gutter);padding-right:var(--gutter)}
+  .index-brand{padding-left:var(--gutter);padding-right:var(--gutter)}
   .index-list{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 16px}
 
   /* Shade / base / highlight side by side reads as the value ramp it is */
-  .triad-hint{padding-left:18px;padding-right:18px}
-  .triad-ramp{grid-template-columns:repeat(3,1fr);gap:14px;padding:2px 18px 4px;max-width:1100px}
+  .triad-hint{padding-left:var(--gutter);padding-right:var(--gutter)}
+  .triad-ramp{grid-template-columns:repeat(3,1fr);gap:14px;padding:2px var(--gutter) 4px;max-width:1100px}
 
-  .results-grid{grid-template-columns:repeat(auto-fill,minmax(344px,1fr));gap:14px;padding:4px 18px;align-items:start}
+  /* 288px was too narrow for "Vallejo Model Color"-length metadata plus two
+     badges — cards now fit the full paint name without a tooltip. */
+  .results-grid{grid-template-columns:repeat(auto-fill,minmax(344px,1fr));gap:14px;
+    padding:4px var(--gutter);align-items:start}
   .card:hover{border-color:#333B4A;transform:translateY(-2px)}
 
-  .stats-band{padding:16px 18px 6px}
-  .feature-card{margin-left:18px;margin-right:18px}
-  .how-grid{padding-left:18px;padding-right:18px}
-  .stats-row,.coll-actions{padding-left:18px;padding-right:18px}
+  .stats-band{padding:16px var(--gutter) 6px}
+  .feature-card{margin-left:var(--gutter);margin-right:var(--gutter)}
+  .how-grid{padding-left:var(--gutter);padding-right:var(--gutter)}
+  .stats-row,.coll-actions{padding-left:var(--gutter);padding-right:var(--gutter)}
 
   /* Stores: list + sticky map side by side */
-  .store-layout{flex-direction:row;align-items:flex-start;gap:16px;padding:2px 18px 12px}
+  .store-layout{flex-direction:row;align-items:flex-start;gap:16px;padding:2px var(--gutter) 12px}
   .store-list{flex:0 0 430px;max-height:calc(100vh - 100px);overflow-y:auto;padding-right:4px}
   .map-container{flex:1;height:calc(100vh - 96px);position:sticky;top:72px}
 
   .footer{margin-top:34px}
+}
+
+/* ═══════════════════════ WIDE DISPLAYS ═══════════════════════
+   The 1680px cap parked several hundred pixels of empty page either side on a
+   large monitor. Let the shell follow the viewport instead, and spend the room
+   on more result columns rather than wider cards. The cap keeps the very
+   largest displays from stretching the landing sections absurdly. */
+@media (min-width:1760px){
+  :root{--gutter:28px}
+  .app{max-width:min(2240px,94vw)}
+  .results-grid{grid-template-columns:repeat(auto-fill,minmax(352px,1fr));gap:16px}
+  .index-list{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2px 24px}
+  .triad-ramp{max-width:1280px}
+  .store-list{flex:0 0 480px}
 }
