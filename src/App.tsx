@@ -422,10 +422,14 @@ export default function App() {
     </div>
   );
 
+  // Keyed on path rather than tab id, so the all-paints index can sit in the
+  // nav alongside the tabs. Rendered as real links, which also gives a crawler
+  // an href to every top-level view from any page.
   const NAV = [
-    { id: "match" as const, Icon: Palette, label: t.navMatch, badge: null as number | null },
-    { id: "collection" as const, Icon: Layers, label: t.navCollection, badge: collection.size || null },
-    { id: "stores" as const, Icon: StoreIcon, label: t.navStores, badge: null as number | null },
+    { path: "/colours", Icon: Palette, label: t.navMatch, badge: null as number | null, active: tab === "match" && !isPaintsIndex },
+    { path: "/paints", Icon: Droplets, label: t.allPaints, badge: ALL_PAINTS.length, active: isPaintsIndex },
+    { path: "/my-paints", Icon: Layers, label: t.navCollection, badge: collection.size || null, active: tab === "collection" },
+    { path: "/stores", Icon: StoreIcon, label: t.navStores, badge: null as number | null, active: tab === "stores" },
   ];
 
   // Collapsed-card summary: collapse split "11:00–13:00, 14:00–19:00" to "11:00–19:00"
@@ -506,11 +510,11 @@ export default function App() {
       <div className="navbar">
         <nav className="nav">
           {NAV.map(n => (
-            <button key={n.id} className={`nav-btn ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
+            <Link key={n.path} to={n.path} className={`nav-btn ${n.active ? "active" : ""}`}>
               <n.Icon size={17} />
               <span>{n.label}</span>
               {n.badge ? <span className="nav-badge">{n.badge}</span> : null}
-            </button>
+            </Link>
           ))}
         </nav>
         <div className="lang-toggle" role="group" aria-label="Language">
@@ -584,6 +588,10 @@ export default function App() {
                   </button>
                 </div>
               </div>
+              {/* Directly under the paint it belongs to. Placed after the
+                  equivalents originally, which buried it below a full results
+                  grid where nobody found it. */}
+              <WhereToBuy paint={selPaint} />
               {(triad.shade.length > 0 || triad.highlight.length > 0) && (<>
                 <div className="section-label"><Layers size={14} /> {t.shadingTriad}</div>
                 <div className="triad-hint">{t.triadHint}</div>
@@ -618,9 +626,6 @@ export default function App() {
                   {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
                 </div>
               </>)}
-              {/* After the equivalents: the cross-reference is what the visitor
-                  came for, so it answers first and the shop links follow. */}
-              <WhereToBuy paint={selPaint} />
               {nameResults.nb.length > 0 && (<>
                 <div className="section-label">{t.similarColours}</div>
                 <div className="results-grid">

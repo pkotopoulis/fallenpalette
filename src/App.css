@@ -58,9 +58,11 @@ a{color:inherit;text-decoration:none}
 .lang-toggle button{padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:.5px;background:none;border:none;color:var(--muted);cursor:pointer;transition:all .15s}
 .lang-toggle button:hover{color:var(--text)}
 .lang-toggle button.active{background:var(--accent-soft);color:var(--bright)}
+/* Anchors, not buttons, so every top-level view has a real href. Nothing here
+   is button-specific; nowrap keeps the four labels and their badges intact. */
 .nav-btn{position:relative;display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;
   background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .18s ease}
+  white-space:nowrap;cursor:pointer;transition:all .18s ease}
 .nav-btn:hover{color:var(--text);border-color:#333B4A;transform:translateY(-1px)}
 .nav-btn.active{color:var(--bright);background:var(--accent-soft);border-color:var(--accent);
   box-shadow:0 0 0 1px var(--accent),0 6px 18px rgba(159,178,201,0.16)}

@@ -107,6 +107,45 @@ describe("routing", () => {
     expect(document.title).toContain("paints");
   });
 
+  it("puts every top-level view in the nav as a real link", () => {
+    // The paint index used to be reachable only from the footer. In the nav it
+    // is findable, and links rather than buttons mean a crawler can follow them.
+    at("/");
+    const nav = document.querySelector("nav")!;
+    const hrefs = [...nav.querySelectorAll<HTMLAnchorElement>("a.nav-btn")]
+      .map(a => a.getAttribute("href"));
+    expect(hrefs).toEqual(["/colours", "/paints", "/my-paints", "/stores"]);
+  });
+
+  it("marks the nav item for the open view as active, one at a time", () => {
+    for (const [url, expected] of [
+      ["/colours", "/colours"],
+      ["/paints", "/paints"],
+      ["/my-paints", "/my-paints"],
+      ["/stores", "/stores"],
+      // A paint page is still part of the colour-search section.
+      ["/paint/citadel/mephiston-red", "/colours"],
+    ] as const) {
+      at(url);
+      const active = [...document.querySelectorAll<HTMLAnchorElement>("a.nav-btn.active")];
+      expect(active.length, `expected exactly one active nav item at ${url}`).toBe(1);
+      expect(active[0].getAttribute("href"), `wrong nav item active at ${url}`).toBe(expected);
+      cleanup();
+    }
+  });
+
+  it("shows the buy block above the results, not buried under them", () => {
+    // It was originally after the equivalents grid, which on a wide screen put
+    // it off-screen; the report was simply "I don't see any dropdown".
+    at("/paint/citadel/mephiston-red");
+    const buy = document.querySelector(".buy-block");
+    const firstGrid = document.querySelector(".results-grid");
+    if (buy && firstGrid) {
+      expect(buy.compareDocumentPosition(firstGrid) & Node.DOCUMENT_POSITION_FOLLOWING,
+        "buy block should come before the first results grid").toBeTruthy();
+    }
+  });
+
   it("offers the index from the footer on every page", () => {
     for (const url of ["/", "/colours", "/stores", "/paint/citadel/mephiston-red"]) {
       at(url);
