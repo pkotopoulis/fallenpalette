@@ -82,12 +82,12 @@ export type MatchTier = "exact" | "close" | "approx";
  * Tier cutoffs, calibrated against the 142 hand-curated equivalence groups
  * (1,185 cross-brand pairs a painter has already declared equivalent):
  *
- *   < 4.0  "Exact"   — 63% of curated equivalents
- *   < 9.5  "Close"   — 29% more, so 92% fall within this
- *   else   "Approx"  — 8%, down from 25% under the old RGB thresholds
+ *   < 4.0  "Exact"   — 62% of curated equivalents
+ *   < 9.5  "Close"   — 30% more, so 92% fall within this
+ *   else   "Approx"  — 8%, down from 26% under the old RGB thresholds
  *
  * Unrelated paints sit far outside: random cross-group pairs average a
- * distance of 23.7, and only 8.2% land inside the Close cutoff.
+ * distance of 23.8, and only 8.0% land inside the Close cutoff.
  *
  * These are the single source of truth for the tiers. Do not re-inline them —
  * the previous 15/35 pair was duplicated in App.tsx and silently disagreed

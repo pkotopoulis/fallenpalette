@@ -6,7 +6,7 @@ import {
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
   Navigation, Sparkles, ArrowRight, Droplets, Mail,
 } from "lucide-react";
-import { PAINT_GROUPS } from "./data/paints";
+import { ALL_PAINTS, equivalentsOf, paintId as pid } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
@@ -14,8 +14,6 @@ import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/c
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
-
-const pid = (p: Paint) => `${p.brand}::${p.name}`;
 
 // Feedback link — flip FEEDBACK_READY to true and set the real address once
 // domain email (Cloudflare Email Routing) is configured. See README.
@@ -81,10 +79,8 @@ export default function App() {
   const isOwned = (p: Paint) => collection.has(pid(p));
 
   // ── Paint logic ──
-  const allPaints = useMemo(() => PAINT_GROUPS.flatMap(g => g.paints), []);
-  const allFlat = useMemo(() =>
-    PAINT_GROUPS.flatMap((g, gi) => g.paints.filter(p => activeBrands.has(p.brand)).map(p => ({ ...p, groupIndex: gi, family: g.family })))
-  , [activeBrands]);
+  const allPaints = ALL_PAINTS;
+  const allFlat = useMemo(() => ALL_PAINTS.filter(p => activeBrands.has(p.brand)), [activeBrands]);
 
   const suggestions = useMemo(() => {
     if (!query.trim() || mode !== "name") return [];
@@ -93,8 +89,7 @@ export default function App() {
   }, [allFlat, query, mode]);
 
   const computeMatches = useCallback((paint: Paint) => {
-    const gr = PAINT_GROUPS.find(g => g.paints.some(p => pid(p) === pid(paint)));
-    const eq = gr ? gr.paints.filter(p => pid(p) !== pid(paint) && activeBrands.has(p.brand)) : [];
+    const eq = equivalentsOf(paint).filter(p => activeBrands.has(p.brand));
     const ids = new Set([pid(paint), ...eq.map(pid)]);
     const nb = allFlat.filter(p => !ids.has(pid(p))).map(p => ({ ...p, distance: colorDistance(paint.hex, p.hex) })).sort((a, b) => a.distance - b.distance).slice(0, 20);
     return { eq, nb };
@@ -118,7 +113,7 @@ export default function App() {
 
   // ── Collection logic ──
   const collPaints = useMemo(() => {
-    const all = PAINT_GROUPS.flatMap(g => g.paints.filter(p => collection.has(pid(p))));
+    const all = ALL_PAINTS.filter(p => collection.has(pid(p)));
     if (!collFilter.trim()) return all;
     const q = collFilter.toLowerCase();
     return all.filter(p => p.name.toLowerCase().includes(q) || (BRANDS[p.brand] || "").toLowerCase().includes(q));
@@ -126,7 +121,7 @@ export default function App() {
 
   const collStats = useMemo(() => {
     const byBrand: Record<string, number> = {};
-    PAINT_GROUPS.flatMap(g => g.paints).filter(p => collection.has(pid(p))).forEach(p => {
+    ALL_PAINTS.filter(p => collection.has(pid(p))).forEach(p => {
       byBrand[p.brand] = (byBrand[p.brand] || 0) + 1;
     });
     return byBrand;

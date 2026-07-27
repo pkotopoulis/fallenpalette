@@ -1,4 +1,4 @@
-import { PaintGroup } from "./types";
+import { Paint, PaintGroup } from "./types";
 
 export const PAINT_GROUPS: PaintGroup[] = [
   // ═══ BLACKS ═══
@@ -38,13 +38,13 @@ export const PAINT_GROUPS: PaintGroup[] = [
   ]},
   {family:"White",paints:[
     {brand:"citadel",name:"Pallid Wych Flesh",hex:"#ebdfc6",type:"Layer"},
-    {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#bea374",type:"Game Color"},
-    {brand:"army_painter",name:"Skeleton Bone",hex:"#c6ba98",type:"Fanatic"},
+    {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#cabf8e",type:"Game Color"},
+    {brand:"army_painter",name:"Skeleton Bone",hex:"#c8bd88",type:"Fanatic"},
     {brand:"proacryl",name:"Ivory",hex:"#d8d0b8",type:"Base Set"},
   ]},
   {family:"White",paints:[
-    {brand:"citadel",name:"Ushabti Bone",hex:"#aba173",type:"Layer"},
-    {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#bea374",type:"Game Color"},
+    {brand:"citadel",name:"Ushabti Bone",hex:"#c9be8b",type:"Layer"},
+    {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#cabf8e",type:"Game Color"},
     {brand:"army_painter",name:"Tomb King Tan",hex:"#ab9b7d",type:"Fanatic"},
     {brand:"ttc",name:"Summoned Bone Midtone",hex:"#b5a67a",type:"Midtone"},
   ]},
@@ -120,10 +120,10 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"ttc",name:"Doomfire Red Highlight",hex:"#c52018",type:"Highlight"},
   ]},
   {family:"Red",paints:[
-    {brand:"citadel",name:"Jokaero Orange",hex:"#ed3814",type:"Base"},
+    {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Base"},
     {brand:"vallejo_gc",name:"Hot Orange (72.009)",hex:"#e23a20",type:"Game Color"},
     {brand:"army_painter",name:"Molten Lava",hex:"#ea4226",type:"Fanatic"},
-    {brand:"proacryl",name:"Orange",hex:"#e84020",type:"Base Set"},
+    {brand:"proacryl",name:"Orange",hex:"#f0661f",type:"Base Set"},
   ]},
   {family:"Red",paints:[
     {brand:"citadel",name:"Astorath Red",hex:"#a9311e",type:"Layer"},
@@ -135,7 +135,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"citadel",name:"Screamer Pink",hex:"#7a0e44",type:"Base"},
     {brand:"vallejo_gc",name:"Warlord Purple (72.014)",hex:"#862351",type:"Game Color"},
     {brand:"army_painter",name:"Moldy Wine",hex:"#81344d",type:"Fanatic"},
-    {brand:"proacryl",name:"Magenta",hex:"#7e1848",type:"Base Set"},
+    {brand:"proacryl",name:"Magenta",hex:"#bd3a76",type:"Base Set"},
   ]},
 
   // ═══ ORANGES ═══
@@ -493,14 +493,14 @@ export const PAINT_GROUPS: PaintGroup[] = [
   // ═══ ORANGE (bright) ═══
   {family:"Orange",paints:[
     {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Layer"},
-    {brand:"vallejo_gc",name:"Hot Orange (72.009)",hex:"#f2641c",type:"Game Color"},
+    {brand:"vallejo_gc",name:"Hot Orange (72.009)",hex:"#e23a20",type:"Game Color"},
     {brand:"army_painter",name:"Lava Orange",hex:"#ef6420",type:"Fanatic"},
     {brand:"proacryl",name:"Orange",hex:"#f0661f",type:"Base Set"},
   ]},
 
   // ═══ YELLOW (bright) ═══
   {family:"Yellow",paints:[
-    {brand:"citadel",name:"Flash Gitz Yellow",hex:"#ffe000",type:"Layer"},
+    {brand:"citadel",name:"Flash Gitz Yellow",hex:"#fff300",type:"Layer"},
     {brand:"vallejo_gc",name:"Sun Yellow (72.006)",hex:"#fbe018",type:"Game Color"},
     {brand:"army_painter",name:"Daemonic Yellow",hex:"#ffdf14",type:"Fanatic"},
     {brand:"proacryl",name:"Yellow",hex:"#ffd400",type:"Base Set"},
@@ -509,7 +509,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
   // ═══ BONE / IVORY ═══
   {family:"Bone",paints:[
     {brand:"citadel",name:"Ushabti Bone",hex:"#c9be8b",type:"Layer"},
-    {brand:"vallejo_gc",name:"Bonewhite (72.034)",hex:"#cabf8e",type:"Game Color"},
+    {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#cabf8e",type:"Game Color"},
     {brand:"army_painter",name:"Skeleton Bone",hex:"#c8bd88",type:"Fanatic"},
     {brand:"proacryl",name:"Bone",hex:"#cdbf92",type:"Base Set"},
   ]},
@@ -1028,3 +1028,50 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"citadel",name:"Stormshield",hex:"#f0f0f0",type:"Technical"},
   ]},
 ];
+
+/**
+ * Stable identity for a paint. Names are unique within a brand, so this also
+ * doubles as the key used to persist a collection — do not change its shape
+ * without migrating stored collections.
+ */
+export const paintId = (p: Paint) => `${p.brand}::${p.name}`;
+
+/**
+ * Every paint exactly once, in catalog order.
+ *
+ * A paint can legitimately belong to more than one equivalence group — a
+ * red-orange sits in both the Red and Orange slots — so flattening
+ * PAINT_GROUPS yields duplicates (649 entries for 621 distinct paints).
+ * Anything user-facing must read from here, otherwise the same paint shows up
+ * twice in search results and gets counted twice in collection stats.
+ */
+export const ALL_PAINTS: Paint[] = (() => {
+  const seen = new Map<string, Paint>();
+  for (const g of PAINT_GROUPS) {
+    for (const p of g.paints) {
+      const id = paintId(p);
+      if (!seen.has(id)) seen.set(id, p);
+    }
+  }
+  return [...seen.values()];
+})();
+
+/**
+ * Curated equivalents of a paint, unioned across every group it belongs to.
+ *
+ * Taking only the first matching group (the previous behaviour) silently hid
+ * equivalents: Citadel Ushabti Bone appears in both a White and a Bone group,
+ * and only ever showed the White one's partners.
+ */
+export function equivalentsOf(paint: Paint): Paint[] {
+  const id = paintId(paint);
+  const out = new Map<string, Paint>();
+  for (const g of PAINT_GROUPS) {
+    if (!g.paints.some(p => paintId(p) === id)) continue;
+    for (const p of g.paints) {
+      const pi = paintId(p);
+      if (pi !== id && !out.has(pi)) out.set(pi, p);
+    }
+  }
+  return [...out.values()];
+}
