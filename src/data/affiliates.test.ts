@@ -71,6 +71,27 @@ describe("affiliateLinksFor", () => {
     }
   });
 
+  it("gives each Amazon marketplace its own tag", () => {
+    // Amazon issues a separate Associates ID per marketplace and a tag used on
+    // the wrong store is silently untracked, so copy-pasting one tag across
+    // marketplaces earns nothing while looking correct.
+    const amazon = affiliateLinksFor(byName("Mephiston Red"))
+      .filter(l => l.href.includes("amazon."));
+    const tags = amazon.map(l => new URL(l.href).searchParams.get("tag"));
+    for (const tag of tags) expect(tag, "Amazon link without a tag").toBeTruthy();
+    expect(new Set(tags).size, `tag reused across marketplaces: ${tags.join(", ")}`).toBe(tags.length);
+  });
+
+  it("uses a European tag suffix on European marketplaces", () => {
+    // "-21" is the European suffix; "-20" belongs to amazon.com and would not
+    // track on these stores.
+    for (const l of affiliateLinksFor(byName("Mephiston Red"))) {
+      const url = new URL(l.href);
+      if (!/amazon\.(co\.uk|de|es|it|fr|nl|se|pl)$/.test(url.host.replace(/^www\./, ""))) continue;
+      expect(url.searchParams.get("tag"), `${url.host} tag is not a -21 tag`).toMatch(/-21$/);
+    }
+  });
+
   it("keeps AFFILIATES_ENABLED consistent with whether links are produced", () => {
     const links = affiliateLinksFor(byName("Mephiston Red"));
     expect(links.length > 0).toBe(AFFILIATES_ENABLED);

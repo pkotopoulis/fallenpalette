@@ -23,8 +23,10 @@ import { BRANDS } from "./brands";
  * tag is silently untracked.
  */
 const AMAZON_MARKETPLACES: { label: string; host: string; tag: string }[] = [
+  // Each marketplace is a separate Associates account with its own tag — these
+  // two are not interchangeable, and a tag used on the wrong store is untracked.
   { label: "Amazon UK", host: "www.amazon.co.uk", tag: "fallenpalette-21" },
-  { label: "Amazon DE", host: "www.amazon.de", tag: "" },     // separate account and tag; ships to most of the EU
+  { label: "Amazon DE", host: "www.amazon.de", tag: "fallenpalet06-21" },   // ships to most of the EU, incl. Greece
 ];
 
 /** Awin publisher ID, from your Awin dashboard. Shared by every Awin advertiser. */
