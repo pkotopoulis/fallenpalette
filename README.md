@@ -43,8 +43,16 @@ mappings live in [`src/utils/urlState.ts`](./src/utils/urlState.ts).
 A paint's slug comes from its name, so **changing a paint name changes its URL**
 and breaks existing links. A test asserts slugs stay unique per brand.
 
-Deep links need the host to serve `index.html` for unmatched paths;
-[`public/_redirects`](./public/_redirects) does that on Cloudflare Pages.
+Deep links need the host to serve the app for paths that match no file.
+Cloudflare Pages does this automatically — **as long as the build output has no
+top-level `404.html`**, Pages treats the project as a single-page app and routes
+unmatched paths to the root.
+
+> **Important:** Adding a `404.html` silently switches that off, and every deep
+> link starts returning it instead of the app. Do not add one. A `_redirects`
+> file with `/* /index.html 200` is not the fix either — Pages rejects it as an
+> infinite loop (error 100324) and the whole deploy fails.
+
 `sitemap.xml` and `robots.txt` are generated at build time from the catalog by
 [`scripts/seo.mjs`](./scripts/seo.mjs), so they cannot drift from the paint data.
 

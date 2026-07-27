@@ -4,6 +4,20 @@ import {
   paintSlug, paintPath, findPaintByPath,
 } from "./paints";
 import { BRANDS } from "./brands";
+import { RANGE_KIND_IDS, rangeKindOf, RangeKind } from "./ranges";
+
+// Written out here rather than imported so the test states what each range is
+// independently of the module under test.
+const EXPECTED_KIND: Record<string, RangeKind> = {
+  "Base": "opaque", "Layer": "opaque", "Dry": "opaque", "Game Color": "opaque",
+  "Model Color": "opaque", "Fanatic": "opaque", "3rd Gen": "opaque",
+  "Scalecolor": "opaque", "Base Set": "opaque", "Expansion": "opaque",
+  "Shadow": "opaque", "Midtone": "opaque", "Highlight": "opaque",
+  "Contrast": "speed", "Xpress Color": "speed", "Speedpaint": "speed", "Instant Color": "speed",
+  "Shade": "wash", "Game Wash": "wash", "Quickshade Wash": "wash",
+  "Metallic": "metallic", "Scalecolor Metal": "metallic",
+  "Technical": "technical",
+};
 
 const rawEntries = PAINT_GROUPS.flatMap(g => g.paints);
 
@@ -169,5 +183,42 @@ describe("paint URLs", () => {
     expect(findPaintByPath("nope", "mephiston-red")).toBeNull();
     expect(findPaintByPath(undefined, undefined)).toBeNull();
     expect(findPaintByPath("citadel", undefined)).toBeNull();
+  });
+});
+
+describe("range kinds", () => {
+  it("classifies every range present in the catalog", () => {
+    // rangeKindOf falls back to "opaque", which keeps an unclassified range
+    // visible but puts a transparent paint in with the covering ones. Every
+    // range actually in the data must therefore be mapped explicitly.
+    const unmapped = [...new Set(ALL_PAINTS.map(p => p.type))]
+      .filter(type => !EXPECTED_KIND[type]);
+    expect(unmapped).toEqual([]);
+  });
+
+  it("agrees with the expected kind for each range", () => {
+    for (const [type, kind] of Object.entries(EXPECTED_KIND)) {
+      expect(rangeKindOf(type), `${type} classified wrong`).toBe(kind);
+    }
+  });
+
+  it("puts every speed-paint range in the speed kind", () => {
+    for (const type of ["Contrast", "Xpress Color", "Speedpaint", "Instant Color"]) {
+      expect(rangeKindOf(type)).toBe("speed");
+    }
+  });
+
+  it("leaves no kind without paints", () => {
+    // An empty filter chip is a dead control.
+    for (const kind of RANGE_KIND_IDS) {
+      const n = ALL_PAINTS.filter(p => rangeKindOf(p.type) === kind).length;
+      expect(n, `no paints in kind "${kind}"`).toBeGreaterThan(0);
+    }
+  });
+
+  it("assigns each paint exactly one kind", () => {
+    for (const p of ALL_PAINTS) {
+      expect(RANGE_KIND_IDS).toContain(rangeKindOf(p.type));
+    }
   });
 });

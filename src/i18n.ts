@@ -22,6 +22,7 @@ export interface Dict {
   howSaveT: string; howSaveD: string;
   colourTitle: string; colourDesc: string; pick: string; hexCode: string;
   filterByBrand: string; closestTo: string;   // "{n} <closestTo> {hex}"
+  filterByRange: string; rangeKinds: Record<string, string>;
   rackEmptyTitle: string; rackPre: string; rackMid: string; rackPost: string;
   browsePaints: string; saveNote: string;
   total: string; filterColl: string;
@@ -96,6 +97,8 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Pick a colour or paste a hex code — we’ll find the closest paint matches across every brand.",
     pick: "Pick", hexCode: "Hex code",
     filterByBrand: "Filter by brand", closestTo: "closest matches to",
+    filterByRange: "Filter by range",
+    rangeKinds: { opaque: "Opaque", speed: "Speed paints", wash: "Washes", metallic: "Metallics", technical: "Technical" },
     rackEmptyTitle: "Your paint rack is empty",
     rackPre: "Search for a paint in ", rackMid: ", then hit the ", rackPost: " button on any result to save it here.",
     browsePaints: "Browse paints",
@@ -146,6 +149,8 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Διάλεξε ένα χρώμα ή επικόλλησε έναν κωδικό hex — θα βρούμε τα πιο κοντινά χρώματα από κάθε μάρκα.",
     pick: "Επιλογή", hexCode: "Κωδικός hex",
     filterByBrand: "Φίλτρο ανά μάρκα", closestTo: "πιο κοντινές αντιστοιχίες με",
+    filterByRange: "Φίλτρο ανά σειρά",
+    rangeKinds: { opaque: "Καλυπτικά", speed: "Speed paints", wash: "Πλυσίματα", metallic: "Μεταλλικά", technical: "Τεχνικά" },
     rackEmptyTitle: "Η παλέτα σου είναι άδεια",
     rackPre: "Ψάξε ένα χρώμα στα ", rackMid: " και πάτα το ", rackPost: " σε όποιο αποτέλεσμα για να το αποθηκεύσεις εδώ.",
     browsePaints: "Περιήγηση χρωμάτων",

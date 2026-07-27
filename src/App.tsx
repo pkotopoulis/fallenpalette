@@ -9,6 +9,7 @@ import {
 import { useLocation, useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
+import { RangeKind, RANGE_KIND_IDS, rangeKindOf } from "./data/ranges";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
@@ -89,6 +90,9 @@ export default function App() {
   };
 
   const [activeBrands, setActiveBrands] = useState<Set<string>>(new Set(BRAND_IDS));
+  // All kinds on by default: hiding a third of the catalog from someone who
+  // never asked would be worse than the noise. One click narrows it.
+  const [activeRanges, setActiveRanges] = useState<Set<RangeKind>>(new Set(RANGE_KIND_IDS));
   const [collection, setCollection] = useState<Set<string>>(loadCollection);
   const [collFilter, setCollFilter] = useState("");
   const [storeQ, setStoreQ] = useState("");
@@ -159,6 +163,12 @@ export default function App() {
     setActiveBrands(p => { const n = new Set(p); if (n.has(b)) { if (n.size > 1) n.delete(b); } else n.add(b); return n; });
   }, []);
 
+  // Same rule as brands: never let the last one be switched off, since an empty
+  // filter yields no results at all and looks like a broken page.
+  const toggleRange = useCallback((k: RangeKind) => {
+    setActiveRanges(p => { const n = new Set(p); if (n.has(k)) { if (n.size > 1) n.delete(k); } else n.add(k); return n; });
+  }, []);
+
   const toggleOwned = useCallback((paint: Paint) => {
     setCollection(p => { const n = new Set(p); const id = pid(paint); n.has(id) ? n.delete(id) : n.add(id); return n; });
   }, []);
@@ -167,7 +177,11 @@ export default function App() {
 
   // ── Paint logic ──
   const allPaints = ALL_PAINTS;
-  const allFlat = useMemo(() => ALL_PAINTS.filter(p => activeBrands.has(p.brand)), [activeBrands]);
+  // Single filtered pool feeding suggestions, similar colours, hex search and
+  // the triad, so every surface respects both filters consistently.
+  const allFlat = useMemo(
+    () => ALL_PAINTS.filter(p => activeBrands.has(p.brand) && activeRanges.has(rangeKindOf(p.type))),
+    [activeBrands, activeRanges]);
 
   const suggestions = useMemo(() => {
     if (!query.trim() || mode !== "name") return [];
@@ -176,11 +190,12 @@ export default function App() {
   }, [allFlat, query, mode]);
 
   const computeMatches = useCallback((paint: Paint) => {
-    const eq = equivalentsOf(paint).filter(p => activeBrands.has(p.brand));
+    const eq = equivalentsOf(paint)
+      .filter(p => activeBrands.has(p.brand) && activeRanges.has(rangeKindOf(p.type)));
     const ids = new Set([pid(paint), ...eq.map(pid)]);
     const nb = allFlat.filter(p => !ids.has(pid(p))).map(p => ({ ...p, distance: colorDistance(paint.hex, p.hex) })).sort((a, b) => a.distance - b.distance).slice(0, 20);
     return { eq, nb };
-  }, [allFlat, activeBrands]);
+  }, [allFlat, activeBrands, activeRanges]);
 
   const nameResults = useMemo(() => selPaint ? computeMatches(selPaint) : { eq: [], nb: [] }, [selPaint, computeMatches]);
 
@@ -295,6 +310,25 @@ export default function App() {
       {BRAND_IDS.map(id => (
         <button key={id} className={`chip ${activeBrands.has(id) ? "active" : ""}`} onClick={() => toggleBrand(id)}>{BRANDS[id]}</button>
       ))}
+    </div>
+  );
+
+  const RangeChips = () => (
+    <div className="chips chips-range">
+      <span className="chips-label">{t.filterByRange}</span>
+      {RANGE_KIND_IDS.map(k => {
+        const n = ALL_PAINTS.filter(p => rangeKindOf(p.type) === k).length;
+        return (
+          <button
+            key={k}
+            className={`chip chip-sm ${activeRanges.has(k) ? "active" : ""}`}
+            onClick={() => toggleRange(k)}
+            title={`${t.rangeKinds[k]} — ${n}`}
+          >
+            {t.rangeKinds[k]} <span className="chip-count">{n}</span>
+          </button>
+        );
+      })}
     </div>
   );
 
