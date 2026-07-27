@@ -326,32 +326,17 @@ export default function App() {
    * Renders nothing at all until a programme is configured in affiliates.ts.
    */
   const WhereToBuy = ({ paint }: { paint: Paint }) => {
-    const links = affiliateLinksFor(paint);
-    if (!links.length) return null;
+    if (!affiliateLinksFor(paint).length) return null;
     return (
       <div className="buy-block">
         <div className="buy-head">
           <ShoppingCart size={14} /> {t.whereToBuy}
         </div>
 
-        {/* One shop needs no menu; several go behind a disclosure so three
-            near-identical Amazon marketplaces do not read as three choices.
-            <details> rather than a <select>: these have to stay real anchors to
+        {/* <details> rather than a <select>: these have to stay real anchors to
             keep rel="sponsored", and routing clicks through JS instead would
             drop it and edge toward the link cloaking Amazon's terms forbid. */}
-        {links.length === 1 ? (
-          <div className="buy-links"><BuyAnchor link={links[0]} /></div>
-        ) : (
-          <details className="buy-menu">
-            <summary className="buy-summary">
-              <span>{t.buyChoose}</span>
-              <ChevronDown size={15} className="buy-chev" />
-            </summary>
-            <div className="buy-menu-list">
-              {links.map(l => <BuyAnchor key={l.id} link={l} />)}
-            </div>
-          </details>
-        )}
+        <ShopMenu paint={paint} />
 
         {/* Outside the menu on purpose: Amazon requires its disclosure to be
             clearly and prominently displayed, which it would not be if a click
@@ -382,24 +367,47 @@ export default function App() {
   );
 
   /**
-   * Compact restock link for a collection row. Uses the first configured
-   * programme as the primary shop rather than crowding the row with every
-   * retailer; the paint's own page lists them all.
+   * The shop chooser, in two sizes.
+   *
+   * One component for both the paint page and collection rows so they cannot
+   * diverge — the row variant used to show only the first shop with no way to
+   * reach the others.
    */
-  const BuyLink = ({ paint }: { paint: Paint }) => {
-    const primary = affiliateLinksFor(paint)[0];
-    if (!primary) return null;
+  const ShopMenu = ({ paint, compact = false }: { paint: Paint; compact?: boolean }) => {
+    const links = affiliateLinksFor(paint);
+    if (!links.length) return null;
+
+    // Nothing to choose between: a menu holding one item is just an extra click.
+    if (links.length === 1) {
+      return compact
+        ? <a
+            className="row-buy"
+            href={links[0].href}
+            target="_blank"
+            rel="sponsored nofollow noopener noreferrer"
+            title={`${t.restock} — ${links[0].name}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <ShoppingCart size={13} /> {t.restock}
+          </a>
+        : <div className="buy-links"><BuyAnchor link={links[0]} /></div>;
+    }
+
     return (
-      <a
-        className="row-buy"
-        href={primary.href}
-        target="_blank"
-        rel="sponsored nofollow noopener noreferrer"
-        title={`${t.restock} — ${primary.name}`}
+      <details
+        className={`buy-menu ${compact ? "is-compact" : ""}`}
+        // Rows can be clickable; opening the menu must not also select the paint.
         onClick={e => e.stopPropagation()}
       >
-        <ShoppingCart size={13} /> {t.restock}
-      </a>
+        <summary className={compact ? "row-buy" : "buy-summary"}>
+          {compact ? <ShoppingCart size={13} /> : null}
+          <span>{compact ? t.restock : t.buyChoose}</span>
+          <ChevronDown size={compact ? 13 : 15} className="buy-chev" />
+        </summary>
+        <div className="buy-menu-list">
+          {links.map(l => <BuyAnchor key={l.id} link={l} />)}
+        </div>
+      </details>
     );
   };
 
@@ -762,7 +770,7 @@ export default function App() {
             </div>
             <div className="results-grid">
               {collPaints.map((p, i) => (
-                <div key={i} className="card"><PaintRow paint={p} extra={<BuyLink paint={p} />} /></div>
+                <div key={i} className="card card-open"><PaintRow paint={p} extra={<ShopMenu paint={p} compact />} /></div>
               ))}
             </div>
           </>)}
@@ -821,9 +829,6 @@ export default function App() {
 
         <footer className="footer">
           <div className="footer-brand"><FallenIcon size={20} /> {t.footer}</div>
-          {/* Present on every page so the paint index — and through it all 620
-              paint pages — is reachable by a crawler from anywhere on the site. */}
-          <Link className="footer-link" to="/paints">{t.allPaints}</Link>
           {FEEDBACK_READY && (
             <a className="footer-feedback" href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Fallen Palette — feedback")}`}>
               <Mail size={13} /> {t.feedback}

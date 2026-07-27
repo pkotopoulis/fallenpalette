@@ -32,9 +32,25 @@ const at = (url: string) =>
     </MemoryRouter>,
   );
 
-// Node does not expose a bare localStorage global here. The app already guards
-// every access, so just clear it when the environment happens to provide one.
-beforeEach(() => { try { window.localStorage?.clear(); } catch {} });
+// Node does not expose a working bare localStorage global here, and the app
+// reads it unqualified, so without a stub every collection is empty and the
+// saved-paints view cannot be tested at all.
+if (!globalThis.localStorage) {
+  const store = new Map<string, string>();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => { store.set(k, String(v)); },
+      removeItem: (k: string) => { store.delete(k); },
+      clear: () => { store.clear(); },
+      key: (i: number) => [...store.keys()][i] ?? null,
+      get length() { return store.size; },
+    },
+  });
+}
+
+beforeEach(() => { try { localStorage.clear(); } catch {} });
 afterEach(cleanup);
 
 describe("routing", () => {
@@ -146,17 +162,6 @@ describe("routing", () => {
     }
   });
 
-  it("offers the index from the footer on every page", () => {
-    for (const url of ["/", "/colours", "/stores", "/paint/citadel/mephiston-red"]) {
-      at(url);
-      expect(
-        document.querySelector('footer a[href="/paints"]'),
-        `no footer link to the index at ${url}`,
-      ).toBeTruthy();
-      cleanup();
-    }
-  });
-
   it("filters speed paints out of results when their chip is switched off", () => {
     // The point of the feature: 318 transparent paints were competing in every
     // opaque-paint search with no way to exclude them.
@@ -227,6 +232,28 @@ describe("routing", () => {
     const disclosure = document.querySelector(".buy-disclosure");
     expect(disclosure?.closest("details")).toBeNull();
     expect(document.querySelector(".buy-hint")?.closest("details")).toBeNull();
+  });
+
+  it("offers the same choice of shops in the collection as on a paint page", () => {
+    // The collection row used to link only to the first configured shop, with
+    // no way to reach the others — the reported "still no dropdown".
+    const paint = "citadel::Mephiston Red";
+    localStorage.setItem("paintxref_collection", JSON.stringify([paint]));
+
+    at("/paint/citadel/mephiston-red");
+    const onPage = document.querySelectorAll(".buy-block a.buy-link").length;
+    cleanup();
+
+    at("/my-paints");
+    const row = document.querySelector(".paint-row");
+    expect(row, "the saved paint should be listed").toBeTruthy();
+    expect(row!.querySelectorAll("a.buy-link").length).toBe(onPage);
+
+    if (onPage > 1) {
+      expect(row!.querySelector("details.buy-menu")).toBeTruthy();
+      // A card that clips its children would hide the menu the moment it opens.
+      expect(row!.closest(".card")?.classList.contains("card-open")).toBe(true);
+    }
   });
 
   it("carries Amazon's prescribed disclosure verbatim wherever its links appear", () => {

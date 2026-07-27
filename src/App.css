@@ -124,6 +124,10 @@ a{color:inherit;text-decoration:none}
 
 /* ═══════════════════════ CARDS & SECTIONS ═══════════════════════ */
 .card{background:var(--card);border-radius:13px;border:1px solid var(--border);overflow:hidden;transition:border-color .16s,transform .16s}
+/* Cards holding a dropdown cannot clip their children, or the menu is hidden
+   the moment it opens. Opt-in rather than dropping overflow from every card,
+   which relies on the clip to round off its contents. */
+.card.card-open{overflow:visible}
 .card.suggestions{margin:0 16px 10px;animation:pop .2s ease}
 .suggest-label{padding:9px 14px 4px;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
 .card-hero{margin:8px 16px 2px;background:linear-gradient(135deg,var(--card),var(--card-alt));border-radius:14px;overflow:hidden;
@@ -179,8 +183,14 @@ a{color:inherit;text-decoration:none}
 .buy-disclosure{margin-top:5px;font-size:10px;color:var(--muted);opacity:.8}
 .row-buy{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;padding:5px 10px;
   font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);
-  border:1px solid var(--border);border-radius:8px;transition:all .16s}
+  border:1px solid var(--border);border-radius:8px;cursor:pointer;list-style:none;transition:all .16s}
+.row-buy::-webkit-details-marker{display:none}
 .row-buy:hover{border-color:var(--accent);color:var(--bright)}
+/* Compact variant: the menu hangs off the right edge of the row rather than
+   stretching the row's width. */
+.buy-menu.is-compact{flex-shrink:0}
+.buy-menu.is-compact .buy-menu-list{left:auto;right:0;min-width:190px}
+.buy-menu.is-compact[open] .row-buy{border-color:var(--accent);color:var(--bright)}
 
 /* ═══════════════════════ ALL-PAINTS INDEX ═══════════════════════ */
 .index-hint{padding:0 16px 10px;font-size:11px;color:var(--muted)}
@@ -189,12 +199,17 @@ a{color:inherit;text-decoration:none}
   margin:10px 0 8px;display:flex;align-items:center;gap:8px}
 .index-brand-name span{font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);
   padding:2px 7px;border-radius:6px}
-.index-list{display:grid;grid-template-columns:1fr;gap:2px}
-.index-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;transition:background .14s}
-.index-item:hover{background:rgba(255,255,255,0.04)}
-.index-item-name{flex:1 1 0;min-width:0;font-size:12px;color:var(--text);
+/* Proper cards rather than a dense text list: bigger swatch, a border and real
+   padding, so each paint is a comfortable tap target and the colour is legible
+   at a glance. */
+.index-list{display:grid;grid-template-columns:1fr;gap:8px}
+.index-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;
+  background:var(--card);border:1px solid var(--border);transition:border-color .16s,transform .16s,background .16s}
+.index-item:hover{background:var(--card-alt);border-color:var(--accent);transform:translateY(-2px)}
+.index-item-name{flex:1 1 0;min-width:0;font-size:13px;font-weight:600;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.index-item-range{flex:0 0 auto;font-size:10px;font-weight:700;color:var(--muted)}
+.index-item-range{flex:0 0 auto;font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--accent);
+  background:var(--accent-soft);padding:2px 7px;border-radius:6px}
 .index-foot{padding:4px 16px 24px}
 
 /* ═══════════════════════ SHADING TRIAD ═══════════════════════ */
@@ -342,9 +357,6 @@ a.detail-row:hover{color:var(--accent)}
 .footer-feedback{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);
   padding:7px 14px;border:1px solid var(--border);border-radius:9px;background:var(--card);transition:all .16s}
 .footer-feedback:hover{border-color:var(--accent);background:var(--accent-soft)}
-.footer-link{font-size:11px;font-weight:700;color:var(--accent);text-decoration:underline;
-  text-decoration-color:var(--accent-soft);text-underline-offset:3px}
-.footer-link:hover{text-decoration-color:var(--accent)}
 .footer-copy{font-size:11px;font-weight:600;color:var(--muted)}
 .footer-disclaimer{max-width:660px;font-size:10px;line-height:1.55;opacity:.85}
 
@@ -374,7 +386,7 @@ a.detail-row:hover{color:var(--accent)}
   .chips,.count,.section-label,.section-head{padding-left:var(--gutter);padding-right:var(--gutter)}
   .index-hint,.index-foot{padding-left:var(--gutter);padding-right:var(--gutter)}
   .index-brand{padding-left:var(--gutter);padding-right:var(--gutter)}
-  .index-list{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 16px}
+  .index-list{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
 
   /* ── Centred content column ──
      Everything lines up on the page centre rather than the left gutter, which
@@ -432,7 +444,7 @@ a.detail-row:hover{color:var(--accent)}
   :root{--gutter:28px}
   .app{max-width:min(2240px,94vw)}
   .results-grid{grid-template-columns:repeat(auto-fill,minmax(352px,1fr));gap:16px}
-  .index-list{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2px 24px}
+  .index-list{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
   .triad-ramp{max-width:1280px}
   .store-list{flex:0 0 480px}
 }

@@ -74,7 +74,7 @@ export const I18N: Record<Lang, Dict> = {
   en: {
     langLabel: "EN",
     tagline: "Miniature Paint Cross-Reference · Collection · Store Finder",
-    navMatch: "Colours", navCollection: "My Paints", navStores: "Stores",
+    navMatch: "Colour search", navCollection: "My Paints", navStores: "Stores",
     byName: "By name", byColour: "By colour",
     searchNamePh: 'Type a paint name, e.g. "Mephiston Red"…',
     selectPaint: "Select a paint",
@@ -131,7 +131,7 @@ export const I18N: Record<Lang, Dict> = {
   el: {
     langLabel: "ΕΛ",
     tagline: "Αντιστοίχιση Χρωμάτων Μινιατούρων · Συλλογή · Εύρεση Καταστημάτων",
-    navMatch: "Χρώματα", navCollection: "Η Συλλογή μου", navStores: "Καταστήματα",
+    navMatch: "Αναζήτηση χρώματος", navCollection: "Η Συλλογή μου", navStores: "Καταστήματα",
     byName: "Με όνομα", byColour: "Με χρώμα",
     searchNamePh: 'Πληκτρολόγησε όνομα χρώματος, π.χ. "Mephiston Red"…',
     selectPaint: "Διάλεξε ένα χρώμα",
