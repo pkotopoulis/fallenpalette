@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["fallen-icon.png", "fallen-banner.jpg"],
+      includeAssets: ["fallen-icon.png", "fallen-banner-wide.jpg"],
       manifest: {
         name: "Fallen Palette",
         short_name: "Fallen Palette",
