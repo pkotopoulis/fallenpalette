@@ -11,6 +11,7 @@ export interface Dict {
   selectPaint: string;
   noPaintMatch: string;            // uses {q}
   directEquivalents: string; similarColours: string;
+  shadingTriad: string; triadShade: string; triadBase: string; triadHighlight: string; triadHint: string;
   brandsLoaded: string;            // unused reserve
   statPaints: string; statBrands: string; statStores: string;
   featured: string; shuffle: string; howItWorks: string;
@@ -75,6 +76,8 @@ export const I18N: Record<Lang, Dict> = {
     selectPaint: "Select a paint",
     noPaintMatch: "No paints match “{q}”",
     directEquivalents: "Direct equivalents", similarColours: "Similar colours",
+    shadingTriad: "Shading triad", triadShade: "Shade", triadBase: "Base", triadHighlight: "Highlight",
+    triadHint: "Same colour, darker and lighter — for recesses and edges",
     brandsLoaded: "brands loaded",
     statPaints: "paints", statBrands: "brands", statStores: "stores",
     featured: "Featured cross-reference", shuffle: "Shuffle", howItWorks: "How it works",
@@ -117,6 +120,8 @@ export const I18N: Record<Lang, Dict> = {
     selectPaint: "Διάλεξε ένα χρώμα",
     noPaintMatch: "Κανένα χρώμα δεν ταιριάζει με «{q}»",
     directEquivalents: "Άμεσα αντίστοιχα", similarColours: "Παρόμοια χρώματα",
+    shadingTriad: "Τριάδα σκίασης", triadShade: "Σκίαση", triadBase: "Βάση", triadHighlight: "Φωτισμός",
+    triadHint: "Ίδιο χρώμα, πιο σκούρο και πιο ανοιχτό — για εσοχές και ακμές",
     brandsLoaded: "μάρκες",
     statPaints: "χρώματα", statBrands: "μάρκες", statStores: "καταστήματα",
     featured: "Προτεινόμενη αντιστοίχιση", shuffle: "Ανακάτεμα", howItWorks: "Πώς λειτουργεί",

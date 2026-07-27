@@ -11,6 +11,7 @@ import { BRANDS, BRAND_IDS } from "./data/brands";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
+import { findTriad } from "./utils/triad";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
@@ -96,6 +97,12 @@ export default function App() {
   }, [allFlat, activeBrands]);
 
   const nameResults = useMemo(() => selPaint ? computeMatches(selPaint) : { eq: [], nb: [] }, [selPaint, computeMatches]);
+
+  // Shade/highlight suggestions honour the brand filter, so a Citadel-only
+  // painter gets a ramp they can actually buy.
+  const triad = useMemo(
+    () => selPaint ? findTriad(selPaint, allFlat, 2) : { shade: [], highlight: [] },
+    [selPaint, allFlat]);
 
   const hexResults = useMemo(() => {
     if (mode !== "hex" || hexVal.length < 7) return [];
@@ -336,6 +343,34 @@ export default function App() {
                   </button>
                 </div>
               </div>
+              {(triad.shade.length > 0 || triad.highlight.length > 0) && (<>
+                <div className="section-label"><Layers size={14} /> {t.shadingTriad}</div>
+                <div className="triad-hint">{t.triadHint}</div>
+                <div className="triad-ramp">
+                  {[
+                    { role: t.triadShade, paints: triad.shade, current: false },
+                    { role: t.triadBase, paints: [selPaint], current: true },
+                    { role: t.triadHighlight, paints: triad.highlight, current: false },
+                  ].filter(step => step.paints.length > 0).map(step => (
+                    <div key={step.role} className={`triad-step ${step.current ? "is-base" : ""}`}>
+                      <div className="triad-role">{step.role}</div>
+                      {step.paints.map((p, i) => (
+                        <button
+                          key={i}
+                          className="triad-paint"
+                          onClick={step.current ? undefined : () => selectPaint(p)}
+                          disabled={step.current}
+                          title={`${p.name} — ${BRANDS[p.brand]} · ${p.type}`}
+                        >
+                          <Swatch hex={p.hex} size={30} />
+                          <span className="triad-name">{p.name}</span>
+                          <span className="triad-brand">{BRANDS[p.brand]}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </>)}
               {nameResults.eq.length > 0 && (<>
                 <div className="section-label">{t.directEquivalents}</div>
                 <div className="results-grid">
