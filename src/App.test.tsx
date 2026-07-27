@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
-import { AFFILIATES_ENABLED } from "./data/affiliates";
+import { AFFILIATES_ENABLED, AMAZON_ENABLED, AMAZON_DISCLOSURE } from "./data/affiliates";
 
 // Leaflet needs a real layout engine, which happy-dom does not provide, and the
 // map is irrelevant to routing. Stub the pieces App imports.
@@ -152,17 +152,39 @@ describe("routing", () => {
     expect(document.querySelectorAll(".range-badge").length).toBeGreaterThan(0);
   });
 
-  it("renders no affiliate markup at all while no programme is configured", () => {
-    // Default state. Shipping an empty "where to buy" heading, or a disclosure
-    // for links that do not exist, would be worse than showing nothing.
+  it("shows affiliate markup exactly when a programme is configured", () => {
+    // Stated as an equivalence rather than pinned to today's config, so it holds
+    // whether programmes are live or not. An empty "where to buy" heading, or a
+    // commission disclosure for links that do not exist, would both be wrong.
     at("/paint/citadel/mephiston-red");
-    expect(AFFILIATES_ENABLED).toBe(false);
-    expect(document.querySelector(".buy-block")).toBeNull();
-    expect(screen.queryByText(/where to buy/i)).toBeNull();
-    // Specific to the affiliate disclosure: a looser /affiliate/i also matches
-    // the Games Workshop disclaimer's "not affiliated with", which must stay.
-    expect(screen.queryByText(/may earn a commission/i)).toBeNull();
+    expect(document.querySelector(".buy-block") !== null).toBe(AFFILIATES_ENABLED);
+    expect(screen.queryByText(/where to buy/i) !== null).toBe(AFFILIATES_ENABLED);
+    // queryAll, not query: the commission wording is deliberately in two places
+    // — beside the links and in the footer — and the singular query throws on
+    // multiple matches. Matched on wording unique to the affiliate note, since a
+    // looser /affiliate/i also hits the GW disclaimer's "not affiliated with".
+    expect(screen.queryAllByText(/may earn a commission/i).length > 0).toBe(AFFILIATES_ENABLED);
     expect(screen.queryByText(/not affiliated with/i), "GW disclaimer must remain").toBeTruthy();
+  });
+
+  it("carries Amazon's prescribed disclosure verbatim wherever its links appear", () => {
+    // Section 5 of the Associates Operating Agreement requires this exact
+    // sentence, clearly and prominently. A paraphrase or a translation risks
+    // the account, so it is asserted character-for-character.
+    at("/paint/citadel/mephiston-red");
+    const bodyText = document.body.textContent ?? "";
+    expect(bodyText.includes(AMAZON_DISCLOSURE)).toBe(AMAZON_ENABLED);
+
+    if (AMAZON_ENABLED) {
+      // Beside the links and in the footer, not one or the other.
+      expect(document.querySelector(".buy-disclosure")?.textContent).toContain(AMAZON_DISCLOSURE);
+      expect(document.querySelector("footer")?.textContent).toContain(AMAZON_DISCLOSURE);
+      // Amazon tags are marketplace-specific; a European tag is "-21".
+      for (const a of document.querySelectorAll<HTMLAnchorElement>("a.buy-link")) {
+        if (!a.href.includes("amazon.")) continue;
+        expect(new URL(a.href).searchParams.get("tag")).toBeTruthy();
+      }
+    }
   });
 
   it("marks every outbound shop link sponsored and safe, whenever one exists", () => {

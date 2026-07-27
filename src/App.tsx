@@ -10,7 +10,7 @@ import { useLocation, useNavigate, useParams, useSearchParams, Link } from "reac
 import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { RangeKind, RANGE_KIND_IDS, rangeKindOf } from "./data/ranges";
-import { affiliateLinksFor, AFFILIATES_ENABLED } from "./data/affiliates";
+import { affiliateLinksFor, AFFILIATES_ENABLED, AMAZON_ENABLED, AMAZON_DISCLOSURE } from "./data/affiliates";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
@@ -347,7 +347,10 @@ export default function App() {
           ))}
         </div>
         <div className="buy-hint">{t.buyHint}</div>
-        <div className="buy-disclosure">{t.affiliateNote}</div>
+        <div className="buy-disclosure">
+          {t.affiliateNote}
+          {AMAZON_ENABLED && <> {AMAZON_DISCLOSURE}</>}
+        </div>
       </div>
     );
   };
@@ -798,7 +801,12 @@ export default function App() {
           <div className="footer-copy">{t.copyright}</div>
           {/* Site-wide disclosure, in addition to the one beside the links
               themselves. Only shown when a programme is actually live. */}
-          {AFFILIATES_ENABLED && <div className="footer-disclaimer">{t.affiliateFooter}</div>}
+          {AFFILIATES_ENABLED && (
+            <div className="footer-disclaimer">
+              {t.affiliateFooter}
+              {AMAZON_ENABLED && <> {AMAZON_DISCLOSURE}</>}
+            </div>
+          )}
           <div className="footer-disclaimer">{t.disclaimer}</div>
         </footer>
       </div>

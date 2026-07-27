@@ -23,8 +23,8 @@ import { BRANDS } from "./brands";
  * tag is silently untracked.
  */
 const AMAZON_MARKETPLACES: { label: string; host: string; tag: string }[] = [
-  { label: "Amazon UK", host: "www.amazon.co.uk", tag: "" },  // e.g. "fallenpalette-21"
-  { label: "Amazon DE", host: "www.amazon.de", tag: "" },     // ships to most of the EU
+  { label: "Amazon UK", host: "www.amazon.co.uk", tag: "fallenpalette-21" },
+  { label: "Amazon DE", host: "www.amazon.de", tag: "" },     // separate account and tag; ships to most of the EU
 ];
 
 /** Awin publisher ID, from your Awin dashboard. Shared by every Awin advertiser. */
@@ -111,3 +111,17 @@ export const AFFILIATES_ENABLED =
   AMAZON_MARKETPLACES.some(m => m.tag) ||
   Boolean(AWIN_PUBLISHER_ID && WAYLAND_AWIN_ADVERTISER_ID) ||
   Boolean(ELEMENT_GAMES_PARAM.value);
+
+/** True when any Amazon marketplace is live, which triggers its own disclosure. */
+export const AMAZON_ENABLED = AMAZON_MARKETPLACES.some(m => m.tag);
+
+/**
+ * Amazon's prescribed disclosure, quoted verbatim from section 5 of the
+ * Associates Programme Operating Agreement, which requires this exact sentence
+ * (or a previously-allowed equivalent) "clearly and prominently" on the site.
+ *
+ * Deliberately not translated and not reworded: compliance checks look for this
+ * string, and a paraphrase risks the account. The generic affiliate note in the
+ * dictionaries covers the localised explanation alongside it.
+ */
+export const AMAZON_DISCLOSURE = "As an Amazon Associate I earn from qualifying purchases.";
