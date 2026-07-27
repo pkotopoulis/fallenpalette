@@ -4,12 +4,13 @@ import L from "leaflet";
 import {
   Search, Palette, Layers, Store as StoreIcon, Plus, Check, Download, Upload,
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
-  Navigation, Sparkles, ArrowRight, Droplets, Mail,
+  Navigation, Sparkles, ArrowRight, Droplets, Mail, ShoppingCart,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { RangeKind, RANGE_KIND_IDS, rangeKindOf } from "./data/ranges";
+import { affiliateLinksFor, AFFILIATES_ENABLED } from "./data/affiliates";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
@@ -313,6 +314,66 @@ export default function App() {
     </div>
   );
 
+  /**
+   * Outbound shop links for a paint.
+   *
+   * rel="sponsored" is required by Google for paid links; without it these read
+   * as a link scheme and can cost the site the ranking the paint pages exist to
+   * earn. nofollow is belt-and-braces for older crawlers, noopener closes the
+   * window.opener hole on target=_blank. The disclosure is a legal requirement
+   * (FTC, ASA/CAP, EU) and has to sit with the links, not only in the footer.
+   *
+   * Renders nothing at all until a programme is configured in affiliates.ts.
+   */
+  const WhereToBuy = ({ paint }: { paint: Paint }) => {
+    const links = affiliateLinksFor(paint);
+    if (!links.length) return null;
+    return (
+      <div className="buy-block">
+        <div className="buy-head">
+          <ShoppingCart size={14} /> {t.whereToBuy}
+        </div>
+        <div className="buy-links">
+          {links.map(l => (
+            <a
+              key={l.id}
+              className="buy-link"
+              href={l.href}
+              target="_blank"
+              rel="sponsored nofollow noopener noreferrer"
+            >
+              {l.name} <ArrowRight size={13} />
+            </a>
+          ))}
+        </div>
+        <div className="buy-hint">{t.buyHint}</div>
+        <div className="buy-disclosure">{t.affiliateNote}</div>
+      </div>
+    );
+  };
+
+  /**
+   * Compact restock link for a collection row. Uses the first configured
+   * programme as the primary shop rather than crowding the row with every
+   * retailer; the paint's own page lists them all.
+   */
+  const BuyLink = ({ paint }: { paint: Paint }) => {
+    const primary = affiliateLinksFor(paint)[0];
+    if (!primary) return null;
+    return (
+      <a
+        className="row-buy"
+        href={primary.href}
+        target="_blank"
+        rel="sponsored nofollow noopener noreferrer"
+        title={`${t.restock} — ${primary.name}`}
+        onClick={e => e.stopPropagation()}
+      >
+        <ShoppingCart size={13} /> {t.restock}
+      </a>
+    );
+  };
+
   const RangeChips = () => (
     <div className="chips chips-range">
       <span className="chips-label">{t.filterByRange}</span>
@@ -528,6 +589,9 @@ export default function App() {
                   {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
                 </div>
               </>)}
+              {/* After the equivalents: the cross-reference is what the visitor
+                  came for, so it answers first and the shop links follow. */}
+              <WhereToBuy paint={selPaint} />
               {nameResults.nb.length > 0 && (<>
                 <div className="section-label">{t.similarColours}</div>
                 <div className="results-grid">
@@ -663,7 +727,9 @@ export default function App() {
               </div>
             </div>
             <div className="results-grid">
-              {collPaints.map((p, i) => <div key={i} className="card"><PaintRow paint={p} /></div>)}
+              {collPaints.map((p, i) => (
+                <div key={i} className="card"><PaintRow paint={p} extra={<BuyLink paint={p} />} /></div>
+              ))}
             </div>
           </>)}
         </div>)}
@@ -730,6 +796,9 @@ export default function App() {
             </a>
           )}
           <div className="footer-copy">{t.copyright}</div>
+          {/* Site-wide disclosure, in addition to the one beside the links
+              themselves. Only shown when a programme is actually live. */}
+          {AFFILIATES_ENABLED && <div className="footer-disclaimer">{t.affiliateFooter}</div>}
           <div className="footer-disclaimer">{t.disclaimer}</div>
         </footer>
       </div>

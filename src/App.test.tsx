@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
+import { AFFILIATES_ENABLED } from "./data/affiliates";
 
 // Leaflet needs a real layout engine, which happy-dom does not provide, and the
 // map is irrelevant to routing. Stub the pieces App imports.
@@ -149,6 +150,45 @@ describe("routing", () => {
     const stillOn = chips().filter(c => c.className.includes("active"));
     expect(stillOn.length).toBe(1);
     expect(document.querySelectorAll(".range-badge").length).toBeGreaterThan(0);
+  });
+
+  it("renders no affiliate markup at all while no programme is configured", () => {
+    // Default state. Shipping an empty "where to buy" heading, or a disclosure
+    // for links that do not exist, would be worse than showing nothing.
+    at("/paint/citadel/mephiston-red");
+    expect(AFFILIATES_ENABLED).toBe(false);
+    expect(document.querySelector(".buy-block")).toBeNull();
+    expect(screen.queryByText(/where to buy/i)).toBeNull();
+    // Specific to the affiliate disclosure: a looser /affiliate/i also matches
+    // the Games Workshop disclaimer's "not affiliated with", which must stay.
+    expect(screen.queryByText(/may earn a commission/i)).toBeNull();
+    expect(screen.queryByText(/not affiliated with/i), "GW disclaimer must remain").toBeTruthy();
+  });
+
+  it("marks every outbound shop link sponsored and safe, whenever one exists", () => {
+    // Google treats unmarked affiliate links as a link scheme, which would
+    // undercut the whole point of the paint pages. target=_blank also needs
+    // noopener. This holds vacuously today and starts biting the moment an ID
+    // is filled in.
+    at("/paint/citadel/mephiston-red");
+    // Keeps the assertions below from passing vacuously: with a programme
+    // configured there must actually be links on a paint page to check.
+    const onPaintPage = document.querySelectorAll("a.buy-link").length;
+    expect(onPaintPage > 0).toBe(AFFILIATES_ENABLED);
+    cleanup();
+
+    for (const url of ["/paint/citadel/mephiston-red", "/my-paints"]) {
+      at(url);
+      for (const a of document.querySelectorAll<HTMLAnchorElement>("a.buy-link, a.row-buy")) {
+        const rel = (a.getAttribute("rel") ?? "").split(/\s+/);
+        expect(rel, `${a.href} missing rel=sponsored`).toContain("sponsored");
+        expect(rel).toContain("nofollow");
+        expect(rel).toContain("noopener");
+        expect(a.getAttribute("target")).toBe("_blank");
+        expect(a.getAttribute("href")?.startsWith("https://")).toBe(true);
+      }
+      cleanup();
+    }
   });
 
   it("navigates to a paint's URL when it is picked from search results", () => {

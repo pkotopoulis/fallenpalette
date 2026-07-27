@@ -61,6 +61,42 @@ unmatched paths to the root.
 > still the generic shell. Prerendering each paint page's `<head>` at build time
 > is the remaining step for full crawlability.
 
+## Affiliate links
+
+"Where to buy" links on paint pages and a restock link in My Paints, configured
+in [`src/data/affiliates.ts`](./src/data/affiliates.ts).
+
+**Nothing renders until you paste in a real ID.** Every retailer with a blank ID
+is skipped, and the whole block plus the footer disclosure disappear when none
+are configured, so the feature ships inert rather than as links that look like
+they work while tracking nothing.
+
+| Retailer | What to set | Where to get it |
+|---|---|---|
+| Amazon | `tag` per marketplace in `AMAZON_MARKETPLACES` | Associates dashboard. The tag must match the store — `-21` for European, `-20` for `.com` |
+| Wayland Games | `AWIN_PUBLISHER_ID` and `WAYLAND_AWIN_ADVERTISER_ID` | Awin dashboard: your publisher ID, and Wayland's advertiser ID from their programme page |
+| Element Games | `ELEMENT_GAMES_PARAM` | Their affiliate dashboard after signing up at [elementgames.co.uk/affiliation](https://elementgames.co.uk/affiliation) — the parameter name is a placeholder, confirm it |
+
+With 620 paints there is no practical way to store a product URL per paint per
+retailer, so links point at each retailer's own search for
+`<brand> <paint name>`.
+
+> **Important:** Outbound links carry `rel="sponsored nofollow noopener"`.
+> `sponsored` is required by Google for paid links — without it they read as a
+> link scheme, which would work directly against the paint pages' ranking. A
+> test asserts this on every link, so do not remove it.
+
+> **Important:** The disclosure next to the links and in the footer is a legal
+> requirement (FTC, UK ASA/CAP, EU consumer law), not a courtesy. Keep it
+> visible if you enable a programme.
+
+Two caveats worth checking before relying on either:
+
+- **Element Games** restrict their scheme to content creators and explicitly
+  exclude "aggregator" sites. Confirm a cross-reference tool qualifies.
+- **Amazon** terms forbid link cloaking and caching prices, and require the
+  disclosure. Search-result links with a tag are permitted.
+
 ## Copyright
 
 Copyright © 2026 Fallen Palette. All rights reserved.
