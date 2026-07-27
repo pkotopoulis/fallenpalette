@@ -167,6 +167,29 @@ describe("routing", () => {
     expect(screen.queryByText(/not affiliated with/i), "GW disclaimer must remain").toBeTruthy();
   });
 
+  it("puts several shops behind one menu, keeping them real links", () => {
+    at("/paint/citadel/mephiston-red");
+    const links = [...document.querySelectorAll<HTMLAnchorElement>(".buy-block a.buy-link")];
+    const menu = document.querySelector("details.buy-menu");
+
+    // A menu only when there is a choice to make.
+    expect(menu !== null).toBe(links.length > 1);
+
+    if (menu) {
+      // Every shop lives inside the menu, and each stays an anchor rather than
+      // an option routed through script — that is what preserves rel and keeps
+      // middle-click and "open in new tab" working.
+      expect(menu.querySelectorAll("a.buy-link").length).toBe(links.length);
+      expect(menu.querySelector("summary")).toBeTruthy();
+      expect(document.querySelector(".buy-block select")).toBeNull();
+    }
+
+    // The disclosures must not be hidden behind the toggle.
+    const disclosure = document.querySelector(".buy-disclosure");
+    expect(disclosure?.closest("details")).toBeNull();
+    expect(document.querySelector(".buy-hint")?.closest("details")).toBeNull();
+  });
+
   it("carries Amazon's prescribed disclosure verbatim wherever its links appear", () => {
     // Section 5 of the Associates Operating Agreement requires this exact
     // sentence, clearly and prominently. A paraphrase or a translation risks

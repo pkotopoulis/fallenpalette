@@ -10,7 +10,7 @@ import { useLocation, useNavigate, useParams, useSearchParams, Link } from "reac
 import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { RangeKind, RANGE_KIND_IDS, rangeKindOf } from "./data/ranges";
-import { affiliateLinksFor, AFFILIATES_ENABLED, AMAZON_ENABLED, AMAZON_DISCLOSURE } from "./data/affiliates";
+import { affiliateLinksFor, AffiliateLink, AFFILIATES_ENABLED, AMAZON_ENABLED, AMAZON_DISCLOSURE } from "./data/affiliates";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
@@ -333,19 +333,29 @@ export default function App() {
         <div className="buy-head">
           <ShoppingCart size={14} /> {t.whereToBuy}
         </div>
-        <div className="buy-links">
-          {links.map(l => (
-            <a
-              key={l.id}
-              className="buy-link"
-              href={l.href}
-              target="_blank"
-              rel="sponsored nofollow noopener noreferrer"
-            >
-              {l.name} <ArrowRight size={13} />
-            </a>
-          ))}
-        </div>
+
+        {/* One shop needs no menu; several go behind a disclosure so three
+            near-identical Amazon marketplaces do not read as three choices.
+            <details> rather than a <select>: these have to stay real anchors to
+            keep rel="sponsored", and routing clicks through JS instead would
+            drop it and edge toward the link cloaking Amazon's terms forbid. */}
+        {links.length === 1 ? (
+          <div className="buy-links"><BuyAnchor link={links[0]} /></div>
+        ) : (
+          <details className="buy-menu">
+            <summary className="buy-summary">
+              <span>{t.buyChoose}</span>
+              <ChevronDown size={15} className="buy-chev" />
+            </summary>
+            <div className="buy-menu-list">
+              {links.map(l => <BuyAnchor key={l.id} link={l} />)}
+            </div>
+          </details>
+        )}
+
+        {/* Outside the menu on purpose: Amazon requires its disclosure to be
+            clearly and prominently displayed, which it would not be if a click
+            were needed to reveal it. */}
         <div className="buy-hint">{t.buyHint}</div>
         <div className="buy-disclosure">
           {t.affiliateNote}
@@ -354,6 +364,22 @@ export default function App() {
       </div>
     );
   };
+
+  /**
+   * Single outbound shop link. Kept as one component so the rel and target
+   * attributes cannot drift apart between the menu and the single-shop case —
+   * losing rel="sponsored" on either would be an SEO and compliance problem.
+   */
+  const BuyAnchor = ({ link }: { link: AffiliateLink }) => (
+    <a
+      className="buy-link"
+      href={link.href}
+      target="_blank"
+      rel="sponsored nofollow noopener noreferrer"
+    >
+      {link.name} <ArrowRight size={13} />
+    </a>
+  );
 
   /**
    * Compact restock link for a collection row. Uses the first configured

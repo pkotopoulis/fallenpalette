@@ -23,7 +23,7 @@ export interface Dict {
   colourTitle: string; colourDesc: string; pick: string; hexCode: string;
   filterByBrand: string; closestTo: string;   // "{n} <closestTo> {hex}"
   filterByRange: string; rangeKinds: Record<string, string>;
-  whereToBuy: string; buyHint: string; affiliateNote: string; affiliateFooter: string; restock: string;
+  whereToBuy: string; buyChoose: string; buyHint: string; affiliateNote: string; affiliateFooter: string; restock: string;
   rackEmptyTitle: string; rackPre: string; rackMid: string; rackPost: string;
   browsePaints: string; saveNote: string;
   total: string; filterColl: string;
@@ -98,7 +98,7 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Pick a colour or paste a hex code — we’ll find the closest paint matches across every brand.",
     pick: "Pick", hexCode: "Hex code",
     filterByBrand: "Filter by brand", closestTo: "closest matches to",
-    whereToBuy: "Where to buy",
+    whereToBuy: "Where to buy", buyChoose: "Choose a shop",
     buyHint: "Searches each shop for this paint — stock and prices are theirs, not ours.",
     affiliateNote: "Affiliate links: we may earn a commission on purchases, at no extra cost to you.",
     affiliateFooter: "Some outbound shop links are affiliate links — we may earn a commission from purchases made through them, at no extra cost to you.",
@@ -155,7 +155,7 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Διάλεξε ένα χρώμα ή επικόλλησε έναν κωδικό hex — θα βρούμε τα πιο κοντινά χρώματα από κάθε μάρκα.",
     pick: "Επιλογή", hexCode: "Κωδικός hex",
     filterByBrand: "Φίλτρο ανά μάρκα", closestTo: "πιο κοντινές αντιστοιχίες με",
-    whereToBuy: "Πού να το αγοράσεις",
+    whereToBuy: "Πού να το αγοράσεις", buyChoose: "Διάλεξε κατάστημα",
     buyHint: "Αναζητά το χρώμα σε κάθε κατάστημα — το στοκ και οι τιμές είναι δικά τους, όχι δικά μας.",
     affiliateNote: "Συνδέσμοι συνεργατών: μπορεί να κερδίσουμε προμήθεια από αγορές, χωρίς επιπλέον κόστος για εσένα.",
     affiliateFooter: "Ορισμένοι σύνδεσμοι προς καταστήματα είναι σύνδεσμοι συνεργατών — μπορεί να κερδίσουμε προμήθεια από αγορές μέσω αυτών, χωρίς επιπλέον κόστος για εσένα.",

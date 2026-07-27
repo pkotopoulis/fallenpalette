@@ -154,6 +154,25 @@ a{color:inherit;text-decoration:none}
 .buy-link{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;font-weight:700;
   color:var(--accent);background:var(--card);border:1px solid var(--border);border-radius:9px;transition:all .16s}
 .buy-link:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--bright)}
+/* Shop menu. <details> gives keyboard support and an open/closed state with no
+   JS; the anchors inside stay ordinary links. */
+.buy-menu{position:relative;display:inline-block;text-align:left}
+.buy-summary{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;
+  min-width:210px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer;
+  color:var(--accent);background:var(--card);border:1px solid var(--border);border-radius:9px;
+  list-style:none;transition:all .16s}
+.buy-summary::-webkit-details-marker{display:none}
+.buy-summary:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--bright)}
+.buy-chev{flex-shrink:0;transition:transform .18s}
+.buy-menu[open] .buy-summary{border-color:var(--accent);background:var(--accent-soft);color:var(--bright)}
+.buy-menu[open] .buy-chev{transform:rotate(180deg)}
+.buy-menu-list{position:absolute;z-index:20;top:calc(100% + 6px);left:0;right:0;
+  display:flex;flex-direction:column;gap:4px;padding:6px;
+  background:var(--panel);border:1px solid var(--border);border-radius:11px;box-shadow:var(--shadow);
+  animation:pop .14s ease}
+.buy-menu-list .buy-link{justify-content:space-between;width:100%;border-color:transparent;background:none}
+.buy-menu-list .buy-link:hover{background:var(--accent-soft);border-color:var(--border)}
+
 .buy-hint{margin-top:9px;font-size:11px;color:var(--muted)}
 .buy-disclosure{margin-top:5px;font-size:10px;color:var(--muted);opacity:.8}
 .row-buy{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;padding:5px 10px;
