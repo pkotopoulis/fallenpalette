@@ -1075,3 +1075,21 @@ export function equivalentsOf(paint: Paint): Paint[] {
   }
   return [...out.values()];
 }
+
+/**
+ * URL-safe form of a paint name. "Bone White (72.034)" -> "bone-white-72-034".
+ *
+ * Part of a paint's public URL, so treat changes as breaking: existing links
+ * and anything already indexed by a search engine are keyed on this.
+ */
+export const paintSlug = (p: Paint) =>
+  p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+/** Canonical path for a paint, e.g. "/paint/citadel/mephiston-red". */
+export const paintPath = (p: Paint) => `/paint/${p.brand}/${paintSlug(p)}`;
+
+const BY_PATH = new Map<string, Paint>(ALL_PAINTS.map(p => [`${p.brand}/${paintSlug(p)}`, p]));
+
+/** Resolve the brand and slug segments of a paint URL back to a paint. */
+export const findPaintByPath = (brand?: string, slug?: string): Paint | null =>
+  (brand && slug ? BY_PATH.get(`${brand}/${slug}`) : null) ?? null;

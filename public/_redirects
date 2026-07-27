@@ -1,0 +1,7 @@
+# Cloudflare Pages SPA fallback.
+#
+# Client-side routing means /paint/citadel/mephiston-red has no file behind it.
+# Without this, loading or sharing a deep link returns the 404 page instead of
+# the app. Status 200 (not 301) so the URL the visitor typed is preserved for
+# the router to read.
+/*  /index.html  200

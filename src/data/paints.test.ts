@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { PAINT_GROUPS, ALL_PAINTS, equivalentsOf, paintId } from "./paints";
+import {
+  PAINT_GROUPS, ALL_PAINTS, equivalentsOf, paintId,
+  paintSlug, paintPath, findPaintByPath,
+} from "./paints";
 import { BRANDS } from "./brands";
 
 const rawEntries = PAINT_GROUPS.flatMap(g => g.paints);
@@ -124,5 +127,47 @@ describe("equivalentsOf", () => {
     const withCrossBrand = ALL_PAINTS.filter(p =>
       equivalentsOf(p).some(e => e.brand !== p.brand));
     expect(withCrossBrand.length / ALL_PAINTS.length).toBeGreaterThan(0.5);
+  });
+});
+
+describe("paint URLs", () => {
+  it("gives every paint a non-empty, URL-safe slug", () => {
+    for (const p of ALL_PAINTS) {
+      const slug = paintSlug(p);
+      expect(slug, `empty slug for "${p.name}"`).toBeTruthy();
+      expect(slug, `unsafe slug for "${p.name}"`).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+    }
+  });
+
+  it("never gives two paints of one brand the same slug", () => {
+    // A collision would make one paint unreachable by URL and break the link
+    // for whichever one lost. Adding a paint whose name differs only by
+    // punctuation would cause it, so this has to stay asserted.
+    const seen = new Map<string, string[]>();
+    for (const p of ALL_PAINTS) {
+      const k = `${p.brand}/${paintSlug(p)}`;
+      if (!seen.has(k)) seen.set(k, []);
+      seen.get(k)!.push(p.name);
+    }
+    const clashes = [...seen.entries()].filter(([, v]) => v.length > 1);
+    expect(clashes.map(([k, v]) => `${k} <- ${v.join(" | ")}`)).toEqual([]);
+  });
+
+  it("round-trips every paint through its own path", () => {
+    for (const p of ALL_PAINTS) {
+      expect(findPaintByPath(p.brand, paintSlug(p)), `${paintPath(p)} did not resolve back`).toBe(p);
+    }
+  });
+
+  it("builds paths under /paint/<brand>/<slug>", () => {
+    const p = ALL_PAINTS.find(x => x.name === "Mephiston Red")!;
+    expect(paintPath(p)).toBe("/paint/citadel/mephiston-red");
+  });
+
+  it("resolves nothing for unknown or missing segments", () => {
+    expect(findPaintByPath("citadel", "not-a-real-paint")).toBeNull();
+    expect(findPaintByPath("nope", "mephiston-red")).toBeNull();
+    expect(findPaintByPath(undefined, undefined)).toBeNull();
+    expect(findPaintByPath("citadel", undefined)).toBeNull();
   });
 });

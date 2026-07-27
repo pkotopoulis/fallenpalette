@@ -19,9 +19,39 @@ stores across Europe — with an English/Greek interface.
 ```bash
 npm install
 npm run dev      # local dev server
-npm run build    # type-check + production build to dist/
+npm run build    # type-check + production build to dist/, then sitemap/robots
 npm run preview  # preview the production build
+npm test         # unit tests (vitest)
 ```
+
+## Routes
+
+The location is the source of truth for the open view, the selected paint and
+the current search, so results are shareable and the back button works. The
+mappings live in [`src/utils/urlState.ts`](./src/utils/urlState.ts).
+
+| Path | View |
+|---|---|
+| `/` and `/colours` | Search by paint name |
+| `/colours?q=<text>` | Search, prefilled |
+| `/colours?hex=<rrggbb>` | Search by colour |
+| `/paint/<brand>/<slug>` | One paint: equivalents, similar colours, triad |
+| `/paints` | Index of every paint, grouped by brand |
+| `/my-paints` | Collection (device-local, excluded from robots.txt) |
+| `/stores` | Store finder |
+
+A paint's slug comes from its name, so **changing a paint name changes its URL**
+and breaks existing links. A test asserts slugs stay unique per brand.
+
+Deep links need the host to serve `index.html` for unmatched paths;
+[`public/_redirects`](./public/_redirects) does that on Cloudflare Pages.
+`sitemap.xml` and `robots.txt` are generated at build time from the catalog by
+[`scripts/seo.mjs`](./scripts/seo.mjs), so they cannot drift from the paint data.
+
+> **Note:** Paint pages are client-rendered. Search engines that execute
+> JavaScript will see the per-paint title and description, but the served HTML is
+> still the generic shell. Prerendering each paint page's `<head>` at build time
+> is the remaining step for full crawlability.
 
 ## Copyright
 

@@ -22,7 +22,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,woff2}"],
+        // Client-side routing: any unknown path is the app, not a 404.
         navigateFallback: "/index.html",
+        // ...except the crawler-facing files, which must be served as
+        // themselves rather than swallowed by the app shell.
+        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/],
       },
     }),
   ],

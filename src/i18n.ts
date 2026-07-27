@@ -12,6 +12,8 @@ export interface Dict {
   noPaintMatch: string;            // uses {q}
   directEquivalents: string; similarColours: string;
   shadingTriad: string; triadShade: string; triadBase: string; triadHighlight: string; triadHint: string;
+  metaDefault: string; metaPaint: string; metaPaintBare: string; metaIndex: string;
+  allPaints: string; allPaintsHint: string; backToSearch: string;
   brandsLoaded: string;            // unused reserve
   statPaints: string; statBrands: string; statStores: string;
   featured: string; shuffle: string; howItWorks: string;
@@ -78,6 +80,12 @@ export const I18N: Record<Lang, Dict> = {
     directEquivalents: "Direct equivalents", similarColours: "Similar colours",
     shadingTriad: "Shading triad", triadShade: "Shade", triadBase: "Base", triadHighlight: "Highlight",
     triadHint: "Same colour, darker and lighter — for recesses and edges",
+    metaDefault: "Cross-reference miniature paints across Citadel, Vallejo, Army Painter, AK, Scale75, Two Thin Coats and Pro Acryl. Find equivalents, shades and highlights.",
+    metaPaint: "{name} by {brand} ({hex}) — find equivalents in {brands}, plus matching shades and highlights for your miniatures.",
+    metaPaintBare: "{name} by {brand} — find the closest matching paints from other brands, plus shades and highlights.",
+    metaIndex: "Browse all {count} miniature paints in the Fallen Palette cross-reference, grouped by brand.",
+    allPaints: "All paints", allPaintsHint: "Every paint in the cross-reference, grouped by brand",
+    backToSearch: "Back to search",
     brandsLoaded: "brands loaded",
     statPaints: "paints", statBrands: "brands", statStores: "stores",
     featured: "Featured cross-reference", shuffle: "Shuffle", howItWorks: "How it works",
@@ -122,6 +130,12 @@ export const I18N: Record<Lang, Dict> = {
     directEquivalents: "Άμεσα αντίστοιχα", similarColours: "Παρόμοια χρώματα",
     shadingTriad: "Τριάδα σκίασης", triadShade: "Σκίαση", triadBase: "Βάση", triadHighlight: "Φωτισμός",
     triadHint: "Ίδιο χρώμα, πιο σκούρο και πιο ανοιχτό — για εσοχές και ακμές",
+    metaDefault: "Αντιστοίχιση χρωμάτων μινιατούρων μεταξύ Citadel, Vallejo, Army Painter, AK, Scale75, Two Thin Coats και Pro Acryl. Βρες αντίστοιχα, σκιάσεις και φωτισμούς.",
+    metaPaint: "{name} της {brand} ({hex}) — βρες αντίστοιχα σε {brands}, μαζί με σκιάσεις και φωτισμούς για τις μινιατούρες σου.",
+    metaPaintBare: "{name} της {brand} — βρες τα πιο κοντινά χρώματα από άλλες μάρκες, μαζί με σκιάσεις και φωτισμούς.",
+    metaIndex: "Δες όλα τα {count} χρώματα μινιατούρων στο Fallen Palette, ομαδοποιημένα κατά μάρκα.",
+    allPaints: "Όλα τα χρώματα", allPaintsHint: "Κάθε χρώμα στη βάση, ομαδοποιημένο κατά μάρκα",
+    backToSearch: "Πίσω στην αναζήτηση",
     brandsLoaded: "μάρκες",
     statPaints: "χρώματα", statBrands: "μάρκες", statStores: "καταστήματα",
     featured: "Προτεινόμενη αντιστοίχιση", shuffle: "Ανακάτεμα", howItWorks: "Πώς λειτουργεί",

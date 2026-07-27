@@ -6,12 +6,17 @@ import {
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
   Navigation, Sparkles, ArrowRight, Droplets, Mail,
 } from "lucide-react";
-import { ALL_PAINTS, equivalentsOf, paintId as pid } from "./data/paints";
+import { useLocation, useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
+import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
 import { findTriad } from "./utils/triad";
+import {
+  Tab, TAB_PATH, tabFromPath, isPaintsIndexPath,
+  modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
+} from "./utils/urlState";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
@@ -45,12 +50,45 @@ function MapController({ store }: { store: Store | null }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<"match" | "collection" | "stores">("match");
+  // ── URL-backed state ──
+  // The location is the source of truth for which view is open, which paint is
+  // selected and what was searched for, so results are shareable, bookmarkable
+  // and the back button behaves. Everything else stays as local state.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { brand: routeBrand, slug: routeSlug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tab = tabFromPath(location.pathname);
+  const setTab = (id: Tab) => navigate(TAB_PATH[id]);
+
+  const isPaintsIndex = isPaintsIndexPath(location.pathname);
+
+  // An unresolvable /paint/... URL falls back to the search view rather than
+  // rendering a blank page, so a stale or mistyped link still lands somewhere.
+  const selPaint = findPaintByPath(routeBrand, routeSlug);
+
+  const mode = modeFromParams(searchParams);
+  const hexVal = hexFromParams(searchParams);
+  const query = selPaint ? selPaint.name : queryFromParams(searchParams);
+
+  const setQuery = (v: string) =>
+    // replace, not push: typing a search must not bury the back button under
+    // one history entry per keystroke.
+    navigate(searchPath(v), { replace: true });
+  const setSelPaint = (p: Paint | null) =>
+    p ? navigate(paintPath(p)) : navigate("/colours", { replace: true });
+  const setMode = (m: "name" | "hex") =>
+    navigate(m === "hex" ? hexSearchPath(hexVal) : "/colours");
+  const setHexVal = (v: string) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set("hex", v.replace(/^#/, ""));
+      return next;
+    }, { replace: true });
+  };
+
   const [activeBrands, setActiveBrands] = useState<Set<string>>(new Set(BRAND_IDS));
-  const [mode, setMode] = useState<"name" | "hex">("name");
-  const [query, setQuery] = useState("");
-  const [hexVal, setHexVal] = useState("#9a1115");
-  const [selPaint, setSelPaint] = useState<Paint | null>(null);
   const [collection, setCollection] = useState<Set<string>>(loadCollection);
   const [collFilter, setCollFilter] = useState("");
   const [storeQ, setStoreQ] = useState("");
@@ -64,6 +102,54 @@ export default function App() {
   const t = I18N[lang];
 
   useEffect(() => { saveCollection(collection); }, [collection]);
+
+  // Per-route title, description and canonical link. A crawler that renders the
+  // page sees a real description of this specific paint instead of the shell's
+  // generic one, and the canonical stops ?q= and ?hex= variants competing with
+  // each other for the same content.
+  useEffect(() => {
+    const setMeta = (selector: string, attr: string, value: string) => {
+      let el = document.head.querySelector(selector) as HTMLElement | null;
+      if (!el) {
+        el = document.createElement(selector.startsWith("link") ? "link" : "meta");
+        if (selector.includes("canonical")) el.setAttribute("rel", "canonical");
+        else if (selector.includes("og:")) el.setAttribute("property", selector.match(/"([^"]+)"/)![1]);
+        else el.setAttribute("name", selector.match(/"([^"]+)"/)![1]);
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attr, value);
+    };
+
+    let title = "Fallen Palette — miniature paint cross-reference";
+    let desc = t.metaDefault;
+    let path = location.pathname;
+
+    if (selPaint) {
+      const brands = [...new Set(equivalentsOf(selPaint).map(p => BRANDS[p.brand]))];
+      title = `${selPaint.name} (${BRANDS[selPaint.brand]}) equivalents — Fallen Palette`;
+      desc = brands.length
+        ? t.metaPaint
+            .replace("{name}", selPaint.name)
+            .replace("{brand}", BRANDS[selPaint.brand])
+            .replace("{hex}", selPaint.hex)
+            .replace("{brands}", brands.join(", "))
+        : t.metaPaintBare.replace("{name}", selPaint.name).replace("{brand}", BRANDS[selPaint.brand]);
+      path = paintPath(selPaint);
+    } else if (isPaintsIndex) {
+      title = `All ${ALL_PAINTS.length} paints — Fallen Palette`;
+      desc = t.metaIndex.replace("{count}", String(ALL_PAINTS.length));
+    } else if (tab === "collection") {
+      title = `${t.navCollection} — Fallen Palette`;
+    } else if (tab === "stores") {
+      title = `${t.navStores} — Fallen Palette`;
+    }
+
+    document.title = title;
+    setMeta('meta[name="description"]', "content", desc);
+    setMeta('link[rel="canonical"]', "href", `https://fallenpalette.com${path}`);
+    setMeta('meta[property="og:title"]', "content", title);
+    setMeta('meta[property="og:description"]', "content", desc);
+  }, [selPaint, isPaintsIndex, tab, location.pathname, t]);
   useEffect(() => {
     try { localStorage.setItem("fp_lang", lang); } catch {}
     document.documentElement.lang = lang;
@@ -116,7 +202,9 @@ export default function App() {
     return [...eq, ...nb].slice(0, 3);
   }, [featured, computeMatches]);
 
-  const selectPaint = (p: Paint) => { setMode("name"); setSelPaint(p); setQuery(p.name); };
+  // Navigating to the paint's own URL is all that's needed now: mode, query and
+  // selection are all derived from the location.
+  const selectPaint = (p: Paint) => navigate(paintPath(p));
 
   // ── Collection logic ──
   const collPaints = useMemo(() => {
@@ -308,17 +396,45 @@ export default function App() {
       </div>
 
       <div className="app-content">
+        {/* ═══════════ ALL PAINTS INDEX ═══════════
+            Plain links to every paint. Doubles as the crawl path that makes
+            each paint page discoverable, since the search view is driven by
+            JavaScript and exposes no hrefs. */}
+        {isPaintsIndex && (<div className="view">
+          <div className="section-label"><Droplets size={14} /> {t.allPaints}</div>
+          <div className="index-hint">{t.allPaintsHint}</div>
+          {BRAND_IDS.map(brandId => {
+            const paints = ALL_PAINTS.filter(p => p.brand === brandId);
+            if (!paints.length) return null;
+            return (
+              <section key={brandId} className="index-brand">
+                <h2 className="index-brand-name">{BRANDS[brandId]} <span>{paints.length}</span></h2>
+                <div className="index-list">
+                  {paints.map(p => (
+                    <Link key={pid(p)} className="index-item" to={paintPath(p)}>
+                      <Swatch hex={p.hex} size={18} />
+                      <span className="index-item-name">{p.name}</span>
+                      <span className="index-item-range">{p.type}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+          <div className="index-foot"><Link className="cta-btn" to="/colours">{t.backToSearch} <ArrowRight size={15} /></Link></div>
+        </div>)}
+
         {/* ═══════════ COLOUR MATCH ═══════════ */}
-        {tab === "match" && (<div className="view">
+        {!isPaintsIndex && tab === "match" && (<div className="view">
           <div className="mode-row">
-            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => { setMode("name"); setSelPaint(null); }}><Search size={14} /> {t.byName}</button>
-            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => { setMode("hex"); setSelPaint(null); setQuery(""); }}><Droplets size={14} /> {t.byColour}</button>
+            <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => setMode("name")}><Search size={14} /> {t.byName}</button>
+            <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => setMode("hex")}><Droplets size={14} /> {t.byColour}</button>
           </div>
 
           {mode === "name" && (<>
             <div className="search-wrap">
               <Search size={17} className="search-icon" />
-              <input className="search-input" placeholder={t.searchNamePh} value={query} onChange={e => { setQuery(e.target.value); setSelPaint(null); }} />
+              <input className="search-input" placeholder={t.searchNamePh} value={query} onChange={e => setQuery(e.target.value)} />
             </div>
             <BrandChips />
 
@@ -465,7 +581,7 @@ export default function App() {
         </div>)}
 
         {/* ═══════════ COLLECTION ═══════════ */}
-        {tab === "collection" && (<div className="view">
+        {!isPaintsIndex && tab === "collection" && (<div className="view">
           {collection.size === 0 ? (
             <div className="empty">
               <div className="empty-icon"><Layers size={40} /></div>
@@ -517,7 +633,7 @@ export default function App() {
         </div>)}
 
         {/* ═══════════ STORES ═══════════ */}
-        {tab === "stores" && (<div className="view">
+        {!isPaintsIndex && tab === "stores" && (<div className="view">
           <div className="search-wrap">
             <Search size={17} className="search-icon" />
             <input className="search-input" placeholder={t.storeSearchPh} value={storeQ} onChange={e => { setStoreQ(e.target.value); }} />
@@ -569,6 +685,9 @@ export default function App() {
 
         <footer className="footer">
           <div className="footer-brand"><FallenIcon size={20} /> {t.footer}</div>
+          {/* Present on every page so the paint index — and through it all 620
+              paint pages — is reachable by a crawler from anywhere on the site. */}
+          <Link className="footer-link" to="/paints">{t.allPaints}</Link>
           {FEEDBACK_READY && (
             <a className="footer-feedback" href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Fallen Palette — feedback")}`}>
               <Mail size={13} /> {t.feedback}
