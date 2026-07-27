@@ -27,6 +27,7 @@ const AMAZON_MARKETPLACES: { label: string; host: string; tag: string }[] = [
   // two are not interchangeable, and a tag used on the wrong store is untracked.
   { label: "Amazon UK", host: "www.amazon.co.uk", tag: "fallenpalette-21" },
   { label: "Amazon DE", host: "www.amazon.de", tag: "fallenpalet06-21" },   // ships to most of the EU, incl. Greece
+  { label: "Amazon FR", host: "www.amazon.fr", tag: "fallenpalet07-21" },
 ];
 
 /** Awin publisher ID, from your Awin dashboard. Shared by every Awin advertiser. */

@@ -11,6 +11,13 @@
   /* Horizontal gutter for content sections. Widens with the shell at each
      breakpoint so everything stays aligned to one edge. */
   --gutter:16px;
+  /* Widths of the centred content column, from narrowest to widest:
+     panels (search, hex picker, buy block), landing sections, result grids.
+     Result grids stay widest so the extra room on a large display buys more
+     columns rather than empty margin. */
+  --panel-max:700px;
+  --content-max:1180px;
+  --grid-max:1800px;
 }
 html{scroll-behavior:smooth}
 html,body,#root{height:100%;background:var(--bg);color:var(--text);
@@ -340,21 +347,40 @@ a.detail-row:hover{color:var(--accent)}
   .nav-btn{padding:10px 20px;font-size:14px}
 
   /* Search controls stay narrow whatever the shell does — a full-width text
-     input on a wide screen is harder to use, not easier. */
-  .mode-row,.search-wrap{max-width:660px;margin-left:auto;margin-right:auto}
+     input on a wide screen is harder to use, not easier. One shared width with
+     the panels below, so the whole column has a single edge. */
+  .mode-row,.search-wrap{max-width:var(--panel-max);margin-left:auto;margin-right:auto}
   .chips,.count,.section-label,.section-head{padding-left:var(--gutter);padding-right:var(--gutter)}
-  .card.suggestions{margin-left:var(--gutter);margin-right:var(--gutter);max-width:660px}
-  .card-hero{margin-left:var(--gutter);margin-right:var(--gutter)}
-  .hex-panel{margin-left:var(--gutter);margin-right:var(--gutter);max-width:680px}
-
-  .buy-block{margin-left:var(--gutter);margin-right:var(--gutter);max-width:680px}
   .index-hint,.index-foot{padding-left:var(--gutter);padding-right:var(--gutter)}
   .index-brand{padding-left:var(--gutter);padding-right:var(--gutter)}
   .index-list{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 16px}
 
+  /* ── Centred content column ──
+     Everything lines up on the page centre rather than the left gutter, which
+     the wider shell made look lopsided against the already-centred search box.
+     Blocks are constrained and given auto margins; text inside cards and rows
+     stays left-aligned, since centring a paint name would hurt scanning. */
+  .chips{justify-content:center}
+  .section-label{justify-content:center}
+  .count,.hint,.index-hint,.triad-hint,.buy-hint,.buy-disclosure{text-align:center}
+  .buy-head,.buy-links{justify-content:center}
+  .index-brand-name{justify-content:center}
+
+  /* Narrow panels: one shared width so they stack in a straight column. */
+  .card.suggestions,.hex-panel,.buy-block,.card-hero{
+    max-width:var(--panel-max);margin-left:auto;margin-right:auto}
+
+  /* Landing and results: capped and centred. The cap also stops .how-grid's
+     minmax(140px) tracks multiplying into a dozen tiny cards on a large
+     monitor, and keeps the last, part-full row of results near the centre. */
+  .stats-band,.feature-card,.how-grid,.stats-row,.coll-actions,.section-head{
+    max-width:var(--content-max);margin-left:auto;margin-right:auto}
+  .results-grid,.index-list{max-width:var(--grid-max);margin-left:auto;margin-right:auto}
+
   /* Shade / base / highlight side by side reads as the value ramp it is */
   .triad-hint{padding-left:var(--gutter);padding-right:var(--gutter)}
-  .triad-ramp{grid-template-columns:repeat(3,1fr);gap:14px;padding:2px var(--gutter) 4px;max-width:1100px}
+  .triad-ramp{grid-template-columns:repeat(3,1fr);gap:14px;padding:2px var(--gutter) 4px;
+    max-width:1100px;margin-left:auto;margin-right:auto}
 
   /* 288px was too narrow for "Vallejo Model Color"-length metadata plus two
      badges — cards now fit the full paint name without a tooltip. */
@@ -363,7 +389,8 @@ a.detail-row:hover{color:var(--accent)}
   .card:hover{border-color:#333B4A;transform:translateY(-2px)}
 
   .stats-band{padding:16px var(--gutter) 6px}
-  .feature-card{margin-left:var(--gutter);margin-right:var(--gutter)}
+  /* No horizontal margin here: the centring rule above owns it, and a gutter
+     margin declared later would override the auto and pin it left again. */
   .how-grid{padding-left:var(--gutter);padding-right:var(--gutter)}
   .stats-row,.coll-actions{padding-left:var(--gutter);padding-right:var(--gutter)}
 
