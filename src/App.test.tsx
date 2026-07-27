@@ -117,6 +117,40 @@ describe("routing", () => {
     }
   });
 
+  it("filters speed paints out of results when their chip is switched off", () => {
+    // The point of the feature: 318 transparent paints were competing in every
+    // opaque-paint search with no way to exclude them.
+    at("/colours?hex=9a1115");
+    const speedTypes = ["Contrast", "Xpress Color", "Speedpaint", "Instant Color"];
+    const rangesShown = () =>
+      [...document.querySelectorAll(".range-badge")].map(el => el.textContent ?? "");
+
+    expect(rangesShown().some(r => speedTypes.includes(r)), "expected speed paints by default").toBe(true);
+
+    const chip = [...document.querySelectorAll<HTMLButtonElement>(".chips-range .chip")]
+      .find(b => b.textContent?.includes("Speed paints"))!;
+    expect(chip).toBeTruthy();
+    fireEvent.click(chip);
+
+    expect(rangesShown().some(r => speedTypes.includes(r))).toBe(false);
+    expect(rangesShown().length, "other paints should still be listed").toBeGreaterThan(0);
+  });
+
+  it("refuses to switch off the last range, which would empty the page", () => {
+    at("/colours?hex=9a1115");
+    const chips = () => [...document.querySelectorAll<HTMLButtonElement>(".chips-range .chip")];
+    // Re-query every iteration: React replaces these nodes on each re-render,
+    // so a list captured up front goes stale after the first click.
+    for (let i = 0; i < chips().length + 1; i++) {
+      const next = chips().find(c => c.className.includes("active"));
+      if (!next) break;
+      fireEvent.click(next);
+    }
+    const stillOn = chips().filter(c => c.className.includes("active"));
+    expect(stillOn.length).toBe(1);
+    expect(document.querySelectorAll(".range-badge").length).toBeGreaterThan(0);
+  });
+
   it("navigates to a paint's URL when it is picked from search results", () => {
     at("/colours?q=mephiston");
     const suggestion = screen.getAllByTitle("Mephiston Red")[0];

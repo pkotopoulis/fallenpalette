@@ -471,6 +471,7 @@ export default function App() {
               <input className="search-input" placeholder={t.searchNamePh} value={query} onChange={e => setQuery(e.target.value)} />
             </div>
             <BrandChips />
+            <RangeChips />
 
             {!selPaint && query.trim() && suggestions.length > 0 && (
               <div className="card suggestions">
@@ -607,6 +608,7 @@ export default function App() {
             </div>
             <div className="section-label"><Palette size={14} /> {t.filterByBrand}</div>
             <BrandChips />
+            <RangeChips />
             <div className="count">{hexResults.length} {t.closestTo} <b style={{ color: "var(--bright)" }}>{hexVal.toUpperCase()}</b></div>
             <div className="results-grid">
               {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
