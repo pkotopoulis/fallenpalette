@@ -79,16 +79,23 @@ a{color:inherit;text-decoration:none}
 .chip.active{border-color:var(--accent);background:var(--accent-soft);color:var(--bright)}
 
 /* ═══════════════════════ PAINT ROW ═══════════════════════ */
-.paint-row{display:flex;align-items:center;gap:10px;padding:10px 14px;transition:background .14s}
+.paint-row{display:flex;align-items:center;gap:11px;padding:12px 14px;min-width:0;transition:background .14s}
 .paint-row.clickable{cursor:pointer}
 .paint-row.clickable:hover{background:rgba(255,255,255,0.03)}
 .swatch{border-radius:5px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)}
 .swatch-lg{border-radius:8px}
-.paint-info{flex:1;min-width:0}
+/* The name owns the whole top line. Brand and range sit on a second line
+   below it, so the only things competing with the name for horizontal room
+   are the swatch, the match badge and the own button. Previously the brand
+   chip sat inline and crushed the name to a single ellipsised letter. */
+.paint-info{flex:1 1 0;min-width:0}
 .paint-name{font-weight:600;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.paint-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand-badge{font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--accent);background:var(--accent-soft);
-  padding:3px 8px;border-radius:6px;flex-shrink:0;white-space:nowrap}
+.paint-sub{display:flex;align-items:center;gap:7px;margin-top:3px;min-width:0}
+.paint-meta{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* The range (Contrast, Xpress Color, …) — short, and no longer a duplicate of
+   the brand name shown in .paint-meta beside it. */
+.range-badge{font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--accent);background:var(--accent-soft);
+  padding:2px 7px;border-radius:6px;flex:0 0 auto;white-space:nowrap}
 .match-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0}
 .own-btn{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;
   flex-shrink:0;border:1px solid var(--border);background:var(--accent-soft);color:var(--accent);transition:all .16s}
@@ -116,7 +123,7 @@ a{color:inherit;text-decoration:none}
   background:none;border:none;cursor:pointer;transition:color .16s}
 .ghost-btn:hover{color:var(--accent)}
 
-.results-grid{display:grid;grid-template-columns:1fr;gap:10px;padding:2px 16px}
+.results-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:4px 16px}
 .results-grid .card{margin:0}
 
 /* ═══════════════════════ COLOUR SEARCH PANEL ═══════════════════════ */
@@ -276,7 +283,9 @@ a.detail-row:hover{color:var(--accent)}
   .card-hero{margin-left:18px;margin-right:18px}
   .hex-panel{margin-left:18px;margin-right:18px;max-width:680px}
 
-  .results-grid{grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:10px;padding:2px 18px;align-items:start}
+  /* 288px was too narrow for "Vallejo Model Color"-length metadata plus two
+     badges — cards now fit the full paint name without a tooltip. */
+  .results-grid{grid-template-columns:repeat(auto-fill,minmax(344px,1fr));gap:14px;padding:4px 18px;align-items:start}
   .card:hover{border-color:#333B4A;transform:translateY(-2px)}
 
   .stats-band{padding:16px 18px 6px}

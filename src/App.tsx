@@ -176,10 +176,12 @@ export default function App() {
       <Swatch hex={paint.hex} />
       <div className="paint-info">
         <div className="paint-name" title={paint.name}>{paint.name}</div>
-        <div className="paint-meta" title={`${BRANDS[paint.brand]} · ${paint.type}`}>{BRANDS[paint.brand]} · {paint.type}</div>
+        <div className="paint-sub">
+          <span className="paint-meta" title={BRANDS[paint.brand]}>{BRANDS[paint.brand]}</span>
+          <span className="range-badge" title={paint.type}>{paint.type}</span>
+        </div>
       </div>
       {extra}
-      <span className="brand-badge">{BRANDS[paint.brand]}</span>
       {showOwn && (
         <button
           className={`own-btn ${isOwned(paint) ? "owned" : ""}`}
