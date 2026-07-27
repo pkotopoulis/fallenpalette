@@ -10,7 +10,7 @@ import { PAINT_GROUPS } from "./data/paints";
 import { BRANDS, BRAND_IDS } from "./data/brands";
 import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
-import { colorDistance, luminance, matchLabel, matchBg, matchFg } from "./utils/colors";
+import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
@@ -167,9 +167,14 @@ export default function App() {
     <div className={`swatch ${className}`} style={{ width: size, height: size, background: hex, border: luminance(hex) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent" }} />
   );
 
-  const MatchBadge = ({ d }: { d: number }) => (
-    <span className="match-badge" style={{ background: matchBg(d), color: matchFg(d) }}>{d < 15 ? t.matchExact : d < 35 ? t.matchClose : t.matchApprox}</span>
-  );
+  const MatchBadge = ({ d }: { d: number }) => {
+    const tier = matchTier(d);
+    return (
+      <span className="match-badge" style={{ background: matchBg(d), color: matchFg(d) }}>
+        {tier === "exact" ? t.matchExact : tier === "close" ? t.matchClose : t.matchApprox}
+      </span>
+    );
+  };
 
   const PaintRow = ({ paint, showOwn = true, extra, onClick }: { paint: Paint; showOwn?: boolean; extra?: React.ReactNode; onClick?: () => void }) => (
     <div className={`paint-row ${onClick ? "clickable" : ""}`} onClick={onClick}>

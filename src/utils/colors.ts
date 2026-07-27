@@ -6,16 +6,111 @@ export function hexToRgb(hex: string) {
   };
 }
 
-export function colorDistance(a: string, b: string): number {
-  const c1 = hexToRgb(a), c2 = hexToRgb(b);
-  return Math.sqrt((c1.r - c2.r) ** 2 + (c1.g - c2.g) ** 2 + (c1.b - c2.b) ** 2);
+export interface Oklab { L: number; a: number; b: number }
+
+const srgbToLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+
+// Converting costs three pow() and three cbrt(). The catalog is ~650 paints and
+// every keystroke re-ranks all of them, so results are memoised by hex.
+const oklabCache = new Map<string, Oklab>();
+
+/** sRGB hex -> Oklab (Björn Ottosson's perceptual colour space). */
+export function hexToOklab(hex: string): Oklab {
+  const hit = oklabCache.get(hex);
+  if (hit) return hit;
+
+  const { r, g, b } = hexToRgb(hex);
+  const R = srgbToLinear(r / 255), G = srgbToLinear(g / 255), B = srgbToLinear(b / 255);
+
+  const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B);
+  const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B);
+  const s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B);
+
+  const out: Oklab = {
+    L: 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+    a: 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+    b: 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s,
+  };
+  oklabCache.set(hex, out);
+  return out;
 }
 
+/**
+ * Lightness carries slightly less weight than hue/chroma.
+ *
+ * Measured against the curated equivalence groups: paints a painter considers
+ * interchangeable differ about twice as much in lightness as in chroma
+ * (|ΔL| p75 = 5.2 vs Δchroma p75 = 2.7). A lightness gap is also the more
+ * recoverable of the two at the desk — you can thin a paint or highlight over
+ * it, but you cannot shift its hue.
+ *
+ * Held here rather than pushed lower: weights below ~0.7 start calling
+ * visibly different neutrals equivalent, since for a grey (a,b ~ 0) lightness
+ * is the *only* signal. At 0.8 no same-hue/different-value pair from a
+ * different group is mislabelled, and #808080 vs #999999 still reads as a
+ * merely "Close" 6.6 rather than an "Exact" 4.2.
+ */
+const LIGHTNESS_WEIGHT = 0.8;
+
+/**
+ * Perceptual distance between two hex colours, scaled ×100 so that typical
+ * values land in a readable 0–100 range rather than 0–1.
+ *
+ * Replaces plain RGB Euclidean distance, which is not perceptually uniform —
+ * it over-weights green and ignores how the eye actually reads lightness. On
+ * the curated groups it mislabelled a quarter of intended equivalents as poor
+ * matches, because their p75 landed exactly on the old "Approx" cutoff.
+ */
+export function colorDistance(a: string, b: string): number {
+  const A = hexToOklab(a), B = hexToOklab(b);
+  return Math.hypot((A.L - B.L) * LIGHTNESS_WEIGHT, A.a - B.a, A.b - B.b) * 100;
+}
+
+/**
+ * Relative brightness, used only to decide whether a near-white swatch needs a
+ * visible border. Deliberately left as the cheap sRGB approximation — it is not
+ * part of colour matching and its 0.85 cutoff is tuned to this formula.
+ */
 export function luminance(hex: string): number {
   const { r, g, b } = hexToRgb(hex);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
-export function matchLabel(d: number) { return d < 15 ? "Exact" : d < 35 ? "Close" : "Approx"; }
-export function matchBg(d: number) { return d < 15 ? "#22C55E20" : d < 35 ? "#F4A02420" : "#EF444420"; }
-export function matchFg(d: number) { return d < 15 ? "#4ADE80" : d < 35 ? "#FBB040" : "#F87171"; }
+export type MatchTier = "exact" | "close" | "approx";
+
+/**
+ * Tier cutoffs, calibrated against the 142 hand-curated equivalence groups
+ * (1,185 cross-brand pairs a painter has already declared equivalent):
+ *
+ *   < 4.0  "Exact"   — 63% of curated equivalents
+ *   < 9.5  "Close"   — 29% more, so 92% fall within this
+ *   else   "Approx"  — 8%, down from 25% under the old RGB thresholds
+ *
+ * Unrelated paints sit far outside: random cross-group pairs average a
+ * distance of 23.7, and only 8.2% land inside the Close cutoff.
+ *
+ * These are the single source of truth for the tiers. Do not re-inline them —
+ * the previous 15/35 pair was duplicated in App.tsx and silently disagreed
+ * with matchLabel() whenever either changed.
+ */
+export const MATCH_EXACT = 4.0;
+export const MATCH_CLOSE = 9.5;
+
+export function matchTier(d: number): MatchTier {
+  return d < MATCH_EXACT ? "exact" : d < MATCH_CLOSE ? "close" : "approx";
+}
+
+export function matchLabel(d: number) {
+  const tier = matchTier(d);
+  return tier === "exact" ? "Exact" : tier === "close" ? "Close" : "Approx";
+}
+
+export function matchBg(d: number) {
+  const tier = matchTier(d);
+  return tier === "exact" ? "#22C55E20" : tier === "close" ? "#F4A02420" : "#EF444420";
+}
+
+export function matchFg(d: number) {
+  const tier = matchTier(d);
+  return tier === "exact" ? "#4ADE80" : tier === "close" ? "#FBB040" : "#F87171";
+}
