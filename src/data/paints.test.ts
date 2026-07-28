@@ -238,6 +238,11 @@ describe("product codes", () => {
     "vallejo_gc|Game Wash": /^73\.\d{3}$/,
     "vallejo_mc|Model Color": /^70\.\d{3}$/,
     "scale75|Scalecolor": /^SC-?\d{2}$/,
+    // Pro Acryl numbers its whole range with a zero-padded three-digit code,
+    // shared across the base, expansion and metallic lines.
+    "proacryl|Base Set": /^\d{3}$/,
+    "proacryl|Expansion": /^\d{3}$/,
+    "proacryl|Metallic": /^\d{3}$/,
   };
 
   it("uses each brand and range's own code format", () => {
