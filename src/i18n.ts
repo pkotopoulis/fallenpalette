@@ -14,6 +14,9 @@ export interface Dict {
   shadingTriad: string; triadShade: string; triadBase: string; triadHighlight: string; triadHint: string;
   metaDefault: string; metaPaint: string; metaPaintBare: string; metaIndex: string;
   allPaints: string; allPaintsHint: string; backToSearch: string;
+  filterPaintsPh: string; noPaintsMatch: string; showingPaints: string;
+  nearMe: string; nearMeLocating: string; nearMeDenied: string; nearMeUnavailable: string;
+  nearMeOn: string; nearMeClear: string; distanceUnknown: string;
   brandsLoaded: string;            // unused reserve
   statPaints: string; statBrands: string; statStores: string;
   featured: string; shuffle: string; howItWorks: string;
@@ -88,6 +91,16 @@ export const I18N: Record<Lang, Dict> = {
     metaPaintBare: "{name} by {brand} — find the closest matching paints from other brands, plus shades and highlights.",
     metaIndex: "Browse all {count} miniature paints in the Fallen Palette cross-reference, grouped by brand.",
     allPaints: "All paints", allPaintsHint: "Every paint in the cross-reference, grouped by brand",
+    filterPaintsPh: "Filter by name, brand or range…",
+    noPaintsMatch: "No paints match “{q}”",
+    showingPaints: "{n} of {total} paints",
+    nearMe: "Sort by nearest",
+    nearMeLocating: "Finding your location…",
+    nearMeDenied: "Location permission was declined, so stores are in their usual order.",
+    nearMeUnavailable: "Your browser could not provide a location, so stores are in their usual order.",
+    nearMeOn: "Nearest first",
+    nearMeClear: "Clear",
+    distanceUnknown: "location not mapped",
     backToSearch: "Back to search",
     brandsLoaded: "brands loaded",
     statPaints: "paints", statBrands: "brands", statStores: "stores",
@@ -149,6 +162,16 @@ export const I18N: Record<Lang, Dict> = {
     metaPaintBare: "{name} της {brand} — βρες τα πιο κοντινά χρώματα από άλλες μάρκες, μαζί με σκιάσεις και φωτισμούς.",
     metaIndex: "Δες όλα τα {count} χρώματα μινιατούρων στο Fallen Palette, ομαδοποιημένα κατά μάρκα.",
     allPaints: "Όλα τα χρώματα", allPaintsHint: "Κάθε χρώμα στη βάση, ομαδοποιημένο κατά μάρκα",
+    filterPaintsPh: "Φίλτρο ανά όνομα, μάρκα ή σειρά…",
+    noPaintsMatch: "Κανένα χρώμα δεν ταιριάζει με «{q}»",
+    showingPaints: "{n} από {total} χρώματα",
+    nearMe: "Ταξινόμηση κατά εγγύτητα",
+    nearMeLocating: "Εντοπισμός τοποθεσίας…",
+    nearMeDenied: "Η άδεια τοποθεσίας απορρίφθηκε, οπότε τα καταστήματα είναι στη συνήθη σειρά.",
+    nearMeUnavailable: "Ο browser δεν μπόρεσε να δώσει τοποθεσία, οπότε τα καταστήματα είναι στη συνήθη σειρά.",
+    nearMeOn: "Πλησιέστερα πρώτα",
+    nearMeClear: "Καθαρισμός",
+    distanceUnknown: "χωρίς καταχωρημένη θέση",
     backToSearch: "Πίσω στην αναζήτηση",
     brandsLoaded: "μάρκες",
     statPaints: "χρώματα", statBrands: "μάρκες", statStores: "καταστήματα",

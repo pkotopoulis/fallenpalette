@@ -149,6 +149,15 @@ a{color:inherit;text-decoration:none}
 .results-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:4px 16px}
 .results-grid .card{margin:0}
 
+/* ═══════════════════════ NEAREST STORE ═══════════════════════ */
+.near-row{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:0 16px 10px}
+.near-btn{display:inline-flex;align-items:center;gap:6px}
+.near-btn:disabled{opacity:.6;cursor:default}
+.near-on{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  color:var(--success);background:rgba(91,214,138,0.12);padding:4px 10px;border-radius:8px}
+.near-note{font-size:11px;color:var(--muted)}
+.store-dist{color:var(--accent);font-weight:700}
+
 /* ═══════════════════════ FROM YOUR PAINTS ═══════════════════════
    Sits above the buy links: the shelf is a better answer than the shop. Given
    the accent border so it reads as the useful answer rather than a footnote. */

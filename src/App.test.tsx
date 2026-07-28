@@ -123,6 +123,78 @@ describe("routing", () => {
     expect(document.title).toContain("paints");
   });
 
+  it("filters the paints index", () => {
+    at("/paints");
+    const rows = () => document.querySelectorAll('a[href^="/paint/"]').length;
+    const all = rows();
+    expect(all).toBeGreaterThan(600);
+
+    fireEvent.change(document.querySelector(".index-hint")!.parentElement!.querySelector(".search-input")!,
+      { target: { value: "mephiston" } });
+    expect(rows()).toBeLessThan(all);
+    expect(rows()).toBeGreaterThan(0);
+    expect(document.body.textContent).toContain("Mephiston Red");
+  });
+
+  it("says so when the index filter matches nothing", () => {
+    at("/paints");
+    fireEvent.change(document.querySelector(".search-input")!, { target: { value: "zzzznotapaint" } });
+    expect(document.querySelectorAll('a[href^="/paint/"]').length).toBe(0);
+    expect(document.body.textContent).toMatch(/No paints match/i);
+  });
+
+  it("does not ask for location until told to", () => {
+    // An unprompted location prompt on a paint website is hostile, so the
+    // geolocation API must not be touched on load.
+    const getCurrentPosition = vi.fn();
+    vi.stubGlobal("navigator", { ...navigator, geolocation: { getCurrentPosition } });
+    at("/stores");
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(document.querySelector(".near-btn")).toBeTruthy();
+    vi.unstubAllGlobals();
+  });
+
+  it("sorts stores nearest first once a location is granted", () => {
+    // Thessaloniki: the nearest shops should be the ones in and around it.
+    const getCurrentPosition = vi.fn(ok =>
+      ok({ coords: { latitude: 40.6401, longitude: 22.9444 } }));
+    vi.stubGlobal("navigator", { ...navigator, geolocation: { getCurrentPosition } });
+
+    at("/stores");
+    fireEvent.click(document.querySelector(".near-btn")!);
+    expect(getCurrentPosition).toHaveBeenCalled();
+
+    const cities = [...document.querySelectorAll(".store-addr")].map(el => el.textContent ?? "");
+    expect(cities[0]).toMatch(/Thessaloniki|Kalamaria/);
+    // Distances are shown, and the unmapped store says so rather than claiming 0.
+    expect(document.body.textContent).toMatch(/\d+(\.\d)? ?(m|km)/);
+    expect(document.body.textContent).toContain("location not mapped");
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps the usual order and explains itself when location is refused", () => {
+    const getCurrentPosition = vi.fn((_ok, fail) =>
+      fail({ code: 1, PERMISSION_DENIED: 1 }));
+    vi.stubGlobal("navigator", { ...navigator, geolocation: { getCurrentPosition } });
+
+    at("/stores");
+    const before = [...document.querySelectorAll(".store-addr")].map(el => el.textContent);
+    fireEvent.click(document.querySelector(".near-btn")!);
+
+    expect(document.body.textContent).toMatch(/permission was declined/i);
+    const after = [...document.querySelectorAll(".store-addr")].map(el => el.textContent);
+    expect(after).toEqual(before);
+    vi.unstubAllGlobals();
+  });
+
+  it("copes with a browser that has no geolocation at all", () => {
+    vi.stubGlobal("navigator", { ...navigator, geolocation: undefined });
+    at("/stores");
+    fireEvent.click(document.querySelector(".near-btn")!);
+    expect(document.body.textContent).toMatch(/could not provide a location/i);
+    vi.unstubAllGlobals();
+  });
+
   it("puts every top-level view in the nav as a real link", () => {
     // The paint index used to be reachable only from the footer. In the nav it
     // is findable, and links rather than buttons mean a crawler can follow them.

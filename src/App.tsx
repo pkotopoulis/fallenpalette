@@ -16,6 +16,7 @@ import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
 import { findTriad } from "./utils/triad";
 import { findSubstitutes } from "./utils/substitute";
+import { sortByDistance, formatDistance, Coords } from "./utils/geo";
 import {
   Tab, TAB_PATH, tabFromPath, isPaintsIndexPath,
   modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
@@ -98,6 +99,15 @@ export default function App() {
   const [collection, setCollection] = useState<Set<string>>(loadCollection);
   const [collFilter, setCollFilter] = useState("");
   const [storeQ, setStoreQ] = useState("");
+  // Browse filter for the all-paints index. Deliberately local rather than in the
+  // URL: the page is prerendered with a canonical pointing at the unfiltered
+  // /paints, and query variants of a page that exists for crawling are not worth
+  // making indexable.
+  const [indexFilter, setIndexFilter] = useState("");
+  // null until the visitor asks. Never requested on load — an unprompted
+  // location prompt on a paint website is hostile.
+  const [here, setHere] = useState<Coords | null>(null);
+  const [geoState, setGeoState] = useState<"idle" | "locating" | "denied" | "unavailable">("idle");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [activeStore, setActiveStore] = useState<number | null>(null);
   const [featSeed, setFeatSeed] = useState(() => Math.floor(Math.random() * 1e9));
@@ -226,6 +236,15 @@ export default function App() {
   // ── Collection logic ──
   // Every owned paint, unfiltered — collPaints below narrows by the search box,
   // which must not narrow what a substitute can be drawn from.
+  const indexPaints = useMemo(() => {
+    const q = indexFilter.trim().toLowerCase();
+    if (!q) return ALL_PAINTS;
+    return ALL_PAINTS.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (BRANDS[p.brand] ?? "").toLowerCase().includes(q) ||
+      p.type.toLowerCase().includes(q));
+  }, [indexFilter]);
+
   const collPaintsAll = useMemo(() => ALL_PAINTS.filter(p => collection.has(pid(p))), [collection]);
 
   const collPaints = useMemo(() => {
@@ -262,6 +281,21 @@ export default function App() {
   }, [storeQ, countryFilter]);
 
   const activeStoreObj = useMemo(() => STORES.find(s => s.id === activeStore) || null, [activeStore]);
+  // Nearest first once a location is known, otherwise the curated order.
+  const storeList = useMemo(
+    () => here ? sortByDistance(storeResults, here) : storeResults.map(s => ({ ...s, distanceKm: undefined as number | undefined })),
+    [storeResults, here]);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) { setGeoState("unavailable"); return; }
+    setGeoState("locating");
+    navigator.geolocation.getCurrentPosition(
+      pos => { setHere({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setGeoState("idle"); },
+      err => setGeoState(err.code === err.PERMISSION_DENIED ? "denied" : "unavailable"),
+      { timeout: 10000, maximumAge: 300000 },
+    );
+  };
+
   const mapStores = useMemo(() => storeResults.filter(s => s.lat != null && s.lng != null), [storeResults]);
 
   // Group results by country (Greece pinned first, then alphabetical)
@@ -271,7 +305,10 @@ export default function App() {
     const rank = (c: string) => (c === "Greece" ? 0 : 1);
     return [...m.entries()].sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]));
   }, [storeResults]);
-  const showGroups = groupedStores.length > 1;
+  // Grouping by country and sorting by distance are competing orders, and the
+  // country headings would break a nearest-first list into meaningless runs. Once
+  // a location is known the flat sorted list wins.
+  const showGroups = groupedStores.length > 1 && !here;
 
   // ── Shared components ──
   const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => (
@@ -496,7 +533,7 @@ export default function App() {
     return th;
   };
 
-  const renderStore = (s: Store) => {
+  const renderStore = (s: Store & { distanceKm?: number }) => {
     const open = activeStore === s.id;
     const th = s.hours[todayKey()];
     const hasHours = DAY_ORDER.some(d => s.hours[d]);
@@ -510,7 +547,14 @@ export default function App() {
               <span className="store-name" title={s.name}>{s.name}</span>
               {s.verified && <BadgeCheck size={14} className="store-verified" />}
             </div>
-            <div className="store-addr" title={`${s.address}, ${s.city}`}>{s.address ? `${s.address} · ` : ""}{s.city}</div>
+            <div className="store-addr" title={`${s.address}, ${s.city}`}>
+              {s.address ? `${s.address} · ` : ""}{s.city}
+              {here && (
+                <span className="store-dist">
+                  {s.distanceKm != null ? ` · ${formatDistance(s.distanceKm)}` : ` · ${t.distanceUnknown}`}
+                </span>
+              )}
+            </div>
           </div>
           <div className="store-right">
             <span className={th === "Closed" ? "closed" : th ? "openhrs" : "noinfo"}>{th === "Closed" ? t.closed : th ? summaryHours(th) : "—"}</span>
@@ -583,8 +627,23 @@ export default function App() {
         {isPaintsIndex && (<div className="view">
           <div className="section-label"><Droplets size={14} /> {t.allPaints}</div>
           <div className="index-hint">{t.allPaintsHint}</div>
+          <div className="search-wrap">
+            <Search size={17} className="search-icon" />
+            <input
+              className="search-input"
+              placeholder={t.filterPaintsPh}
+              value={indexFilter}
+              onChange={e => setIndexFilter(e.target.value)}
+            />
+          </div>
+          <div className="count">
+            {t.showingPaints.replace("{n}", String(indexPaints.length)).replace("{total}", String(ALL_PAINTS.length))}
+          </div>
+          {indexPaints.length === 0 && (
+            <div className="hint">{t.noPaintsMatch.replace("{q}", indexFilter)}</div>
+          )}
           {BRAND_IDS.map(brandId => {
-            const paints = ALL_PAINTS.filter(p => p.brand === brandId);
+            const paints = indexPaints.filter(p => p.brand === brandId);
             if (!paints.length) return null;
             return (
               <section key={brandId} className="index-brand">
@@ -834,6 +893,20 @@ export default function App() {
             {countries.map(c => <button key={c} className={`chip ${countryFilter === c ? "active" : ""}`} onClick={() => setCountryFilter(countryFilter === c ? null : c)}>{t.countries[c] || c}</button>)}
           </div>
           <div className="count">{storeResults.length} {storeResults.length !== 1 ? t.storePlur : t.storeSing}</div>
+          <div className="near-row">
+            {here ? (
+              <>
+                <span className="near-on"><Navigation size={13} /> {t.nearMeOn}</span>
+                <button className="ghost-btn" onClick={() => { setHere(null); setGeoState("idle"); }}>{t.nearMeClear}</button>
+              </>
+            ) : (
+              <button className="chip near-btn" onClick={requestLocation} disabled={geoState === "locating"}>
+                <Navigation size={13} /> {geoState === "locating" ? t.nearMeLocating : t.nearMe}
+              </button>
+            )}
+            {geoState === "denied" && <span className="near-note">{t.nearMeDenied}</span>}
+            {geoState === "unavailable" && <span className="near-note">{t.nearMeUnavailable}</span>}
+          </div>
 
           <div className="store-layout">
             <div className="store-list">
@@ -843,7 +916,7 @@ export default function App() {
                     <div className="store-group-label"><MapPin size={12} /> {t.countries[country] || country} <span className="store-group-count">{list.length}</span></div>
                     {list.map(renderStore)}
                   </div>
-                )) : storeResults.map(renderStore)
+                )) : storeList.map(renderStore)
               }
             </div>
 
