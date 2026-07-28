@@ -158,7 +158,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"proacryl",name:"Orange",hex:"#f0661f",type:"Base Set"},
   ]},
   {family:"Red",paints:[
-    {brand:"citadel",name:"Astorath Red",hex:"#a9311e",type:"Layer"},
+    {brand:"citadel",name:"Astorath Red",hex:"#a9311e",type:"Dry"},
     {brand:"ak",name:"Brick Red (AK11093)",hex:"#ab3520",type:"3rd Gen"},
     {brand:"scale75",name:"Aldebaran Red (SC-38)",hex:"#ab3520",type:"Scalecolor"},
     {brand:"vallejo_gc",name:"Scarlet Blood (72.106)",hex:"#c22222",type:"Game Color"},
@@ -304,7 +304,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"ttc",name:"Boar Hide",hex:"#8a524c",type:"Midtone"},
   ]},
   {family:"Flesh",paints:[
-    {brand:"citadel",name:"Ratskin Flesh",hex:"#a86648",type:"Layer"},
+    {brand:"citadel",name:"Ratskin Flesh",hex:"#a86648",type:"Base"},
     {brand:"ak",name:"Saddle Brown (AK11104)",hex:"#a86a4c",type:"3rd Gen"},
     {brand:"scale75",name:"African Shadow (SC-24)",hex:"#a06248",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Dark Flesh (70.927)",hex:"#a86a4a",type:"Model Color"},
@@ -322,7 +322,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"ttc",name:"Elven Skin",hex:"#d2aa74",type:"Highlight"},
   ]},
   {family:"Flesh",paints:[
-    {brand:"citadel",name:"Eldar Flesh",hex:"#e8c07f",type:"Layer"},
+    {brand:"citadel",name:"Eldar Flesh",hex:"#e8c07f",type:"Dry"},
     {brand:"ak",name:"Sunny Skin Tone (AK11055)",hex:"#e6c184",type:"3rd Gen"},
     {brand:"scale75",name:"Light Skin (SC-18)",hex:"#e6c184",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Pale Sand (70.837)",hex:"#e3c28d",type:"Model Color"},
@@ -439,7 +439,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"proacryl",name:"Dark Camo Green",hex:"#0E3820",type:"Expansion"},
   ]},
   {family:"Green",paints:[
-    {brand:"citadel",name:"Warpstone Glow",hex:"#1b8c2e",type:"Base"},
+    {brand:"citadel",name:"Warpstone Glow",hex:"#1b8c2e",type:"Layer"},
     {brand:"vallejo_mc",name:"Light Green (70.942)",hex:"#1f8e32",type:"Model Color"},
     {brand:"vallejo_gc",name:"Scorpy Green (72.032)",hex:"#4f8436",type:"Game Color"},
     {brand:"army_painter",name:"Eternal Hunt",hex:"#169239",type:"Fanatic"},
@@ -458,7 +458,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"proacryl",name:"Camo Green",hex:"#304820",type:"Base Set"},
   ]},
   {family:"Green",paints:[
-    {brand:"citadel",name:"Deathworld Forest",hex:"#556229",type:"Layer"},
+    {brand:"citadel",name:"Deathworld Forest",hex:"#556229",type:"Base"},
     {brand:"ak",name:"Gunship Green (AK11150)",hex:"#58652c",type:"3rd Gen"},
     {brand:"scale75",name:"Ardennes Green (SC-45)",hex:"#58652c",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Russian Uniform WWII (70.924)",hex:"#58652c",type:"Model Color"},
@@ -473,7 +473,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Camouflage Green",hex:"#627147",type:"Fanatic"},
   ]},
   {family:"Green",paints:[
-    {brand:"citadel",name:"Niblet Green",hex:"#378c35",type:"Layer"},
+    {brand:"citadel",name:"Niblet Green",hex:"#378c35",type:"Dry"},
     {brand:"ak",name:"Light Green (AK11141)",hex:"#3a8e38",type:"3rd Gen"},
     {brand:"scale75",name:"Irati Green (SC-43)",hex:"#3a8e38",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Park Green Flat (70.969)",hex:"#3a8e38",type:"Model Color"},
@@ -489,7 +489,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Olive Drab",hex:"#728451",type:"Fanatic"},
   ]},
   {family:"Green",paints:[
-    {brand:"citadel",name:"Orruk Flesh",hex:"#8cc276",type:"Layer"},
+    {brand:"citadel",name:"Orruk Flesh",hex:"#8cc276",type:"Base"},
     {brand:"ak",name:"Pastel Green (AK11131)",hex:"#8ec478",type:"3rd Gen"},
     {brand:"scale75",name:"Spring Green (SC-47)",hex:"#8ec478",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Pastel Green (70.885)",hex:"#8ec478",type:"Model Color"},
@@ -534,7 +534,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"citadel",name:"Xereus Purple",hex:"#6c1f82",type:"Layer"},
     {brand:"vallejo_mc",name:"Violet (70.960)",hex:"#6e2484",type:"Model Color"},
     {brand:"vallejo_gc",name:"Warlord Purple (72.014)",hex:"#862351",type:"Game Color"},
-    {brand:"army_painter",name:"Wizard Orchid",hex:"#702485",type:"Fanatic"},
+    {brand:"army_painter",name:"Alien Purple",hex:"#702485",type:"Fanatic"},
     {brand:"ak",name:"Magenta (AK11067)",hex:"#6D2082",type:"3rd Gen"},
     {brand:"ttc",name:"Sorceror's Cloak",hex:"#6e2280",type:"Midtone"},
   ]},
@@ -546,7 +546,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Mulled Berry",hex:"#663746",type:"Fanatic"},
   ]},
   {family:"Purple",paints:[
-    {brand:"citadel",name:"Daemonette Hide",hex:"#655f81",type:"Layer"},
+    {brand:"citadel",name:"Daemonette Hide",hex:"#655f81",type:"Base"},
     {brand:"ak",name:"Lilac (AK11071)",hex:"#676183",type:"3rd Gen"},
     {brand:"vallejo_mc",name:"Lavender Grey (70.774)",hex:"#676183",type:"Model Color"},
     {brand:"vallejo_gc",name:"Alien Purple (72.076)",hex:"#7161a8",type:"Game Color"},
@@ -636,7 +636,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
 
   // ═══ ORANGE (bright) ═══
   {family:"Orange",paints:[
-    {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Layer"},
+    {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Base"},
     {brand:"ak",name:"Medium Orange (AK11078)",hex:"#f06622",type:"3rd Gen"},
     {brand:"scale75",name:"Mars Orange (SC-39)",hex:"#ef6620",type:"Scalecolor"},
     {brand:"vallejo_mc",name:"Bright Orange (70.851)",hex:"#ef5f22",type:"Model Color"},
