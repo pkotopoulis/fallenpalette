@@ -23,6 +23,7 @@ export interface Dict {
   colourTitle: string; colourDesc: string; pick: string; hexCode: string;
   filterByBrand: string; closestTo: string;   // "{n} <closestTo> {hex}"
   filterByRange: string; rangeKinds: Record<string, string>;
+  fromYourPaints: string; fromYourPaintsHint: string; curatedMatch: string; ownedNone: string;
   whereToBuy: string; buyChoose: string; buyHint: string; affiliateNote: string; affiliateFooter: string; restock: string;
   rackEmptyTitle: string; rackPre: string; rackMid: string; rackPost: string;
   browsePaints: string; saveNote: string;
@@ -98,6 +99,10 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Pick a colour or paste a hex code — we’ll find the closest paint matches across every brand.",
     pick: "Pick", hexCode: "Hex code",
     filterByBrand: "Filter by brand", closestTo: "closest matches to",
+    fromYourPaints: "From your paints",
+    fromYourPaintsHint: "The closest thing you already own — test a swatch before committing.",
+    curatedMatch: "Known match",
+    ownedNone: "Nothing in your collection is close to this one.",
     whereToBuy: "Where to buy", buyChoose: "Choose a shop",
     buyHint: "Searches each shop for this paint — stock and prices are theirs, not ours.",
     affiliateNote: "Affiliate links: we may earn a commission on purchases, at no extra cost to you.",
@@ -155,6 +160,10 @@ export const I18N: Record<Lang, Dict> = {
     colourDesc: "Διάλεξε ένα χρώμα ή επικόλλησε έναν κωδικό hex — θα βρούμε τα πιο κοντινά χρώματα από κάθε μάρκα.",
     pick: "Επιλογή", hexCode: "Κωδικός hex",
     filterByBrand: "Φίλτρο ανά μάρκα", closestTo: "πιο κοντινές αντιστοιχίες με",
+    fromYourPaints: "Από τα χρώματά σου",
+    fromYourPaintsHint: "Το πιο κοντινό που έχεις ήδη — δοκίμασε δείγμα πριν το χρησιμοποιήσεις.",
+    curatedMatch: "Γνωστή αντιστοιχία",
+    ownedNone: "Τίποτα στη συλλογή σου δεν είναι κοντά σε αυτό.",
     whereToBuy: "Πού να το αγοράσεις", buyChoose: "Διάλεξε κατάστημα",
     buyHint: "Αναζητά το χρώμα σε κάθε κατάστημα — το στοκ και οι τιμές είναι δικά τους, όχι δικά μας.",
     affiliateNote: "Συνδέσμοι συνεργατών: μπορεί να κερδίσουμε προμήθεια από αγορές, χωρίς επιπλέον κόστος για εσένα.",

@@ -234,6 +234,45 @@ describe("routing", () => {
     expect(document.querySelector(".buy-hint")?.closest("details")).toBeNull();
   });
 
+  it("suggests an owned paint as a substitute, above the buy links", () => {
+    // Gory Red is a curated equivalent of Mephiston Red, so owning it should
+    // answer "can I paint this tonight" without buying anything.
+    localStorage.setItem("paintxref_collection", JSON.stringify(["vallejo_gc::Gory Red (72.011)"]));
+    at("/paint/citadel/mephiston-red");
+
+    const block = document.querySelector(".sub-block");
+    expect(block, "expected a From your paints block").toBeTruthy();
+    expect(block!.textContent).toContain("Gory Red");
+    // Flagged as a curated match rather than merely a near colour.
+    expect(block!.querySelector(".sub-curated")).toBeTruthy();
+
+    // The shelf comes before the shop.
+    const buy = document.querySelector(".buy-block");
+    if (buy) {
+      expect(block!.compareDocumentPosition(buy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+  });
+
+  it("says so plainly when nothing owned is close", () => {
+    localStorage.setItem("paintxref_collection", JSON.stringify(["citadel::Averland Sunset"]));
+    at("/paint/citadel/kantor-blue");
+    const block = document.querySelector(".sub-block");
+    expect(block).toBeTruthy();
+    expect(block!.querySelector(".sub-empty")).toBeTruthy();
+    // No suggestion cards, rather than a yellow offered for a dark blue.
+    expect(block!.querySelectorAll(".card").length).toBe(0);
+  });
+
+  it("hides the substitute block with an empty collection or an owned paint", () => {
+    at("/paint/citadel/mephiston-red");
+    expect(document.querySelector(".sub-block"), "no collection, nothing to say").toBeNull();
+    cleanup();
+
+    localStorage.setItem("paintxref_collection", JSON.stringify(["citadel::Mephiston Red"]));
+    at("/paint/citadel/mephiston-red");
+    expect(document.querySelector(".sub-block"), "already owned, nothing to substitute").toBeNull();
+  });
+
   it("offers the same choice of shops in the collection as on a paint page", () => {
     // The collection row used to link only to the first configured shop, with
     // no way to reach the others — the reported "still no dropdown".

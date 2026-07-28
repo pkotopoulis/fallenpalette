@@ -15,6 +15,7 @@ import { STORES, DAY_ORDER, DAY_LABEL } from "./data/stores";
 import { Paint, Store, DayKey } from "./data/types";
 import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/colors";
 import { findTriad } from "./utils/triad";
+import { findSubstitutes } from "./utils/substitute";
 import {
   Tab, TAB_PATH, tabFromPath, isPaintsIndexPath,
   modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
@@ -223,12 +224,16 @@ export default function App() {
   const selectPaint = (p: Paint) => navigate(paintPath(p));
 
   // ── Collection logic ──
+  // Every owned paint, unfiltered — collPaints below narrows by the search box,
+  // which must not narrow what a substitute can be drawn from.
+  const collPaintsAll = useMemo(() => ALL_PAINTS.filter(p => collection.has(pid(p))), [collection]);
+
   const collPaints = useMemo(() => {
-    const all = ALL_PAINTS.filter(p => collection.has(pid(p)));
+    const all = collPaintsAll;
     if (!collFilter.trim()) return all;
     const q = collFilter.toLowerCase();
     return all.filter(p => p.name.toLowerCase().includes(q) || (BRANDS[p.brand] || "").toLowerCase().includes(q));
-  }, [collection, collFilter]);
+  }, [collPaintsAll, collFilter]);
 
   const collStats = useMemo(() => {
     const byBrand: Record<string, number> = {};
@@ -325,6 +330,45 @@ export default function App() {
    *
    * Renders nothing at all until a programme is configured in affiliates.ts.
    */
+  /**
+   * What you could use tonight instead of buying this.
+   *
+   * Sits above "where to buy" deliberately: the shelf is a better answer than
+   * the shop, and putting the affiliate links first would be self-serving.
+   * Hidden entirely for a paint you already own, and when the collection is
+   * empty, since there is nothing useful to say in either case.
+   */
+  const FromYourPaints = ({ paint }: { paint: Paint }) => {
+    if (!collection.size || isOwned(paint)) return null;
+    const subs = findSubstitutes(paint, collPaintsAll, 3);
+    return (
+      <div className="sub-block">
+        <div className="sub-head"><Layers size={14} /> {t.fromYourPaints}</div>
+        {subs.length === 0
+          ? <div className="sub-empty">{t.ownedNone}</div>
+          : (<>
+              <div className="results-grid">
+                {subs.map(s => (
+                  <div key={pid(s.paint)} className="card">
+                    <PaintRow
+                      paint={s.paint}
+                      onClick={() => selectPaint(s.paint)}
+                      extra={
+                        <>
+                          {s.curated && <span className="sub-curated">{t.curatedMatch}</span>}
+                          <MatchBadge d={s.distance} />
+                        </>
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="sub-hint">{t.fromYourPaintsHint}</div>
+            </>)}
+      </div>
+    );
+  };
+
   const WhereToBuy = ({ paint }: { paint: Paint }) => {
     if (!affiliateLinksFor(paint).length) return null;
     return (
@@ -596,6 +640,9 @@ export default function App() {
                   </button>
                 </div>
               </div>
+              {/* The shelf before the shop: what you already own beats a buy
+                  link, and ordering it the other way would be self-serving. */}
+              <FromYourPaints paint={selPaint} />
               {/* Directly under the paint it belongs to. Placed after the
                   equivalents originally, which buried it below a full results
                   grid where nobody found it. */}
