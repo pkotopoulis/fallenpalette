@@ -9,7 +9,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Matt Black",hex:"#000000",type:"Fanatic"},
     {brand:"ak",name:"Black (AK11029)",hex:"#0a0a0a",type:"3rd Gen"},
     {brand:"scale75",name:"Black (SC-00)",hex:"#0f0f0f",type:"Scalecolor"},
-    {brand:"ttc",name:"Soulless Grey Shadow",hex:"#0e0e10",type:"Shadow"},
+    {brand:"ttc",name:"Doom Death Black",hex:"#121010",type:"Shadow"},
     {brand:"proacryl",name:"Coal Black",hex:"#080808",type:"Base Set"},
   ]},
   {family:"Black",paints:[
@@ -28,7 +28,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Matt White",hex:"#ffffff",type:"Fanatic"},
     {brand:"ak",name:"White (AK11001)",hex:"#fafafa",type:"3rd Gen"},
     {brand:"scale75",name:"White (SC-01)",hex:"#f8f8f8",type:"Scalecolor"},
-    {brand:"ttc",name:"Summoned Bone Highlight",hex:"#faf8f0",type:"Highlight"},
+    {brand:"ttc",name:"Trooper White",hex:"#faf8f0",type:"Highlight"},
     {brand:"proacryl",name:"Bold Titanium White",hex:"#fcfcfc",type:"Base Set"},
   ]},
   {family:"White",paints:[
@@ -56,7 +56,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Buff (70.976)",hex:"#cbbd8b",type:"Model Color"},
     {brand:"vallejo_gc",name:"Bone White (72.034)",hex:"#cabf8e",type:"Game Color"},
     {brand:"army_painter",name:"Tomb King Tan",hex:"#ab9b7d",type:"Fanatic"},
-    {brand:"ttc",name:"Summoned Bone Midtone",hex:"#b5a67a",type:"Midtone"},
+    {brand:"ttc",name:"Skeleton Legion",hex:"#b5a67a",type:"Midtone"},
   ]},
   {family:"White",paints:[
     {brand:"citadel",name:"Wrack White",hex:"#d3d0cf",type:"Dry"},
@@ -83,7 +83,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Green Grey (70.886)",hex:"#95988e",type:"Model Color"},
     {brand:"vallejo_gc",name:"Stonewall Grey (72.049)",hex:"#9c9384",type:"Game Color"},
     {brand:"army_painter",name:"Grey Castle",hex:"#9a9a8f",type:"Fanatic"},
-    {brand:"ttc",name:"Soulless Grey Highlight",hex:"#9a9a98",type:"Highlight"},
+    {brand:"ttc",name:"Kobold Grey",hex:"#9c9c94",type:"Highlight"},
     {brand:"proacryl",name:"Bright Warm Grey",hex:"#9c968e",type:"Base Set"},
   ]},
   {family:"Grey",paints:[
@@ -93,7 +93,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Dark Sea Grey (70.991)",hex:"#6d7371",type:"Model Color"},
     {brand:"vallejo_gc",name:"Neutral Grey (72.050)",hex:"#6f6d61",type:"Game Color"},
     {brand:"army_painter",name:"Uniform Grey",hex:"#727880",type:"Fanatic"},
-    {brand:"ttc",name:"Soulless Grey Midtone",hex:"#6c6e68",type:"Midtone"},
+    {brand:"ttc",name:"Carcharodon Grey",hex:"#6c7074",type:"Midtone"},
     {brand:"proacryl",name:"Dark Warm Grey",hex:"#686460",type:"Base Set"},
   ]},
   {family:"Grey",paints:[
@@ -127,7 +127,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Resplendent Red",hex:"#992425",type:"Fanatic"},
     {brand:"ak",name:"Blood Red (AK11089)",hex:"#961015",type:"3rd Gen"},
     {brand:"scale75",name:"Blood Red (SC-36)",hex:"#9e1420",type:"Scalecolor"},
-    {brand:"ttc",name:"Doomfire Red Midtone",hex:"#981218",type:"Midtone"},
+    {brand:"ttc",name:"Sanguine Scarlet",hex:"#9a1a1c",type:"Midtone"},
     {brand:"proacryl",name:"Bold Pyrrole Red",hex:"#a01520",type:"Base Set"},
   ]},
   {family:"Red",paints:[
@@ -136,7 +136,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Red (70.926)",hex:"#792825",type:"Model Color"},
     {brand:"ak",name:"Deep Red (AK11088)",hex:"#6B1018",type:"3rd Gen"},
     {brand:"scale75",name:"Deep Red (SC-35)",hex:"#70111C",type:"Scalecolor"},
-    {brand:"ttc",name:"Doomfire Red Shadow",hex:"#620008",type:"Shadow"},
+    {brand:"ttc",name:"Berserker Red",hex:"#62100a",type:"Shadow"},
     {brand:"proacryl",name:"Burnt Red",hex:"#6e1510",type:"Base Set"},
   ]},
   {family:"Red",paints:[
@@ -146,7 +146,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Vermillion (70.909)",hex:"#c82a20",type:"Model Color"},
     {brand:"army_painter",name:"Pure Red",hex:"#b90118",type:"Fanatic"},
     {brand:"ak",name:"Scarlet Red (AK11087)",hex:"#C01C16",type:"3rd Gen"},
-    {brand:"ttc",name:"Doomfire Red Highlight",hex:"#c52018",type:"Highlight"},
+    {brand:"ttc",name:"Demon Red",hex:"#c62a1c",type:"Highlight"},
   ]},
   {family:"Red",paints:[
     {brand:"citadel",name:"Jokaero Orange",hex:"#f0641e",type:"Base"},
@@ -190,7 +190,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Orange Red (70.910)",hex:"#f2622b",type:"Model Color"},
     {brand:"vallejo_gc",name:"Hot Orange (72.009)",hex:"#e23a20",type:"Game Color"},
     {brand:"army_painter",name:"Molten Lava",hex:"#ea4226",type:"Fanatic"},
-    {brand:"ttc",name:"Fire Wyrm Midtone",hex:"#f06828",type:"Midtone"},
+    {brand:"ttc",name:"Fanatic Orange",hex:"#f26a2a",type:"Midtone"},
   ]},
 
   // ═══ YELLOWS ═══
@@ -201,7 +201,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Inner Light",hex:"#fdca52",type:"Fanatic"},
     {brand:"ak",name:"Deep Yellow (AK11045)",hex:"#F9B41E",type:"3rd Gen"},
     {brand:"scale75",name:"Sol Yellow (SC-40)",hex:"#FAB820",type:"Scalecolor"},
-    {brand:"ttc",name:"Smouldering Flame Midtone",hex:"#f8b620",type:"Midtone"},
+    {brand:"ttc",name:"Skulker Yellow",hex:"#f8b822",type:"Midtone"},
     {brand:"proacryl",name:"Golden Yellow",hex:"#f0b018",type:"Base Set"},
   ]},
   {family:"Yellow",paints:[
@@ -211,7 +211,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Deep Yellow (70.915)",hex:"#fbd01e",type:"Model Color"},
     {brand:"vallejo_gc",name:"Toxic Yellow (72.109)",hex:"#e8d457",type:"Game Color"},
     {brand:"army_painter",name:"Warped Yellow",hex:"#ffd434",type:"Fanatic"},
-    {brand:"ttc",name:"Smouldering Flame Highlight",hex:"#ffd600",type:"Highlight"},
+    {brand:"ttc",name:"Yellow Flame",hex:"#ffd60a",type:"Highlight"},
   ]},
   {family:"Yellow",paints:[
     {brand:"citadel",name:"Flash Gitz Yellow",hex:"#fff300",type:"Layer"},
@@ -230,7 +230,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Bootstrap Brown",hex:"#4b322c",type:"Fanatic"},
     {brand:"ak",name:"Burnt Umber (AK11111)",hex:"#482810",type:"3rd Gen"},
     {brand:"scale75",name:"Burnt Umber",hex:"#4B2910",type:"Scalecolor"},
-    {brand:"ttc",name:"Nomad Flesh Shadow",hex:"#48302a",type:"Shadow"},
+    {brand:"ttc",name:"Amphora Red",hex:"#4a322c",type:"Shadow"},
     {brand:"proacryl",name:"Dark Umber",hex:"#402820",type:"Base Set"},
   ]},
   {family:"Brown",paints:[
@@ -301,7 +301,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Cavalry Brown (70.982)",hex:"#84443a",type:"Model Color"},
     {brand:"army_painter",name:"Fur Brown",hex:"#7d4742",type:"Fanatic"},
     {brand:"ak",name:"Basic Skin Tone (AK11052)",hex:"#C26B4E",type:"3rd Gen"},
-    {brand:"ttc",name:"Nomad Flesh Midtone",hex:"#88504a",type:"Midtone"},
+    {brand:"ttc",name:"Boar Hide",hex:"#8a524c",type:"Midtone"},
   ]},
   {family:"Flesh",paints:[
     {brand:"citadel",name:"Ratskin Flesh",hex:"#a86648",type:"Layer"},
@@ -319,7 +319,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_gc",name:"Pale Flesh (72.003)",hex:"#caa47f",type:"Game Color"},
     {brand:"army_painter",name:"Amber Skin",hex:"#c6a482",type:"Fanatic"},
     {brand:"ak",name:"Light Flesh (AK11050)",hex:"#D4A27A",type:"3rd Gen"},
-    {brand:"ttc",name:"Nomad Flesh Highlight",hex:"#d0a872",type:"Highlight"},
+    {brand:"ttc",name:"Elven Skin",hex:"#d2aa74",type:"Highlight"},
   ]},
   {family:"Flesh",paints:[
     {brand:"citadel",name:"Eldar Flesh",hex:"#e8c07f",type:"Layer"},
@@ -337,7 +337,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Triumphant Navy",hex:"#1b2b51",type:"Fanatic"},
     {brand:"ak",name:"Dark Blue (AK11181)",hex:"#062550",type:"3rd Gen"},
     {brand:"scale75",name:"Abyssal Blue (SC-08)",hex:"#052348",type:"Scalecolor"},
-    {brand:"ttc",name:"Knight's Oath Shadow",hex:"#081048",type:"Shadow"},
+    {brand:"ttc",name:"Abyss Blue",hex:"#0a1248",type:"Shadow"},
     {brand:"proacryl",name:"Dark Blue",hex:"#0a1850",type:"Expansion"},
   ]},
   {family:"Blue",paints:[
@@ -346,7 +346,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Ultramarine Blue",hex:"#254486",type:"Fanatic"},
     {brand:"ak",name:"Ultramarine (AK11179)",hex:"#12407E",type:"3rd Gen"},
     {brand:"scale75",name:"Adriatic Blue (SC-15)",hex:"#104080",type:"Scalecolor"},
-    {brand:"ttc",name:"Baron's Cloak Midtone",hex:"#143C78",type:"Midtone"},
+    {brand:"ttc",name:"Witching Hour Blue",hex:"#163e7a",type:"Midtone"},
     {brand:"proacryl",name:"Faded Ultramarine",hex:"#1A4080",type:"Base Set"},
   ]},
   {family:"Blue",paints:[
@@ -356,7 +356,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_gc",name:"Magic Blue (72.021)",hex:"#006aa8",type:"Game Color"},
     {brand:"army_painter",name:"Stratos Blue",hex:"#31628d",type:"Fanatic"},
     {brand:"ak",name:"Medium Blue (AK11184)",hex:"#376DB2",type:"3rd Gen"},
-    {brand:"ttc",name:"Baron's Cloak Highlight",hex:"#386898",type:"Highlight"},
+    {brand:"ttc",name:"Seafarer Blue",hex:"#3a6a9a",type:"Highlight"},
     {brand:"proacryl",name:"Blue",hex:"#2060A0",type:"Base Set"},
   ]},
   {family:"Blue",paints:[
@@ -374,7 +374,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Basalt Grey (70.869)",hex:"#445e73",type:"Model Color"},
     {brand:"vallejo_gc",name:"Sombre Grey (72.048)",hex:"#535d69",type:"Game Color"},
     {brand:"army_painter",name:"Thunderous Blue",hex:"#355477",type:"Fanatic"},
-    {brand:"ttc",name:"Cold Corpse Blue Shadow",hex:"#3E5870",type:"Shadow"},
+    {brand:"ttc",name:"Cold Corpse Blue",hex:"#3e5870",type:"Shadow"},
   ]},
   {family:"Blue",paints:[
     {brand:"citadel",name:"Thousand Sons Blue",hex:"#00506f",type:"Base"},
@@ -435,7 +435,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Angel Green",hex:"#1f3e2b",type:"Fanatic"},
     {brand:"ak",name:"Dark Green (AK11146)",hex:"#044020",type:"3rd Gen"},
     {brand:"scale75",name:"Black Forest Green (SC-41)",hex:"#053E1E",type:"Scalecolor"},
-    {brand:"ttc",name:"Orc Skin Shadow",hex:"#083818",type:"Shadow"},
+    {brand:"ttc",name:"Wyvern Green",hex:"#0a3a1a",type:"Shadow"},
     {brand:"proacryl",name:"Dark Camo Green",hex:"#0E3820",type:"Expansion"},
   ]},
   {family:"Green",paints:[
@@ -445,7 +445,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Eternal Hunt",hex:"#169239",type:"Fanatic"},
     {brand:"ak",name:"Lime Green (AK11137)",hex:"#1C8C2C",type:"3rd Gen"},
     {brand:"scale75",name:"Sherwood Green (SC-44)",hex:"#1A8828",type:"Scalecolor"},
-    {brand:"ttc",name:"Orc Skin Midtone",hex:"#1E8A2E",type:"Midtone"},
+    {brand:"ttc",name:"Jade Green",hex:"#1f8c30",type:"Midtone"},
     {brand:"proacryl",name:"Green",hex:"#188830",type:"Base Set"},
   ]},
   {family:"Green",paints:[
@@ -479,7 +479,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Park Green Flat (70.969)",hex:"#3a8e38",type:"Model Color"},
     {brand:"vallejo_gc",name:"Scorpy Green (72.032)",hex:"#4f8436",type:"Game Color"},
     {brand:"army_painter",name:"Eternal Hunt",hex:"#169239",type:"Fanatic"},
-    {brand:"ttc",name:"Orc Skin Highlight",hex:"#3E9038",type:"Highlight"},
+    {brand:"ttc",name:"Ghoul Green",hex:"#40923a",type:"Highlight"},
   ]},
   {family:"Green",paints:[
     {brand:"citadel",name:"Nurgling Green",hex:"#7e975e",type:"Layer"},
@@ -519,7 +519,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Terrestrial Titan",hex:"#363146",type:"Fanatic"},
     {brand:"ak",name:"Deep Purple (AK11074)",hex:"#3E2458",type:"3rd Gen"},
     {brand:"scale75",name:"Violet",hex:"#3C2250",type:"Scalecolor"},
-    {brand:"ttc",name:"Sorceror's Cloak Shadow",hex:"#3A2850",type:"Shadow"},
+    {brand:"ttc",name:"Von Evile Purple",hex:"#3a2852",type:"Shadow"},
     {brand:"proacryl",name:"Dark Purple",hex:"#382450",type:"Expansion"},
   ]},
   {family:"Purple",paints:[
@@ -536,7 +536,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_gc",name:"Warlord Purple (72.014)",hex:"#862351",type:"Game Color"},
     {brand:"army_painter",name:"Wizard Orchid",hex:"#702485",type:"Fanatic"},
     {brand:"ak",name:"Magenta (AK11067)",hex:"#6D2082",type:"3rd Gen"},
-    {brand:"ttc",name:"Sorceror's Cloak Midtone",hex:"#6E2080",type:"Midtone"},
+    {brand:"ttc",name:"Sorceror's Cloak",hex:"#6e2280",type:"Midtone"},
   ]},
   {family:"Purple",paints:[
     {brand:"citadel",name:"Gal Vorbak Red",hex:"#4b213c",type:"Base"},
@@ -551,7 +551,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_mc",name:"Lavender Grey (70.774)",hex:"#676183",type:"Model Color"},
     {brand:"vallejo_gc",name:"Alien Purple (72.076)",hex:"#7161a8",type:"Game Color"},
     {brand:"army_painter",name:"Cultist Purple",hex:"#6b59a0",type:"Fanatic"},
-    {brand:"ttc",name:"Sorceror's Cloak Highlight",hex:"#6A5A88",type:"Highlight"},
+    {brand:"ttc",name:"Spectral Purple",hex:"#6a5a88",type:"Highlight"},
   ]},
   {family:"Purple",paints:[
     {brand:"citadel",name:"Lucius Lilac",hex:"#b598c9",type:"Dry"},
@@ -569,7 +569,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Gun Metal",hex:"#86868c",type:"Fanatic"},
     {brand:"ak",name:"Dark Aluminium (AK11208)",hex:"#84848A",type:"3rd Gen"},
     {brand:"scale75",name:"Heavy Metal (SC-65)",hex:"#87878C",type:"Scalecolor Metal"},
-    {brand:"ttc",name:"Ancient Silver",hex:"#88888E",type:"Metallic"},
+    {brand:"ttc",name:"Doom Metal",hex:"#88888e",type:"Metallic"},
     {brand:"proacryl",name:"Dark Silver",hex:"#82828A",type:"Metallic"},
   ]},
   {family:"Metallic",paints:[
@@ -579,7 +579,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_gc",name:"Silver (72.052)",hex:"#AAABB0",type:"Game Color"},
     {brand:"army_painter",name:"Shining Silver",hex:"#ACADB0",type:"Fanatic"},
     {brand:"ak",name:"Silver (AK11209)",hex:"#A9AAB0",type:"3rd Gen"},
-    {brand:"ttc",name:"Shining Silver",hex:"#AAAAB0",type:"Metallic"},
+    {brand:"ttc",name:"Platinum Crown",hex:"#aaaab0",type:"Metallic"},
     {brand:"proacryl",name:"Silver",hex:"#A6A6AE",type:"Metallic"},
   ]},
   {family:"Metallic",paints:[
@@ -589,7 +589,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"army_painter",name:"Greedy Gold",hex:"#CA9C34",type:"Fanatic"},
     {brand:"ak",name:"Old Gold (AK11192)",hex:"#C69830",type:"3rd Gen"},
     {brand:"scale75",name:"Dwarven Gold (SC-73)",hex:"#C79A30",type:"Scalecolor Metal"},
-    {brand:"ttc",name:"True Gold",hex:"#C89A30",type:"Metallic"},
+    {brand:"ttc",name:"Heirloom Gold",hex:"#c89a32",type:"Metallic"},
     {brand:"proacryl",name:"Rich Gold",hex:"#C09228",type:"Metallic"},
   ]},
   {family:"Metallic",paints:[
@@ -599,7 +599,7 @@ export const PAINT_GROUPS: PaintGroup[] = [
     {brand:"vallejo_gc",name:"Bright Bronze (72.057)",hex:"#9A6A2A",type:"Game Color"},
     {brand:"army_painter",name:"Weapon Bronze",hex:"#9E6C2C",type:"Fanatic"},
     {brand:"ak",name:"Bronze (AK11196)",hex:"#9B6928",type:"3rd Gen"},
-    {brand:"ttc",name:"Aged Bronze",hex:"#986828",type:"Metallic"},
+    {brand:"ttc",name:"Overlord Brass",hex:"#98682a",type:"Metallic"},
     {brand:"proacryl",name:"Bronze",hex:"#986628",type:"Metallic"},
   ]},
   {family:"Metallic",paints:[
