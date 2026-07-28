@@ -64,10 +64,20 @@ function page({ path, title, description, body }) {
     .replace('<div id="root"></div>', `<div id="root"><noscript>\n${body}\n  </noscript></div>`);
 }
 
+/**
+ * Writes "<path>.html", not "<path>/index.html".
+ *
+ * Cloudflare's default html_handling is auto-trailing-slash: a flat file is
+ * served at /foo with a 200, but a folder index redirects /foo to /foo/ with a
+ * 307. The first version of this script emitted folder indexes, which made every
+ * one of the 768 sitemap URLs a redirect and left each canonical tag pointing at
+ * a URL that redirects somewhere else — worse for search than the generic shell
+ * it replaced.
+ */
 function write(path, html) {
-  const dir = resolve(dist, path.replace(/^\//, ""));
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(resolve(dir, "index.html"), html);
+  const rel = path.replace(/^\//, "");
+  mkdirSync(resolve(dist, dirname(rel)), { recursive: true });
+  writeFileSync(resolve(dist, `${rel}.html`), html);
 }
 
 let count = 0;
@@ -134,7 +144,7 @@ for (const [path, title, description] of [
 const sitemap = readFileSync(resolve(dist, "sitemap.xml"), "utf8");
 const advertised = [...sitemap.matchAll(/<loc>https:\/\/fallenpalette\.com([^<]*)<\/loc>/g)].map(m => m[1]);
 const missing = advertised.filter(u => {
-  const file = u === "/" ? resolve(dist, "index.html") : resolve(dist, u.replace(/^\//, ""), "index.html");
+  const file = u === "/" ? resolve(dist, "index.html") : resolve(dist, `${u.replace(/^\//, "")}.html`);
   try { readFileSync(file); return false; } catch { return true; }
 });
 if (missing.length) {
