@@ -7,7 +7,7 @@
   "author": "Fallen Palette",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/seo.mjs",
+    "build": "tsc && vite build && node scripts/seo.mjs && node scripts/prerender.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

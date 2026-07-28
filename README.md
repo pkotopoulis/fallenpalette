@@ -56,10 +56,44 @@ unmatched paths to the root.
 `sitemap.xml` and `robots.txt` are generated at build time from the catalog by
 [`scripts/seo.mjs`](./scripts/seo.mjs), so they cannot drift from the paint data.
 
-> **Note:** Paint pages are client-rendered. Search engines that execute
-> JavaScript will see the per-paint title and description, but the served HTML is
-> still the generic shell. Prerendering each paint page's `<head>` at build time
-> is the remaining step for full crawlability.
+## Prerendering
+
+[`scripts/prerender.mjs`](./scripts/prerender.mjs) writes a real HTML file per
+route into `dist/` after the Vite build — one per paint, plus the index and the
+public views. Each carries its own `<title>`, description, canonical and Open
+Graph tags, and a `<noscript>` block holding the paint's details and its
+equivalents as real text and real links.
+
+Without it every URL in the sitemap served the same shell, so a crawler that
+does not execute JavaScript saw nothing specific to the page.
+
+The shell still boots normally: the `<noscript>` sits inside `#root` and React
+replaces it on mount, so nothing changes for a visitor.
+
+> **Important:** This step must run **after** `vite build`, so that
+> vite-plugin-pwa has already written its precache manifest. Reordering it would
+> add ~770 HTML files to the service worker precache for no benefit — crawlers
+> do not run service workers, and a returning visitor gets the shell from cache
+> regardless.
+
+`seo.mjs` and `prerender.mjs` derive their route lists independently, so the
+prerender step ends by asserting every URL in `sitemap.xml` has a file behind it
+and fails the build otherwise.
+
+## Analytics
+
+Enable **Web Analytics** in the Cloudflare Pages project under Metrics.
+Cloudflare injects the beacon on the next deployment — it is cookieless, needs
+no consent banner, and requires no code here.
+
+> **Important:** Do not also add the beacon snippet to `index.html`. With
+> dashboard injection enabled that loads it twice and double-counts every
+> pageview.
+
+It reports pageviews, referrers, paths and Core Web Vitals. It does **not** do
+custom events, so it will not tell you whether the affiliate links are clicked —
+the Amazon Associates dashboard reports clicks and conversions per tag, which is
+where that lives.
 
 ## Affiliate links
 
