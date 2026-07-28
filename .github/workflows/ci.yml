@@ -1,0 +1,58 @@
+name: CI
+
+# Cloudflare deploys from this repo on push regardless of what happens here, so
+# this does not gate a release on its own — it tells you a push broke something.
+# To make it actually block, enable branch protection on main requiring "verify".
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # ci, not install: installs exactly the locked versions and fails if
+      # package.json and the lockfile disagree.
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      # Covers more than a typecheck: the build also runs scripts/seo.mjs and
+      # scripts/prerender.mjs, and prerender exits non-zero if any sitemap URL
+      # has no page behind it.
+      - name: Typecheck, build, sitemap and prerender
+        run: npm run build
+
+      - name: Check the build produced what it should
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/paint/citadel/mephiston-red.html
+
+          # Flat files, not folder indexes: Cloudflare's default html_handling
+          # serves foo.html at /foo with a 200 but 307-redirects foo/index.html
+          # to /foo/, which would make every sitemap URL a redirect and point
+          # each canonical at a URL that redirects elsewhere.
+          if find dist/paint -name index.html | grep -q .; then
+            echo "::error::found folder index.html under dist/paint; prerender must emit flat .html files"
+            exit 1
+          fi
+
+          pages=$(find dist -name '*.html' | wc -l)
+          urls=$(grep -c '<loc>' dist/sitemap.xml)
+          echo "prerendered pages: $pages, sitemap urls: $urls"
+          if [ "$pages" -lt "$urls" ]; then
+            echo "::error::fewer prerendered pages ($pages) than sitemap urls ($urls)"
+            exit 1
+          fi
