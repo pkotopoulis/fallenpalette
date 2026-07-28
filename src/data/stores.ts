@@ -199,16 +199,21 @@ export const STORES: Store[] = [
     hours: { Mon: "11:00–19:00", Tue: "11:00–19:00", Wed: "11:00–19:00", Thu: "11:00–19:00", Fri: "11:00–19:00", Sat: "10:30–19:00", Sun: "11:00–19:00" }, verified: true, color: "#F5C542" },
 
   // ─── Greece · Thessaloniki & central Greece (partial data — unknown fields left empty) ───
-  { id: 48, name: "Hobby Games", city: "Thessaloniki", country: "Greece", postal: "54621", address: "Georgiou Theochari 4", phone: "+30 2310 252668", website: "https://www.hobby-games.eu",
+  { id: 48, name: "Hobby Games", city: "Thessaloniki", country: "Greece", postal: "54621", address: "Georgiou Theochari 4", lat: 40.6287858, lng: 22.9500401, phone: "+30 2310 252668", website: "https://www.hobby-games.eu",
     hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#22C55E" },
-  { id: 49, name: "Underworld Games", city: "Thessaloniki", country: "Greece", postal: "54635", address: "Konstantinou Palaiologou 25", phone: "+30 2310 240193", website: "https://www.underworldgames.gr",
+  { id: 49, name: "Underworld Games", city: "Thessaloniki", country: "Greece", postal: "54635", address: "Konstantinou Palaiologou 25", lat: 40.6334024, lng: 22.9502005, phone: "+30 2310 240193", website: "https://www.underworldgames.gr",
     hours: { Mon: "Closed", Tue: "11:00–14:30, 17:30–20:30", Wed: "11:00–15:00", Thu: "11:00–14:30, 17:30–20:30", Fri: "11:00–14:30, 17:30–20:30", Sat: "11:00–16:00", Sun: "11:30–17:00" }, verified: true, color: "#22D3EE" },
-  { id: 50, name: "Kaissa Kalamaria", city: "Kalamaria", country: "Greece", postal: "55132", address: "Mitropoliti Chrysanthou 20", phone: "+30 2313 037108", website: "https://kaissagames.com",
+  { id: 50, name: "Kaissa Kalamaria", city: "Kalamaria", country: "Greece", postal: "55132", address: "Mitropoliti Chrysanthou 20", lat: 40.5815173, lng: 22.9495901, phone: "+30 2313 037108", website: "https://kaissagames.com",
     hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
-  { id: 51, name: "Kaissa Larissa", city: "Larissa", country: "Greece", postal: "41222", address: "Koumoundourou 22", phone: "+30 2410 538555",
+  { id: 51, name: "Kaissa Larissa", city: "Larissa", country: "Greece", postal: "41222", address: "Koumoundourou 22", lat: 39.6358075, lng: 22.4143762, phone: "+30 2410 538555",
     hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
-  { id: 52, name: "Kaissa Chalkida", city: "Chalkida", country: "Greece", postal: "34100", address: "Miaouli 24", phone: "+30 2221 087315",
+  { id: 52, name: "Kaissa Chalkida", city: "Chalkida", country: "Greece", postal: "34100", address: "Miaouli 24", lat: 38.4679139, lng: 23.5960031, phone: "+30 2221 087315",
     hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#F97316" },
+  // No coordinates: OpenStreetMap only knows one "Πολυμέρη 6" in Volos and tags
+  // it postcode 38500 (Iolkos), not the 38221 on record here — potentially about
+  // a kilometre out. The Directions button navigates to lat/lng, so a wrong pin
+  // would actively misdirect someone driving there, whereas no pin just hides
+  // the button. Needs the exact position from someone who knows the shop.
   { id: 53, name: "GameVille", city: "Volos", country: "Greece", postal: "38221", address: "Polymeri 6", phone: "+30 2421 108718", website: "http://gameville.gr",
     hours: { Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" }, verified: true, color: "#A855F7" },
 ];
