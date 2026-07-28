@@ -222,3 +222,43 @@ describe("range kinds", () => {
     }
   });
 });
+
+describe("product codes", () => {
+  // Each brand numbers its paints in one shape. This catches a malformed or
+  // mistyped code; it cannot catch a well-formed code pointing at the wrong
+  // colour, which only source verification finds — sixteen AK entries shipped
+  // with valid codes belonging to different paints until they were checked
+  // against the manufacturer's chart.
+  // Keyed by range where a brand numbers its lines separately: Vallejo's Game
+  // Color and Xpress Color share 72.xxx, but the Game Washes are 73.xxx.
+  const CODE_SHAPE: Record<string, RegExp> = {
+    "ak|3rd Gen": /^AK\d{5}$/,
+    "vallejo_gc|Game Color": /^72\.\d{3}$/,
+    "vallejo_gc|Xpress Color": /^72\.\d{3}$/,
+    "vallejo_gc|Game Wash": /^73\.\d{3}$/,
+    "vallejo_mc|Model Color": /^70\.\d{3}$/,
+    "scale75|Scalecolor": /^SC-?\d{2}$/,
+  };
+
+  it("uses each brand and range's own code format", () => {
+    for (const p of ALL_PAINTS) {
+      const code = p.name.match(/\(([^)]+)\)\s*$/)?.[1];
+      if (!code) continue;
+      const shape = CODE_SHAPE[`${p.brand}|${p.type}`];
+      if (!shape) continue;
+      expect(code, `${p.brand} ${p.type} "${p.name}" does not match ${shape}`).toMatch(shape);
+    }
+  });
+
+  it("carries a code on every paint of a brand that numbers its range", () => {
+    // Vallejo and AK colours are ordered by code, so omitting it makes a paint
+    // hard to buy. Recorded as a floor rather than "all", since a few metallic
+    // and older entries predate the convention.
+    for (const brand of ["vallejo_gc", "vallejo_mc", "ak"]) {
+      const ps = ALL_PAINTS.filter(p => p.brand === brand);
+      const withCode = ps.filter(p => /\([^)]+\)\s*$/.test(p.name));
+      expect(withCode.length / ps.length, `${brand}: only ${withCode.length}/${ps.length} carry a code`)
+        .toBeGreaterThan(0.9);
+    }
+  });
+});
