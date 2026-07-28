@@ -73,10 +73,17 @@ describe("findTriad", () => {
   it("finds the pairings Games Workshop publishes for its own paints", () => {
     // Independent check that the maths recovers real relationships rather than
     // merely self-consistent ones: these are GW's own recommended steps.
-    const blue = findTriad(byName("Macragge Blue"), ALL_PAINTS, 3);
+    //
+    // Scoped to the Citadel range, which is the question being asked. Across all
+    // brands a near-identical grey from another maker can outrank Dawnstone —
+    // Scale75 Graphite sits at #6b7070 against Dawnstone's #697068 — which says
+    // nothing about whether the pairing was found.
+    const citadel = ALL_PAINTS.filter(p => p.brand === "citadel");
+
+    const blue = findTriad(byName("Macragge Blue"), citadel, 3);
     expect(blue.shade.map(p => p.name)).toContain("Kantor Blue");
 
-    const grey = findTriad(byName("Mechanicus Standard Grey"), ALL_PAINTS, 3);
+    const grey = findTriad(byName("Mechanicus Standard Grey"), citadel, 3);
     expect(grey.highlight.map(p => p.name)).toContain("Dawnstone");
   });
 
