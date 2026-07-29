@@ -27,6 +27,7 @@ export interface Dict {
   filterByBrand: string; closestTo: string;   // "{n} <closestTo> {hex}"
   filterByRange: string; rangeKinds: Record<string, string>;
   fromYourPaints: string; fromYourPaintsHint: string; curatedMatch: string; ownedNone: string;
+  mixIt: string; mixHint: string; mixParts: string;
   whereToBuy: string; buyChoose: string; buyHint: string; affiliateNote: string; affiliateFooter: string; restock: string;
   rackEmptyTitle: string; rackPre: string; rackMid: string; rackPost: string;
   browsePaints: string; saveNote: string;
@@ -115,6 +116,9 @@ export const I18N: Record<Lang, Dict> = {
     fromYourPaints: "From your paints",
     fromYourPaintsHint: "The closest thing you already own — test a swatch before committing.",
     curatedMatch: "Known match",
+    mixIt: "Or mix it",
+    mixHint: "Predicted from the colours, not from how pigments really behave — mix a swatch and check before you commit. Complementary pairs are not offered, because the maths cannot predict them.",
+    mixParts: "{parts} parts",
     ownedNone: "Nothing in your collection is close to this one.",
     whereToBuy: "Where to buy", buyChoose: "Choose a shop",
     buyHint: "Searches each shop for this paint — stock and prices are theirs, not ours.",
@@ -186,6 +190,9 @@ export const I18N: Record<Lang, Dict> = {
     fromYourPaints: "Από τα χρώματά σου",
     fromYourPaintsHint: "Το πιο κοντινό που έχεις ήδη — δοκίμασε δείγμα πριν το χρησιμοποιήσεις.",
     curatedMatch: "Γνωστή αντιστοιχία",
+    mixIt: "Ή φτιάξε το με μίξη",
+    mixHint: "Πρόβλεψη από τα χρώματα, όχι από τη συμπεριφορά των πιγμέντων — δοκίμασε δείγμα πρώτα. Συμπληρωματικά ζεύγη δεν προτείνονται, γιατί δεν μπορούν να προβλεφθούν.",
+    mixParts: "{parts} μέρη",
     ownedNone: "Τίποτα στη συλλογή σου δεν είναι κοντά σε αυτό.",
     whereToBuy: "Πού να το αγοράσεις", buyChoose: "Διάλεξε κατάστημα",
     buyHint: "Αναζητά το χρώμα σε κάθε κατάστημα — το στοκ και οι τιμές είναι δικά τους, όχι δικά μας.",

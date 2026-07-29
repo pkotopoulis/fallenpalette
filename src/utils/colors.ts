@@ -35,6 +35,39 @@ export function hexToOklab(hex: string): Oklab {
   return out;
 }
 
+const linearToSrgb = (c: number) =>
+  c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+
+const channel = (v: number) => {
+  const n = Math.round(Math.max(0, Math.min(1, linearToSrgb(v))) * 255);
+  return n.toString(16).padStart(2, "0");
+};
+
+/** Oklab back to an sRGB hex string, clamped into gamut. */
+export function oklabToHex({ L, a, b }: Oklab): string {
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+  const l = l_ ** 3, m = m_ ** 3, s = s_ ** 3;
+
+  return "#" +
+    channel(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s) +
+    channel(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s) +
+    channel(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s);
+}
+
+/** Distance from the neutral axis: 0 for white, black and any grey. */
+export const chromaOf = ({ a, b }: Oklab) => Math.hypot(a, b);
+
+/** Hue angle in degrees, meaningless for anything near the neutral axis. */
+export const hueOf = ({ a, b }: Oklab) => (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+
+/** Shortest angle between two hues, 0..180. */
+export function hueDistance(x: Oklab, y: Oklab): number {
+  const d = Math.abs(hueOf(x) - hueOf(y)) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
 /**
  * Lightness carries slightly less weight than hue/chroma.
  *

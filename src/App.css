@@ -169,6 +169,18 @@ a{color:inherit;text-decoration:none}
 .sub-curated{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.3px;white-space:nowrap;
   color:var(--success);background:rgba(91,214,138,0.12);padding:3px 8px;border-radius:6px}
 
+/* ═══════════════════════ MIX SUGGESTION ═══════════════════════
+   Quieter than a substitute card: a prediction, not a known match. */
+.mix-head{padding:12px 16px 8px;font-size:11px;font-weight:800;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted)}
+.mix-card{border-style:dashed}
+.mix-row{display:flex;align-items:center;gap:11px;padding:12px 14px;min-width:0}
+.mix-info{flex:1 1 0;min-width:0}
+.mix-recipe{font-size:12px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mix-plus{color:var(--accent);font-weight:800;margin:0 2px}
+.mix-meta{font-size:11px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+
 /* ═══════════════════════ WHERE TO BUY (affiliate) ═══════════════════════
    Deliberately quiet: a bordered block rather than a banner, sitting below the
    cross-reference the visitor actually came for. */

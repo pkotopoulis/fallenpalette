@@ -17,6 +17,7 @@ import { colorDistance, luminance, matchTier, matchBg, matchFg } from "./utils/c
 import { findTriad } from "./utils/triad";
 import { findSubstitutes } from "./utils/substitute";
 import { sortByDistance, formatDistance, Coords } from "./utils/geo";
+import { findMixes } from "./utils/mix";
 import {
   Tab, TAB_PATH, tabFromPath, isPaintsIndexPath,
   modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
@@ -378,10 +379,14 @@ export default function App() {
   const FromYourPaints = ({ paint }: { paint: Paint }) => {
     if (!collection.size || isOwned(paint)) return null;
     const subs = findSubstitutes(paint, collPaintsAll, 3);
+    // Only worth offering a mix when the shelf does not already answer it, so
+    // the cheapest correct advice always comes first.
+    const bestSingle = subs.length ? subs[0].distance : Infinity;
+    const mixes = bestSingle > 4 ? findMixes(paint, collPaintsAll, bestSingle, 2) : [];
     return (
       <div className="sub-block">
         <div className="sub-head"><Layers size={14} /> {t.fromYourPaints}</div>
-        {subs.length === 0
+        {subs.length === 0 && mixes.length === 0
           ? <div className="sub-empty">{t.ownedNone}</div>
           : (<>
               <div className="results-grid">
@@ -400,7 +405,28 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <div className="sub-hint">{t.fromYourPaintsHint}</div>
+              {subs.length > 0 && <div className="sub-hint">{t.fromYourPaintsHint}</div>}
+
+              {mixes.length > 0 && (<>
+                <div className="mix-head">{t.mixIt}</div>
+                <div className="results-grid">
+                  {mixes.map((m, i) => (
+                    <div key={i} className="card mix-card">
+                      <div className="mix-row">
+                        <Swatch hex={m.hex} size={30} />
+                        <div className="mix-info">
+                          <div className="mix-recipe">
+                            {m.a.name} <span className="mix-plus">+</span> {m.b.name}
+                          </div>
+                          <div className="mix-meta">{t.mixParts.replace("{parts}", m.parts)}</div>
+                        </div>
+                        <MatchBadge d={m.distance} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="sub-hint">{t.mixHint}</div>
+              </>)}
             </>)}
       </div>
     );

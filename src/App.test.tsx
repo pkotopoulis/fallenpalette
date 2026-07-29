@@ -345,6 +345,33 @@ describe("routing", () => {
     expect(document.querySelector(".sub-block"), "already owned, nothing to substitute").toBeNull();
   });
 
+  it("offers a mix only when no owned paint is close on its own", () => {
+    // Owning a curated equivalent means the honest answer is "use that", not a
+    // two-paint recipe.
+    localStorage.setItem("paintxref_collection", JSON.stringify(["vallejo_gc::Gory Red (72.011)"]));
+    at("/paint/citadel/mephiston-red");
+    expect(document.querySelector(".mix-card"), "close single paint owned, no mix needed").toBeNull();
+    cleanup();
+
+    // White and Emperor's Children on the shelf, Fulgrim Pink wanted. The
+    // nearest single paint is 13.5 away; a 1:2 tint lands at 1.9. Asserted
+    // unconditionally, because an earlier version of this test wrapped it in a
+    // truthiness check and passed while producing no mix at all.
+    localStorage.setItem("paintxref_collection",
+      JSON.stringify(["citadel::Corax White", "citadel::Emperor's Children"]));
+    at("/paint/citadel/fulgrim-pink");
+
+    const mix = document.querySelector(".mix-card");
+    expect(mix, "expected a mix suggestion").toBeTruthy();
+    expect(mix!.textContent).toContain("Corax White");
+    expect(mix!.textContent).toMatch(/\d+ : \d+ parts/);
+
+    // The caveat travels with the suggestion, since this is a prediction from
+    // colour values rather than pigment behaviour.
+    expect(document.querySelector(".sub-block")!.textContent)
+      .toMatch(/not from how pigments really behave/i);
+  });
+
   it("offers the same choice of shops in the collection as on a paint page", () => {
     // The collection row used to link only to the first configured shop, with
     // no way to reach the others — the reported "still no dropdown".
