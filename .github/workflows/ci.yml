@@ -56,3 +56,23 @@ jobs:
             echo "::error::fewer prerendered pages ($pages) than sitemap urls ($urls)"
             exit 1
           fi
+
+          # The map must stay in its own lazily loaded chunk. Importing StoreMap
+          # eagerly would fold ~150 kB of Leaflet back into the bundle that every
+          # visitor downloads, and nothing about the app would look different.
+          if ! ls dist/assets/StoreMap-*.js >/dev/null 2>&1; then
+            echo "::error::no separate StoreMap chunk; the map is no longer lazily loaded"
+            exit 1
+          fi
+          if grep -lq leaflet dist/assets/index-*.js; then
+            echo "::error::leaflet found in the main chunk; it belongs only in the map chunk"
+            exit 1
+          fi
+
+          # Leaflet's stylesheet is bundled with the map chunk. Linking it from a
+          # CDN in index.html would put a render-blocking third-party request on
+          # every page, including the prerendered paint pages that show no map.
+          if grep -rq 'unpkg.com' dist/index.html; then
+            echo "::error::third-party stylesheet linked from index.html"
+            exit 1
+          fi

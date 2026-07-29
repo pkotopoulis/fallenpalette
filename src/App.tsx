@@ -1,6 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from "react";
 import {
   Search, Palette, Layers, Store as StoreIcon, Plus, Check, Download, Upload,
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
@@ -28,33 +26,19 @@ import { loadCollection, saveCollection, exportCollection, importCollection } fr
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
 
+/**
+ * Loaded on demand. Leaflet, react-leaflet and the Leaflet stylesheet are only
+ * needed by the Stores tab, and were previously downloaded by everyone —
+ * including every visitor landing on a paint page from a search result.
+ */
+const StoreMap = lazy(() => import("./StoreMap"));
+
 // Feedback link — flip FEEDBACK_READY to true and set the real address once
 // domain email (Cloudflare Email Routing) is configured. See README.
 const FEEDBACK_READY = true;
 const FEEDBACK_EMAIL = "feedback@fallenpalette.com";
 const JS_DAY: DayKey[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const todayKey = (): DayKey => JS_DAY[new Date().getDay()];
-
-// Clean futuristic map marker — glowing node
-const makeIcon = (color: string, active: boolean) =>
-  L.divIcon({
-    className: "",
-    html: `<div class="map-pin ${active ? "active" : ""}" style="--pc:${color}"></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -12],
-  });
-
-// Pans/zooms the map toward the active store
-function MapController({ store }: { store: Store | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (store && store.lat != null && store.lng != null) {
-      map.flyTo([store.lat, store.lng], Math.max(map.getZoom(), 14), { duration: 0.7 });
-    }
-  }, [store, map]);
-  return null;
-}
 
 export default function App() {
   // ── URL-backed state ──
@@ -1075,28 +1059,14 @@ export default function App() {
             </div>
 
             {mapStores.length > 0 && (
-              <div className="map-container">
-                <MapContainer
-                  key={mapStores.map(s => s.id).join(",")}
-                  bounds={mapStores.map(s => [s.lat as number, s.lng as number] as [number, number])}
-                  boundsOptions={{ padding: [50, 50], maxZoom: 13 }}
-                  scrollWheelZoom={true}
-                  style={{ height: "100%", width: "100%" }}
-                >
-                  <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    subdomains="abcd"
-                    attribution='&copy; OpenStreetMap &copy; CARTO'
-                  />
-                  <MapController store={activeStoreObj} />
-                  {mapStores.map(s => (
-                    <Marker key={s.id} position={[s.lat as number, s.lng as number]} icon={makeIcon(s.color, activeStore === s.id)}
-                      eventHandlers={{ click: () => setActiveStore(s.id) }}>
-                      <Popup><b>{s.name}</b><br />{s.city}</Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
+              <Suspense fallback={<div className="map-container map-loading" />}>
+                <StoreMap
+                  stores={mapStores}
+                  activeStore={activeStore}
+                  activeStoreObj={activeStoreObj}
+                  onSelect={setActiveStore}
+                />
+              </Suspense>
             )}
           </div>
         </div>)}

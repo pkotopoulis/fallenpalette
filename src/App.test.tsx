@@ -108,9 +108,24 @@ describe("routing", () => {
     expect(document.querySelector(".hex-input")).toBeNull();
   });
 
-  it("renders the stores tab at its own URL", () => {
+  it("renders the stores tab at its own URL", async () => {
     at("/stores");
-    expect(screen.getByTestId("map")).toBeTruthy();
+    // The map is a lazily loaded chunk, so it arrives after a tick rather than
+    // being present on first render.
+    expect(await screen.findByTestId("map")).toBeTruthy();
+  });
+
+  it("does not pull in the map on pages that have none", async () => {
+    // The whole point of splitting it out: a visitor landing on a paint page from
+    // a search result should not be paying for Leaflet.
+    at("/paint/citadel/mephiston-red");
+    await Promise.resolve();
+    expect(screen.queryByTestId("map")).toBeNull();
+    cleanup();
+
+    at("/colours");
+    await Promise.resolve();
+    expect(screen.queryByTestId("map")).toBeNull();
   });
 
   it("lists every paint on the index, as real links", () => {
