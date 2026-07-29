@@ -19,7 +19,7 @@ export interface Dict {
   nearMeOn: string; nearMeClear: string; distanceUnknown: string;
   brandsLoaded: string;            // unused reserve
   statPaints: string; statBrands: string; statStores: string;
-  featured: string; shuffle: string; howItWorks: string;
+  featured: string; featuredAcross: string; shuffle: string; howItWorks: string;
   howSearchT: string; howSearchD: string;
   howCompareT: string; howCompareD: string;
   howSaveT: string; howSaveD: string;
@@ -107,7 +107,8 @@ export const I18N: Record<Lang, Dict> = {
     backToSearch: "Back to search",
     brandsLoaded: "brands loaded",
     statPaints: "paints", statBrands: "brands", statStores: "stores",
-    featured: "Featured cross-reference", shuffle: "Shuffle", howItWorks: "How it works",
+    featured: "Featured cross-reference", featuredAcross: "The same colour across {n} of {total} brands",
+    shuffle: "Shuffle", howItWorks: "How it works",
     howSearchT: "Search", howSearchD: "Find any paint by name or pick a colour.",
     howCompareT: "Compare", howCompareD: "See equivalents across every brand.",
     howSaveT: "Save", howSaveD: "Track what you own in your rack.",
@@ -189,7 +190,8 @@ export const I18N: Record<Lang, Dict> = {
     backToSearch: "Πίσω στην αναζήτηση",
     brandsLoaded: "μάρκες",
     statPaints: "χρώματα", statBrands: "μάρκες", statStores: "καταστήματα",
-    featured: "Προτεινόμενη αντιστοίχιση", shuffle: "Ανακάτεμα", howItWorks: "Πώς λειτουργεί",
+    featured: "Προτεινόμενη αντιστοίχιση", featuredAcross: "Το ίδιο χρώμα σε {n} από {total} μάρκες",
+    shuffle: "Ανακάτεμα", howItWorks: "Πώς λειτουργεί",
     howSearchT: "Αναζήτηση", howSearchD: "Βρες οποιοδήποτε χρώμα με όνομα ή διάλεξε ένα χρώμα.",
     howCompareT: "Σύγκριση", howCompareD: "Δες αντίστοιχα χρώματα σε κάθε μάρκα.",
     howSaveT: "Αποθήκευση", howSaveD: "Κράτα ό,τι έχεις στη συλλογή σου.",

@@ -231,11 +231,38 @@ export default function App() {
   }, [allFlat, hexVal, mode]);
 
   // ── Landing data ──
-  const featured = useMemo(() => allPaints[featSeed % allPaints.length], [featSeed, allPaints]);
+  /**
+   * Featured paints are drawn only from those with a broad cross-reference.
+   *
+   * Picking uniformly would show three brands or fewer 44% of the time and an
+   * empty card for the 34 paints with no equivalent at all — a poor showcase for
+   * a section whose whole job is demonstrating coverage. This narrows which
+   * example is shown, not what the catalog claims: every row is still a real
+   * curated equivalence.
+   */
+  const featurePool = useMemo(() => {
+    const broad = ALL_PAINTS.filter(p =>
+      new Set(equivalentsOf(p).filter(e => e.brand !== p.brand).map(e => e.brand)).size >= 4);
+    return broad.length ? broad : ALL_PAINTS;
+  }, []);
+
+  const featured = useMemo(() => featurePool[featSeed % featurePool.length], [featSeed, featurePool]);
+  /**
+   * One curated equivalent per brand for the featured paint, in brand order.
+   *
+   * Showing every brand rather than the first three is the point: it is the
+   * clearest demonstration of what the cross-reference actually holds. Only
+   * curated equivalents are used — padding the list with nearest-by-colour
+   * matches would inflate the apparent coverage of brands that have none.
+   */
   const featuredMatches = useMemo(() => {
-    const { eq, nb } = computeMatches(featured);
-    return [...eq, ...nb].slice(0, 3);
-  }, [featured, computeMatches]);
+    const best = new Map<string, Paint>();
+    for (const p of equivalentsOf(featured)) {
+      if (p.brand === featured.brand || best.has(p.brand)) continue;
+      best.set(p.brand, p);
+    }
+    return BRAND_IDS.filter(b => best.has(b)).map(b => best.get(b)!);
+  }, [featured]);
 
   // Navigating to the paint's own URL is all that's needed now: mode, query and
   // selection are all derived from the location.
@@ -841,17 +868,25 @@ export default function App() {
                     </div>
                     <ArrowRight size={18} className="feature-arrow" />
                   </div>
-                  {featuredMatches.length > 0 && (
+                  {featuredMatches.length > 0 && (<>
+                    <div className="feature-count">
+                      {t.featuredAcross
+                        .replace("{n}", String(featuredMatches.length + 1))
+                        .replace("{total}", String(BRAND_IDS.length))}
+                    </div>
                     <div className="feature-matches">
                       {featuredMatches.map((p, i) => (
                         <div key={i} className="feature-match">
                           <Swatch hex={p.hex} size={20} />
                           <span className="fm-name" title={p.name}>{p.name}</span>
+                          <span className="fm-badge">
+                            <MatchBadge d={colorDistance(featured.hex, p.hex)} />
+                          </span>
                           <span className="fm-brand">{BRANDS[p.brand]}</span>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </>)}
                 </div>
 
                 <div className="section-label">{t.howItWorks}</div>

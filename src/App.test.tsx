@@ -143,6 +143,28 @@ describe("routing", () => {
     expect(document.body.textContent).toMatch(/No paints match/i);
   });
 
+  it("shows the featured colour across every brand that has it", () => {
+    at("/");
+    const rows = [...document.querySelectorAll(".feature-match")];
+    // The point of the section is breadth, so more than the old fixed three. The
+    // featured paint is drawn only from those with a broad cross-reference, so
+    // this holds for every seed rather than most of them.
+    expect(rows.length).toBeGreaterThanOrEqual(4);
+
+    // One row per brand at most, never the same brand twice.
+    const brands = [...document.querySelectorAll(".fm-brand")].map(el => el.textContent);
+    expect(new Set(brands).size).toBe(brands.length);
+
+    // The count claim must agree with the rows actually rendered: it includes the
+    // featured paint itself, so rows + 1.
+    const claim = document.querySelector(".feature-count")!.textContent ?? "";
+    const n = Number(claim.match(/(\d+) of (\d+)/)![1]);
+    expect(n).toBe(rows.length + 1);
+
+    // Every row is a real equivalence with a match badge, not padding.
+    for (const row of rows) expect(row.querySelector(".match-badge")).toBeTruthy();
+  });
+
   it("offers photo mode and says the image stays on the device", () => {
     at("/colours?photo=1");
     expect(document.querySelector(".photo-pick"), "expected a file picker").toBeTruthy();
