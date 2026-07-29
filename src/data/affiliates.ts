@@ -30,6 +30,42 @@ const AMAZON_MARKETPLACES: { label: string; host: string; tag: string }[] = [
   { label: "Amazon FR", host: "www.amazon.fr", tag: "fallenpalet07-21" },
 ];
 
+/**
+ * Which Amazon store to offer first, by the visitor's region.
+ *
+ * These marketplaces are separate accounts rather than a OneLink setup, so the
+ * order shown is the only steer available — and it matters. Since Brexit,
+ * amazon.co.uk to Greece means customs and import VAT, while amazon.de ships
+ * there as a routine domestic-style delivery. Leading a Greek visitor with the UK
+ * store sends them to the least usable of the three.
+ *
+ * Regions not listed fall through to the default order. Hosts named here that are
+ * not configured are simply skipped, so adding or removing a marketplace does not
+ * require touching this table.
+ */
+const STORE_PREFERENCE: Record<string, string[]> = {
+  GR: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  CY: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  GB: ["www.amazon.co.uk", "www.amazon.de", "www.amazon.fr"],
+  IE: ["www.amazon.co.uk", "www.amazon.de", "www.amazon.fr"],
+  DE: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  AT: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  CH: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  FR: ["www.amazon.fr", "www.amazon.de", "www.amazon.co.uk"],
+  BE: ["www.amazon.fr", "www.amazon.de", "www.amazon.co.uk"],
+  LU: ["www.amazon.fr", "www.amazon.de", "www.amazon.co.uk"],
+  NL: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+  ES: ["www.amazon.fr", "www.amazon.de", "www.amazon.co.uk"],
+  IT: ["www.amazon.de", "www.amazon.fr", "www.amazon.co.uk"],
+};
+
+const DEFAULT_STORE_ORDER = ["www.amazon.co.uk", "www.amazon.de", "www.amazon.fr"];
+
+/** Preferred store order for a region code, e.g. "GR". Case-insensitive. */
+export function storeOrderFor(region?: string | null): string[] {
+  return STORE_PREFERENCE[(region ?? "").toUpperCase()] ?? DEFAULT_STORE_ORDER;
+}
+
 /** Awin publisher ID, from your Awin dashboard. Shared by every Awin advertiser. */
 const AWIN_PUBLISHER_ID = "";
 
@@ -75,11 +111,20 @@ function awinLink(advertiserId: string, destination: string): string {
   return `https://www.awin1.com/cread.php?${params}`;
 }
 
-export function affiliateLinksFor(paint: Paint): AffiliateLink[] {
+export function affiliateLinksFor(paint: Paint, region?: string | null): AffiliateLink[] {
   const term = searchTermFor(paint);
   const links: AffiliateLink[] = [];
 
-  for (const m of AMAZON_MARKETPLACES) {
+  // Configured stores, ordered by how useful they are where the visitor is.
+  // Anything outside the preference list keeps its declared order, after those
+  // that are listed.
+  const order = storeOrderFor(region);
+  const ranked = [...AMAZON_MARKETPLACES].sort((a, b) => {
+    const ia = order.indexOf(a.host), ib = order.indexOf(b.host);
+    return (ia === -1 ? order.length : ia) - (ib === -1 ? order.length : ib);
+  });
+
+  for (const m of ranked) {
     if (!m.tag) continue;
     links.push({
       id: m.host,

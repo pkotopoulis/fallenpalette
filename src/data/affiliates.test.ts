@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { affiliateLinksFor, searchTermFor, AFFILIATES_ENABLED } from "./affiliates";
+import { affiliateLinksFor, searchTermFor, storeOrderFor, AFFILIATES_ENABLED } from "./affiliates";
 import { ALL_PAINTS } from "./paints";
 import { BRANDS } from "./brands";
 
@@ -89,6 +89,56 @@ describe("affiliateLinksFor", () => {
       const url = new URL(l.href);
       if (!/amazon\.(co\.uk|de|es|it|fr|nl|se|pl)$/.test(url.host.replace(/^www\./, ""))) continue;
       expect(url.searchParams.get("tag"), `${url.host} tag is not a -21 tag`).toMatch(/-21$/);
+    }
+  });
+
+  it("leads with the store that actually delivers, by region", () => {
+    // Since Brexit, amazon.co.uk to Greece means customs and import VAT while
+    // amazon.de ships there routinely, so leading a Greek visitor with the UK
+    // store points them at the least usable of the three.
+    const gr = affiliateLinksFor(byName("Mephiston Red"), "GR").map(l => l.id);
+    const gb = affiliateLinksFor(byName("Mephiston Red"), "GB").map(l => l.id);
+    if (gr.length > 1) {
+      expect(gr[0]).toBe("www.amazon.de");
+      expect(gb[0]).toBe("www.amazon.co.uk");
+    }
+  });
+
+  it("orders by region without changing which stores or tags are offered", () => {
+    // Ordering is a steer, not a filter: the same links must be present either
+    // way, or a visitor loses a store depending on where they happen to be.
+    const a = affiliateLinksFor(byName("Mephiston Red"), "GR");
+    const b = affiliateLinksFor(byName("Mephiston Red"), "FR");
+    expect(new Set(a.map(l => l.href))).toEqual(new Set(b.map(l => l.href)));
+    expect(a.length).toBe(b.length);
+  });
+
+  it("falls back to a sensible order for an unknown or missing region", () => {
+    const none = affiliateLinksFor(byName("Mephiston Red")).map(l => l.id);
+    const unknown = affiliateLinksFor(byName("Mephiston Red"), "ZZ").map(l => l.id);
+    const nonsense = affiliateLinksFor(byName("Mephiston Red"), "").map(l => l.id);
+    expect(unknown).toEqual(none);
+    expect(nonsense).toEqual(none);
+    if (none.length > 1) expect(none[0]).toBe("www.amazon.co.uk");
+  });
+
+  it("is case-insensitive about the region code", () => {
+    expect(storeOrderFor("gr")).toEqual(storeOrderFor("GR"));
+    expect(storeOrderFor("Gr")).toEqual(storeOrderFor("GR"));
+  });
+
+  it("names only real marketplace hosts in the preference table", () => {
+    // A typo here would silently sort that store to the back rather than erroring.
+    const known = new Set(affiliateLinksFor(byName("Mephiston Red"), "GB").map(l => l.id));
+    for (const region of ["GR", "GB", "DE", "FR", "IT", "ES", "NL"]) {
+      for (const host of storeOrderFor(region)) {
+        expect(host, `${region} names an unconfigured host: ${host}`).toMatch(/^www\.amazon\./);
+      }
+      // Every configured store must appear somewhere in each region's order,
+      // otherwise it lands in the unlisted bucket by accident.
+      for (const host of known) {
+        expect(storeOrderFor(region), `${region} omits ${host}`).toContain(host);
+      }
     }
   });
 

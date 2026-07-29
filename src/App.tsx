@@ -109,6 +109,18 @@ export default function App() {
   });
   const t = I18N[lang];
 
+  /**
+   * Visitor region, used only to order the shop links so the most usable store
+   * comes first. Taken from the browser locale, falling back to the chosen
+   * interface language — someone reading the Greek UI is far more likely to be
+   * shopping from Greece than from the UK.
+   */
+  const region = useMemo(() => {
+    const fromBrowser = (navigator.languages?.[0] ?? navigator.language ?? "").split("-")[1];
+    if (fromBrowser) return fromBrowser.toUpperCase();
+    return lang === "el" ? "GR" : "GB";
+  }, [lang]);
+
   useEffect(() => { saveCollection(collection); }, [collection]);
 
   // Per-route title, description and canonical link. A crawler that renders the
@@ -506,7 +518,7 @@ export default function App() {
   };
 
   const WhereToBuy = ({ paint }: { paint: Paint }) => {
-    if (!affiliateLinksFor(paint).length) return null;
+    if (!affiliateLinksFor(paint, region).length) return null;
     return (
       <div className="buy-block">
         <div className="buy-head">
@@ -554,7 +566,7 @@ export default function App() {
    * reach the others.
    */
   const ShopMenu = ({ paint, compact = false }: { paint: Paint; compact?: boolean }) => {
-    const links = affiliateLinksFor(paint);
+    const links = affiliateLinksFor(paint, region);
     if (!links.length) return null;
 
     // Nothing to choose between: a menu holding one item is just an extra click.
