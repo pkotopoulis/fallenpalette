@@ -367,9 +367,27 @@ export default function App() {
   const showGroups = groupedStores.length > 1 && !here;
 
   // ── Shared components ──
-  const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => (
-    <div className={`swatch ${className}`} style={{ width: size, height: size, background: hex, border: luminance(hex) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent" }} />
-  );
+  /**
+   * `size` is still given in px at the call sites, but rendered as em against the
+   * 14px base so swatches scale with the root font size like everything else. A
+   * fixed pixel swatch beside text that grows on a large screen ends up looking
+   * undersized.
+   */
+  const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => {
+    const em = `${size / 14}em`;
+    return (
+      <div
+        className={`swatch ${className}`}
+        style={{
+          width: em,
+          height: em,
+          flexShrink: 0,
+          background: hex,
+          border: luminance(hex) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent",
+        }}
+      />
+    );
+  };
 
   const MatchBadge = ({ d }: { d: number }) => {
     const tier = matchTier(d);
