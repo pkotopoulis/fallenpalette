@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from "react
 import {
   Search, Palette, Layers, Store as StoreIcon, Plus, Check, Download, Upload,
   Trash2, MapPin, Phone, Clock, Globe, ChevronDown, Shuffle, BadgeCheck,
-  Navigation, Sparkles, ArrowRight, Droplets, Mail, ShoppingCart, Eye, EyeOff,
+  Navigation, Sparkles, ArrowRight, Droplets, Mail, ShoppingCart,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { ALL_PAINTS, equivalentsOf, paintId as pid, paintPath, findPaintByPath } from "./data/paints";
@@ -22,7 +22,6 @@ import {
   modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath, photoSearchPath,
   SearchMode,
 } from "./utils/urlState";
-import { CvdType, CVD_TYPES, simulateCvd, isConfusable, confusablePairs } from "./utils/cvd";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
 import FallenIcon from "./FallenIcon";
@@ -109,44 +108,6 @@ export default function App() {
     return (navigator.language || "").toLowerCase().startsWith("el") ? "el" : "en";
   });
   const t = I18N[lang];
-
-  /**
-   * Colour vision, and whether to recolour the swatches to match it.
-   *
-   * Deliberately not URL state, unlike the tab, query and hex: this describes the
-   * person looking, not the thing being looked at. Putting it in the URL would
-   * make every shared link carry someone else's eyes.
-   *
-   * Two settings rather than one because the deficiency implies two different
-   * needs. Someone who has it wants the confusable-pair warnings and emphatically
-   * does not want the swatches repainted — they already see that, and a "helpful"
-   * simulation would just be a second, wronger filter on top of their own. A
-   * normal-sighted painter checking a scheme wants the opposite. So the type
-   * drives the warnings and the simulation is opt-in on top.
-   */
-  const [cvd, setCvd] = useState<CvdType>(() => {
-    try {
-      const s = localStorage.getItem("fp_cvd");
-      if (s && (CVD_TYPES as string[]).includes(s)) return s as CvdType;
-    } catch {}
-    return "none";
-  });
-  const [cvdSim, setCvdSim] = useState(() => {
-    try { return localStorage.getItem("fp_cvd_sim") === "1"; } catch {}
-    return false;
-  });
-  useEffect(() => { try { localStorage.setItem("fp_cvd", cvd); } catch {} }, [cvd]);
-  useEffect(() => { try { localStorage.setItem("fp_cvd_sim", cvdSim ? "1" : "0"); } catch {} }, [cvdSim]);
-
-  /** Non-"none" only while the simulation is actually wanted, so callers stay terse. */
-  const simAs: CvdType = cvdSim ? cvd : "none";
-
-  const CVD_OPTION_LABEL: Record<CvdType, string> = {
-    none: t.cvdOff,
-    protanopia: t.cvdProtanopia,
-    deuteranopia: t.cvdDeuteranopia,
-    tritanopia: t.cvdTritanopia,
-  };
 
   /**
    * Visitor region, used only to order the shop links so the most usable store
@@ -324,19 +285,6 @@ export default function App() {
     return all.filter(p => p.name.toLowerCase().includes(q) || (BRANDS[p.brand] || "").toLowerCase().includes(q));
   }, [collPaintsAll, collFilter]);
 
-  /**
-   * Pots on the shelf this viewer cannot tell apart.
-   *
-   * Drawn from the unfiltered collection: the search box narrows what you are
-   * looking at, but a pair is still a hazard when only one half of it matches
-   * the filter. Memoised because it is quadratic, and keyed on the collection
-   * rather than the paint list so it survives re-renders from unrelated state.
-   */
-  const collConfusable = useMemo(
-    () => confusablePairs(collPaintsAll, cvd),
-    [collPaintsAll, cvd],
-  );
-
   const collStats = useMemo(() => {
     const byBrand: Record<string, number> = {};
     ALL_PAINTS.filter(p => collection.has(pid(p))).forEach(p => {
@@ -439,14 +387,6 @@ export default function App() {
    */
   const Swatch = ({ hex, size = 28, className = "" }: { hex: string; size?: number; className?: string }) => {
     const em = `${size / 14}em`;
-    // The simulation has to drive the border test too. A pale yellow that needs a
-    // visible edge can simulate to a mid grey that does not, and vice versa —
-    // testing the original would put the border on the wrong swatches.
-    //
-    // Guarded rather than leaning on simulateCvd's own "none" case, which still
-    // allocates a lowercased copy. The all-paints index renders 764 of these, and
-    // nobody should pay for a feature they have not switched on.
-    const shown = simAs === "none" ? hex : simulateCvd(hex, simAs);
     return (
       <div
         className={`swatch ${className}`}
@@ -454,8 +394,8 @@ export default function App() {
           width: em,
           height: em,
           flexShrink: 0,
-          background: shown,
-          border: luminance(shown) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent",
+          background: hex,
+          border: luminance(hex) > 0.85 ? "1px solid #3A3D42" : "1px solid transparent",
         }}
       />
     );
@@ -466,26 +406,6 @@ export default function App() {
     return (
       <span className="match-badge" style={{ background: matchBg(d), color: matchFg(d) }}>
         {tier === "exact" ? t.matchExact : tier === "close" ? t.matchClose : t.matchApprox}
-      </span>
-    );
-  };
-
-  /**
-   * Shown on a result that the selected colour vision cannot separate from the
-   * reference paint.
-   *
-   * Reads as good news rather than a warning, because it is: the app has just
-   * rated this pair "Close" or "Approx", and for this viewer that gap does not
-   * exist. It is a better substitute for them than the badge beside it admits.
-   */
-  const SameToYou = ({ a, b }: { a: string; b: string }) => {
-    if (!isConfusable(a, b, cvd)) return null;
-    return (
-      <span
-        className="cvd-same-badge"
-        title={t.cvdSameToYouTitle.replace("{normal}", colorDistance(a, b).toFixed(1))}
-      >
-        <Eye size={11} /> {t.cvdSameToYou}
       </span>
     );
   };
@@ -563,7 +483,6 @@ export default function App() {
                       extra={
                         <>
                           {s.curated && <span className="sub-curated">{t.curatedMatch}</span>}
-                          <SameToYou a={paint.hex} b={s.paint.hex} />
                           <MatchBadge d={s.distance} />
                         </>
                       }
@@ -809,30 +728,6 @@ export default function App() {
           <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} aria-pressed={lang === "en"}>EN</button>
           <button className={lang === "el" ? "active" : ""} onClick={() => setLang("el")} aria-pressed={lang === "el"}>GR</button>
         </div>
-        {/* The simulation toggle only appears once a deficiency is chosen — on its
-            own it would have nothing to simulate. */}
-        <div className="cvd-control">
-          <select
-            className="cvd-select"
-            value={cvd}
-            aria-label={t.cvdLabel}
-            title={t.cvdLabel}
-            onChange={e => setCvd(e.target.value as CvdType)}
-          >
-            {CVD_TYPES.map(c => <option key={c} value={c}>{CVD_OPTION_LABEL[c]}</option>)}
-          </select>
-          {cvd !== "none" && (
-            <button
-              className={`cvd-sim-btn ${cvdSim ? "active" : ""}`}
-              onClick={() => setCvdSim(v => !v)}
-              aria-pressed={cvdSim}
-              title={t.cvdSimulate}
-            >
-              {cvdSim ? <Eye size={14} /> : <EyeOff size={14} />}
-              <span>{cvdSim ? t.cvdSimulateOn : t.cvdSimulate}</span>
-            </button>
-          )}
-        </div>
       </div>
 
       <div className="app-content">
@@ -954,13 +849,13 @@ export default function App() {
               {nameResults.eq.length > 0 && (<>
                 <div className="section-label">{t.directEquivalents}</div>
                 <div className="results-grid">
-                  {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<><SameToYou a={selPaint.hex} b={p.hex} /><MatchBadge d={colorDistance(selPaint.hex, p.hex)} /></>} /></div>)}
+                  {nameResults.eq.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={colorDistance(selPaint.hex, p.hex)} />} /></div>)}
                 </div>
               </>)}
               {nameResults.nb.length > 0 && (<>
                 <div className="section-label">{t.similarColours}</div>
                 <div className="results-grid">
-                  {nameResults.nb.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<><SameToYou a={selPaint.hex} b={p.hex} /><MatchBadge d={(p as any).distance} /></>} /></div>)}
+                  {nameResults.nb.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
                 </div>
               </>)}
             </>)}
@@ -999,7 +894,6 @@ export default function App() {
                           <Swatch hex={p.hex} size={20} />
                           <span className="fm-name" title={p.name}>{p.name}</span>
                           <span className="fm-badge">
-                            <SameToYou a={featured.hex} b={p.hex} />
                             <MatchBadge d={colorDistance(featured.hex, p.hex)} />
                           </span>
                           <span className="fm-brand">{BRANDS[p.brand]}</span>
@@ -1062,7 +956,7 @@ export default function App() {
                   <div className="results-grid">
                     {near.map((p, j) => (
                       <div key={j} className="card">
-                        <PaintRow paint={p} onClick={() => selectPaint(p)} extra={<><SameToYou a={entry.hex} b={p.hex} /><MatchBadge d={p.distance} /></>} />
+                        <PaintRow paint={p} onClick={() => selectPaint(p)} extra={<MatchBadge d={p.distance} />} />
                       </div>
                     ))}
                   </div>
@@ -1097,7 +991,7 @@ export default function App() {
             <RangeChips />
             <div className="count">{hexResults.length} {t.closestTo} <b style={{ color: "var(--bright)" }}>{hexVal.toUpperCase()}</b></div>
             <div className="results-grid">
-              {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<><SameToYou a={hexVal} b={p.hex} /><MatchBadge d={(p as any).distance} /></>} /></div>)}
+              {hexResults.map((p, i) => <div key={i} className="card"><PaintRow paint={p} extra={<MatchBadge d={(p as any).distance} />} /></div>)}
             </div>
           </>)}
         </div>)}
@@ -1148,30 +1042,6 @@ export default function App() {
                 <button className="text-btn danger" onClick={() => { if (confirm(t.clearConfirm)) setCollection(new Set()); }}><Trash2 size={13} /> {t.clearL}</button>
               </div>
             </div>
-            {cvd !== "none" && (
-              <div className="sub-block cvd-block">
-                <div className="sub-head"><Eye size={14} /> {t.cvdPairsTitle}</div>
-                {collConfusable.length === 0 ? (
-                  <div className="sub-empty">{t.cvdPairsNone}</div>
-                ) : (<>
-                  <div className="sub-hint">{t.cvdPairsHint}</div>
-                  <div className="results-grid">
-                    {collConfusable.map(pair => (
-                      <div key={`${pid(pair.a)}|${pid(pair.b)}`} className="card cvd-pair">
-                        {[pair.a, pair.b].map(p => (
-                          <PaintRow key={pid(p)} paint={p} showOwn={false} onClick={() => selectPaint(p)} />
-                        ))}
-                        <div className="cvd-pair-foot">
-                          {t.cvdPairsSeen
-                            .replace("{normal}", pair.normal.toFixed(1))
-                            .replace("{seen}", pair.seen.toFixed(1))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>)}
-              </div>
-            )}
             <div className="results-grid">
               {collPaints.map((p, i) => (
                 <div key={i} className="card card-open"><PaintRow paint={p} extra={<ShopMenu paint={p} compact />} /></div>

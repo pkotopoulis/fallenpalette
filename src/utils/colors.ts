@@ -8,9 +8,7 @@ export function hexToRgb(hex: string) {
 
 export interface Oklab { L: number; a: number; b: number }
 
-/** sRGB channel (0..1) to linear light. Exported for the CVD simulation, which
- *  must operate on linear values to be physically meaningful. */
-export const srgbToLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const srgbToLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 
 // Converting costs three pow() and three cbrt(). The catalog is ~650 paints and
 // every keystroke re-ranks all of them, so results are memoised by hex.
@@ -37,8 +35,7 @@ export function hexToOklab(hex: string): Oklab {
   return out;
 }
 
-/** Linear light back to an sRGB channel (0..1). */
-export const linearToSrgb = (c: number) =>
+const linearToSrgb = (c: number) =>
   c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
 
 const channel = (v: number) => {

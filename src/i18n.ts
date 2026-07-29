@@ -47,13 +47,6 @@ export interface Dict {
   countries: Record<string, string>;
   matchExact: string; matchClose: string; matchApprox: string;
   addPaint: string; removePaint: string;
-  cvdLabel: string; cvdOff: string;
-  cvdProtanopia: string; cvdDeuteranopia: string; cvdTritanopia: string;
-  cvdSimulate: string; cvdSimulateOn: string;
-  cvdSameToYou: string; cvdSameToYouTitle: string;   // {normal}
-  cvdPairsTitle: string; cvdPairsHint: string; cvdPairsNone: string;
-  cvdPairsSeen: string;                              // {normal} {seen}
-  cvdPairsMore: string;                              // {n}
   footer: string; copyright: string; disclaimer: string;
   feedback: string;
 }
@@ -163,20 +156,6 @@ export const I18N: Record<Lang, Dict> = {
     countries: {},
     matchExact: "Exact", matchClose: "Close", matchApprox: "Approx",
     addPaint: "Add to my paints", removePaint: "Remove from my paints",
-    cvdLabel: "Colour vision",
-    cvdOff: "No adjustment",
-    cvdProtanopia: "Protanopia (red-blind)",
-    cvdDeuteranopia: "Deuteranopia (green-blind)",
-    cvdTritanopia: "Tritanopia (blue-blind)",
-    cvdSimulate: "Show me the simulation",
-    cvdSimulateOn: "Simulating",
-    cvdSameToYou: "Same to you",
-    cvdSameToYouTitle: "We rate this {normal} away from your paint, but with the colour vision you selected the two are indistinguishable — so it will substitute perfectly for you.",
-    cvdPairsTitle: "Paints you may not be able to tell apart",
-    cvdPairsHint: "These pairs look clearly different to most people, which is why nothing else in the app flags them — but with the colour vision you selected they read as the same colour. Worth labelling the pots.",
-    cvdPairsNone: "Nothing in your collection should be hard to tell apart.",
-    cvdPairsSeen: "{normal} apart normally · {seen} to you",
-    cvdPairsMore: "and {n} more",
     footer: "Fallen Palette · Data is approximate — always test swatches",
     copyright: "© 2026 Fallen Palette. All rights reserved.",
     disclaimer: "Unofficial fan-made tool — not affiliated with, endorsed by, or sponsored by Games Workshop. Warhammer and all associated marks are trademarks of Games Workshop Ltd. Paint names and colours are trademarks of their respective manufacturers.",
@@ -260,20 +239,6 @@ export const I18N: Record<Lang, Dict> = {
     countries: EL_COUNTRIES,
     matchExact: "Ακριβές", matchClose: "Κοντινό", matchApprox: "Κατά προσέγγ.",
     addPaint: "Προσθήκη στα χρώματά μου", removePaint: "Αφαίρεση από τα χρώματά μου",
-    cvdLabel: "Χρωματική όραση",
-    cvdOff: "Χωρίς προσαρμογή",
-    cvdProtanopia: "Πρωτανοπία (αδυναμία στο κόκκινο)",
-    cvdDeuteranopia: "Δευτερανοπία (αδυναμία στο πράσινο)",
-    cvdTritanopia: "Τριτανοπία (αδυναμία στο μπλε)",
-    cvdSimulate: "Δείξε μου την προσομοίωση",
-    cvdSimulateOn: "Προσομοίωση",
-    cvdSameToYou: "Ίδιο για εσένα",
-    cvdSameToYouTitle: "Το βαθμολογούμε σε απόσταση {normal} από το χρώμα σου, αλλά με τη χρωματική όραση που επέλεξες τα δύο δεν διακρίνονται — οπότε για εσένα υποκαθιστά απόλυτα.",
-    cvdPairsTitle: "Χρώματα που μπορεί να μην ξεχωρίζεις",
-    cvdPairsHint: "Αυτά τα ζεύγη φαίνονται καθαρά διαφορετικά στους περισσότερους, γι’ αυτό τίποτα άλλο στην εφαρμογή δεν τα επισημαίνει — αλλά με τη χρωματική όραση που επέλεξες διαβάζονται ως το ίδιο χρώμα. Αξίζει να σημάνεις τα δοχεία.",
-    cvdPairsNone: "Τίποτα στη συλλογή σου δεν θα πρέπει να είναι δυσδιάκριτο.",
-    cvdPairsSeen: "απόσταση {normal} κανονικά · {seen} για εσένα",
-    cvdPairsMore: "και {n} ακόμη",
     footer: "Fallen Palette · Τα δεδομένα είναι κατά προσέγγιση — δοκίμαζε πάντα δείγματα.",
     copyright: "© 2026 Fallen Palette. Με επιφύλαξη παντός δικαιώματος.",
     disclaimer: "Ανεπίσημο εργαλείο από φαν — δεν σχετίζεται, δεν εγκρίνεται και δεν χορηγείται από την Games Workshop. Το Warhammer και τα σχετικά σήματα είναι εμπορικά σήματα της Games Workshop Ltd. Τα ονόματα και τα χρώματα βαφών είναι εμπορικά σήματα των αντίστοιχων κατασκευαστών.",
