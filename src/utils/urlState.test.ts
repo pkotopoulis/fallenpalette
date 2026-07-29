@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   TAB_PATH, DEFAULT_HEX, tabFromPath, isPaintsIndexPath,
-  modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
+  modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath, photoSearchPath,
 } from "./urlState";
 
 const params = (qs: string) => new URLSearchParams(qs);
@@ -55,6 +55,13 @@ describe("mode and hex from the query string", () => {
     expect(modeFromParams(params(""))).toBe("name");
     expect(modeFromParams(params("q=red"))).toBe("name");
     expect(modeFromParams(params("hex=9a1115"))).toBe("hex");
+  });
+
+  it("recognises photo mode, and prefers it over a leftover hex", () => {
+    expect(modeFromParams(params("photo=1"))).toBe("photo");
+    // A hex left in the URL must not override an explicit request for the picker.
+    expect(modeFromParams(params("hex=9a1115&photo=1"))).toBe("photo");
+    expect(photoSearchPath()).toBe("/colours?photo=1");
   });
 
   it("normalises a bare hex back to #rrggbb", () => {

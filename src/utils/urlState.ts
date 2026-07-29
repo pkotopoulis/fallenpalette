@@ -30,7 +30,16 @@ export function isPaintsIndexPath(pathname: string): boolean {
   return pathname === "/paints" || pathname.startsWith("/paints/");
 }
 
-export function modeFromParams(params: URLSearchParams): "name" | "hex" {
+export type SearchMode = "name" | "hex" | "photo";
+
+/**
+ * Photo mode is a URL flag even though the image itself never is: the mode
+ * belongs with the rest of the view state, and a shared /colours?photo link
+ * simply opens the picker. Checked before hex so an old ?hex left in the URL
+ * cannot override an explicit request for the picker.
+ */
+export function modeFromParams(params: URLSearchParams): SearchMode {
+  if (params.has("photo")) return "photo";
   return params.has("hex") ? "hex" : "name";
 }
 
@@ -55,3 +64,6 @@ export function searchPath(query: string): string {
 export function hexSearchPath(hex: string): string {
   return `/colours?hex=${hex.replace(/^#/, "")}`;
 }
+
+/** Target for palette-from-photo mode. */
+export const photoSearchPath = () => "/colours?photo=1";

@@ -143,6 +143,40 @@ describe("routing", () => {
     expect(document.body.textContent).toMatch(/No paints match/i);
   });
 
+  it("offers photo mode and says the image stays on the device", () => {
+    at("/colours?photo=1");
+    expect(document.querySelector(".photo-pick"), "expected a file picker").toBeTruthy();
+    const input = document.querySelector('.photo-pick input[type="file"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    expect(input.accept).toBe("image/*");
+    // The privacy claim is load-bearing: it is the reason this needs no backend.
+    expect(document.body.textContent).toMatch(/never uploaded/i);
+  });
+
+  it("reaches photo mode from the mode buttons, without a leftover hex winning", () => {
+    at("/colours?hex=9a1115");
+    expect(document.querySelector(".hex-input")).toBeTruthy();
+    const photoBtn = [...document.querySelectorAll<HTMLButtonElement>(".mode-btn")]
+      .find(b => /photo/i.test(b.textContent ?? ""))!;
+    expect(photoBtn).toBeTruthy();
+    fireEvent.click(photoBtn);
+    expect(document.querySelector(".photo-pick")).toBeTruthy();
+    expect(document.querySelector(".hex-input")).toBeNull();
+  });
+
+  it("never posts the chosen image anywhere", () => {
+    // Extraction is local by design. If this ever starts making requests, the
+    // privacy claim in the UI becomes a lie.
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    at("/colours?photo=1");
+    const input = document.querySelector('.photo-pick input[type="file"]') as HTMLInputElement;
+    const file = new File([new Uint8Array([1, 2, 3])], "mini.png", { type: "image/png" });
+    fireEvent.change(input, { target: { files: [file] } });
+    expect(fetchSpy).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
   it("does not ask for location until told to", () => {
     // An unprompted location prompt on a paint website is hostile, so the
     // geolocation API must not be touched on load.

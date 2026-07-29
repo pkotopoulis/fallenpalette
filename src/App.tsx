@@ -18,9 +18,11 @@ import { findTriad } from "./utils/triad";
 import { findSubstitutes } from "./utils/substitute";
 import { sortByDistance, formatDistance, Coords } from "./utils/geo";
 import { findMixes } from "./utils/mix";
+import { extractPalette, sampleSize, PaletteEntry } from "./utils/palette";
 import {
   Tab, TAB_PATH, tabFromPath, isPaintsIndexPath,
-  modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath,
+  modeFromParams, hexFromParams, queryFromParams, searchPath, hexSearchPath, photoSearchPath,
+  SearchMode,
 } from "./utils/urlState";
 import { loadCollection, saveCollection, exportCollection, importCollection } from "./utils/storage";
 import { I18N, Lang } from "./i18n";
@@ -83,8 +85,8 @@ export default function App() {
     navigate(searchPath(v), { replace: true });
   const setSelPaint = (p: Paint | null) =>
     p ? navigate(paintPath(p)) : navigate("/colours", { replace: true });
-  const setMode = (m: "name" | "hex") =>
-    navigate(m === "hex" ? hexSearchPath(hexVal) : "/colours");
+  const setMode = (m: SearchMode) =>
+    navigate(m === "hex" ? hexSearchPath(hexVal) : m === "photo" ? photoSearchPath() : "/colours");
   const setHexVal = (v: string) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
@@ -109,6 +111,11 @@ export default function App() {
   // location prompt on a paint website is hostile.
   const [here, setHere] = useState<Coords | null>(null);
   const [geoState, setGeoState] = useState<"idle" | "locating" | "denied" | "unavailable">("idle");
+  // Palette pulled from a chosen image. The image itself is never stored beyond a
+  // preview URL and never leaves the device.
+  const [palette, setPalette] = useState<PaletteEntry[]>([]);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoState, setPhotoState] = useState<"idle" | "working" | "failed">("idle");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [activeStore, setActiveStore] = useState<number | null>(null);
   const [featSeed, setFeatSeed] = useState(() => Math.floor(Math.random() * 1e9));
@@ -286,6 +293,43 @@ export default function App() {
   const storeList = useMemo(
     () => here ? sortByDistance(storeResults, here) : storeResults.map(s => ({ ...s, distanceKm: undefined as number | undefined })),
     [storeResults, here]);
+
+  /**
+   * Reads a chosen image and extracts its palette.
+   *
+   * Everything happens here on the device: the file is decoded to a canvas,
+   * downscaled, and clustered. Nothing is uploaded, which is both the honest
+   * default for someone’s photos and the reason this needs no backend.
+   */
+  const handlePhoto = async (file: File) => {
+    setPhotoState("working");
+    setPalette([]);
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("not an image"));
+        img.src = url;
+      });
+
+      const { width, height } = sampleSize(img.naturalWidth, img.naturalHeight);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no 2d context");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      setPalette(extractPalette(ctx.getImageData(0, 0, width, height).data, 6));
+      // Revoke the previous preview rather than leaking it.
+      setPhotoUrl(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+      setPhotoState("idle");
+    } catch {
+      URL.revokeObjectURL(url);
+      setPhotoState("failed");
+    }
+  };
 
   const requestLocation = () => {
     if (!navigator.geolocation) { setGeoState("unavailable"); return; }
@@ -694,6 +738,7 @@ export default function App() {
           <div className="mode-row">
             <button className={`mode-btn ${mode === "name" ? "active" : ""}`} onClick={() => setMode("name")}><Search size={14} /> {t.byName}</button>
             <button className={`mode-btn ${mode === "hex" ? "active" : ""}`} onClick={() => setMode("hex")}><Droplets size={14} /> {t.byColour}</button>
+            <button className={`mode-btn ${mode === "photo" ? "active" : ""}`} onClick={() => setMode("photo")}><Sparkles size={14} /> {t.byPhoto}</button>
           </div>
 
           {mode === "name" && (<>
@@ -821,6 +866,54 @@ export default function App() {
                 </div>
               </div>
             )}
+          </>)}
+
+          {mode === "photo" && (<>
+            <div className="hex-panel">
+              <div className="hex-title">{t.photoTitle}</div>
+              <div className="hex-desc">{t.photoDesc}</div>
+              <div className="photo-privacy">{t.photoPrivacy}</div>
+
+              <label className="photo-pick">
+                {photoUrl ? t.photoAgain : t.photoPick}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handlePhoto(f); }}
+                />
+              </label>
+
+              {photoState === "working" && <div className="photo-note">{t.photoWorking}</div>}
+              {photoState === "failed" && <div className="photo-note photo-error">{t.photoFailed}</div>}
+              {photoUrl && <img className="photo-preview" src={photoUrl} alt="" />}
+            </div>
+
+            {palette.map((entry, i) => {
+              const near = allFlat
+                .map(p => ({ ...p, distance: colorDistance(entry.hex, p.hex) }))
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, 3);
+              return (
+                <div key={i} className="pal-group">
+                  <div className="pal-head">
+                    <Swatch hex={entry.hex} size={30} />
+                    <div className="pal-info">
+                      <div className="pal-hex">{entry.hex.toUpperCase()}</div>
+                      <div className="pal-share">
+                        {t.photoShare.replace("{n}", String(Math.round(entry.share * 100)))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="results-grid">
+                    {near.map((p, j) => (
+                      <div key={j} className="card">
+                        <PaintRow paint={p} onClick={() => selectPaint(p)} extra={<MatchBadge d={p.distance} />} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </>)}
 
           {mode === "hex" && (<>

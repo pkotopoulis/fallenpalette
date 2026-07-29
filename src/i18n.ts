@@ -6,7 +6,7 @@ export interface Dict {
   langLabel: string;
   tagline: string;
   navMatch: string; navCollection: string; navStores: string;
-  byName: string; byColour: string;
+  byName: string; byColour: string; byPhoto: string;
   searchNamePh: string;
   selectPaint: string;
   noPaintMatch: string;            // uses {q}
@@ -28,6 +28,8 @@ export interface Dict {
   filterByRange: string; rangeKinds: Record<string, string>;
   fromYourPaints: string; fromYourPaintsHint: string; curatedMatch: string; ownedNone: string;
   mixIt: string; mixHint: string; mixParts: string;
+  photoTitle: string; photoDesc: string; photoPrivacy: string; photoPick: string;
+  photoAgain: string; photoWorking: string; photoFailed: string; photoShare: string;
   whereToBuy: string; buyChoose: string; buyHint: string; affiliateNote: string; affiliateFooter: string; restock: string;
   rackEmptyTitle: string; rackPre: string; rackMid: string; rackPost: string;
   browsePaints: string; saveNote: string;
@@ -80,7 +82,7 @@ export const I18N: Record<Lang, Dict> = {
     langLabel: "EN",
     tagline: "Miniature Paint Cross-Reference · Collection · Store Finder",
     navMatch: "Colour search", navCollection: "My Paints", navStores: "Stores",
-    byName: "By name", byColour: "By colour",
+    byName: "By name", byColour: "By colour", byPhoto: "From a photo",
     searchNamePh: 'Type a paint name, e.g. "Mephiston Red"…',
     selectPaint: "Select a paint",
     noPaintMatch: "No paints match “{q}”",
@@ -119,6 +121,14 @@ export const I18N: Record<Lang, Dict> = {
     mixIt: "Or mix it",
     mixHint: "Predicted from the colours, not from how pigments really behave — mix a swatch and check before you commit. Complementary pairs are not offered, because the maths cannot predict them.",
     mixParts: "{parts} parts",
+    photoTitle: "Palette from a photo",
+    photoDesc: "Drop in a photo or a piece of reference art and we’ll pull out its main colours, then match each to real paints.",
+    photoPrivacy: "The image is read on your device and never uploaded.",
+    photoPick: "Choose an image",
+    photoAgain: "Choose another",
+    photoWorking: "Reading the image…",
+    photoFailed: "That file could not be read as an image.",
+    photoShare: "{n}% of the image",
     ownedNone: "Nothing in your collection is close to this one.",
     whereToBuy: "Where to buy", buyChoose: "Choose a shop",
     buyHint: "Searches each shop for this paint — stock and prices are theirs, not ours.",
@@ -154,7 +164,7 @@ export const I18N: Record<Lang, Dict> = {
     langLabel: "ΕΛ",
     tagline: "Αντιστοίχιση Χρωμάτων Μινιατούρων · Συλλογή · Εύρεση Καταστημάτων",
     navMatch: "Αναζήτηση χρώματος", navCollection: "Η Συλλογή μου", navStores: "Καταστήματα",
-    byName: "Με όνομα", byColour: "Με χρώμα",
+    byName: "Με όνομα", byColour: "Με χρώμα", byPhoto: "Από φωτογραφία",
     searchNamePh: 'Πληκτρολόγησε όνομα χρώματος, π.χ. "Mephiston Red"…',
     selectPaint: "Διάλεξε ένα χρώμα",
     noPaintMatch: "Κανένα χρώμα δεν ταιριάζει με «{q}»",
@@ -193,6 +203,14 @@ export const I18N: Record<Lang, Dict> = {
     mixIt: "Ή φτιάξε το με μίξη",
     mixHint: "Πρόβλεψη από τα χρώματα, όχι από τη συμπεριφορά των πιγμέντων — δοκίμασε δείγμα πρώτα. Συμπληρωματικά ζεύγη δεν προτείνονται, γιατί δεν μπορούν να προβλεφθούν.",
     mixParts: "{parts} μέρη",
+    photoTitle: "Παλέτα από φωτογραφία",
+    photoDesc: "Ανέβασε μια φωτογραφία ή εικόνα αναφοράς και θα βγάλουμε τα κύρια χρώματα, αντιστοιχισμένα σε πραγματικά χρώματα.",
+    photoPrivacy: "Η εικόνα διαβάζεται στη συσκευή σου και δεν ανεβαίνει πουθενά.",
+    photoPick: "Διάλεξε εικόνα",
+    photoAgain: "Διάλεξε άλλη",
+    photoWorking: "Ανάγνωση εικόνας…",
+    photoFailed: "Το αρχείο δεν μπόρεσε να διαβαστεί ως εικόνα.",
+    photoShare: "{n}% της εικόνας",
     ownedNone: "Τίποτα στη συλλογή σου δεν είναι κοντά σε αυτό.",
     whereToBuy: "Πού να το αγοράσεις", buyChoose: "Διάλεξε κατάστημα",
     buyHint: "Αναζητά το χρώμα σε κάθε κατάστημα — το στοκ και οι τιμές είναι δικά τους, όχι δικά μας.",
