@@ -513,10 +513,22 @@ a.detail-row:hover{color:var(--accent)}
    on more result columns rather than wider cards. The cap keeps the very
    largest displays from stretching the landing sections absurdly. */
 @media (min-width:1760px){
-  :root{--gutter:28px}
+  /* The content column was capped well below the shell, leaving wide empty
+     margins either side of the landing sections and the featured card. The caps
+     exist to stop text lines running absurdly long, so they widen with the screen
+     rather than being removed — the search box in particular stays narrow, since a
+     full-width text input is harder to use, not easier. */
+  :root{--gutter:28px;--panel-max:760px;--content-max:1480px;--grid-max:1900px}
   .app{max-width:min(2240px,94vw)}
   .results-grid{grid-template-columns:repeat(auto-fill,minmax(352px,1fr));gap:16px}
   .index-list{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
   .triad-ramp{max-width:1280px}
   .store-list{flex:0 0 480px}
+}
+
+/* Very large monitors, where even 1480px leaves noticeable empty margin. Must
+   stay after the 1760px block: both match here, and equal specificity means the
+   later rule wins. */
+@media (min-width:2200px){
+  :root{--panel-max:820px;--content-max:1720px;--grid-max:2100px}
 }
