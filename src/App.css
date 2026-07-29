@@ -338,7 +338,7 @@ a{color:inherit;text-decoration:none}
 .feature-match{display:flex;align-items:center;gap:9px;padding:5px 0;min-width:0}
 .fm-name{flex:1 1 0;min-width:0;font-size:0.8571rem;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fm-badge{flex-shrink:0;display:inline-flex}
+.fm-badge{flex-shrink:0;display:inline-flex;align-items:center;gap:5px}
 .fm-brand{flex-shrink:0;width:11em;text-align:right;font-size:0.7143rem;font-weight:700;color:var(--accent)}
 
 .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;padding:2px 16px 8px}
@@ -370,6 +370,40 @@ a{color:inherit;text-decoration:none}
   background:none;border:none;cursor:pointer;transition:color .16s}
 .text-btn:hover{color:var(--text)}
 .text-btn.danger{color:var(--danger)}
+
+/* ═══════════════════════ COLOUR VISION ═══════════════════════
+   The navbar control, plus the two places its answer surfaces: a badge on a
+   result that this viewer cannot separate from the reference, and the pair list
+   in the collection. */
+.cvd-control{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.cvd-select{padding:8px 11px;font-size:0.7857rem;font-weight:600;font-family:inherit;cursor:pointer;
+  color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:11px;
+  outline:none;max-width:16em;transition:all .16s}
+.cvd-select:hover{color:var(--text)}
+.cvd-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+/* The native menu inherits the page's dark surface rather than the OS default,
+   which on Windows renders white-on-white against this palette. */
+.cvd-select option{background:var(--panel);color:var(--text)}
+.cvd-sim-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;font-size:0.7857rem;font-weight:600;
+  color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:11px;
+  cursor:pointer;white-space:nowrap;transition:all .16s}
+.cvd-sim-btn:hover{color:var(--text)}
+.cvd-sim-btn.active{border-color:var(--accent);background:var(--accent-soft);color:var(--bright)}
+
+/* Teal, so it does not read as either a match tier or the green "Known match"
+   beside it. It carries an icon and a label as well as a colour — a badge about
+   colour vision cannot afford to encode its meaning in hue alone. */
+.cvd-same-badge{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;white-space:nowrap;
+  font-size:0.7143rem;font-weight:800;letter-spacing:.3px;padding:3px 8px;border-radius:6px;
+  color:#8FD3E0;background:rgba(143,211,224,0.13);border:1px solid rgba(143,211,224,0.28)}
+
+.cvd-block{margin-top:4px}
+/* Two rows that belong together, marked as a set by the shared left edge rather
+   than by a heading — the pair is the unit here, not either paint. */
+.cvd-pair{border-left:2px solid rgba(143,211,224,0.45)}
+.cvd-pair .paint-row + .paint-row{border-top:1px solid var(--border)}
+.cvd-pair-foot{padding:8px 14px;font-size:0.7143rem;font-weight:600;color:var(--muted);
+  border-top:1px solid var(--border);background:var(--card-alt);font-variant-numeric:tabular-nums}
 
 /* ═══════════════════════ STORES ═══════════════════════ */
 .store-layout{display:flex;flex-direction:column;gap:12px;padding:0 16px 8px}
@@ -480,6 +514,7 @@ a.detail-row:hover{color:var(--accent)}
      monitor, and keeps the last, part-full row of results near the centre. */
   .stats-band,.feature-card,.how-grid,.stats-row,.coll-actions,.section-head{
     max-width:var(--content-max);margin-left:auto;margin-right:auto}
+  .cvd-block .sub-hint{max-width:var(--content-max);margin-left:auto;margin-right:auto}
   .results-grid,.index-list{max-width:var(--grid-max);margin-left:auto;margin-right:auto}
 
   /* Shade / base / highlight side by side reads as the value ramp it is */
